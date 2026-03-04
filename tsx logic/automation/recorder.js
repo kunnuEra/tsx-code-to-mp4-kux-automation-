@@ -73,9 +73,9 @@ function parseResolution(code) {
         fs.mkdirSync(downloadsDir, { recursive: true });
     }
 
-    // Parse resolution from first block (most common case)
-    const resolution = parseResolution(blocks[0].code);
-    console.log(`🖥️  Target resolution: ${resolution.width}x${resolution.height}\n`);
+    // Force 4K resolution for highest quality
+    const resolution = { width: 3840, height: 2160 };
+    console.log(`🖥️  Target resolution forced to 4K: ${resolution.width}x${resolution.height}\n`);
 
     const browser = await chromium.launch({
         headless: false,
@@ -87,6 +87,7 @@ function parseResolution(code) {
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-gpu',
+            '--start-maximized',
             `--window-size=${resolution.width},${resolution.height}`,
         ]
     });
@@ -121,21 +122,10 @@ function parseResolution(code) {
             await page.fill(editorSelector, block.code);
             console.log('   ✅ Code pasted');
 
-            // Step 3: Wait for preview to fully render
-            // The preview needs time to compile and show the component
-            console.log('   ⏳ Waiting for preview to compile and render...');
-            await page.waitForTimeout(5000);
-
-            // Check if preview iframe/canvas is ready
-            try {
-                await page.waitForSelector('iframe, canvas, [data-preview]', { timeout: 10000 });
-                console.log('   ✅ Preview detected');
-            } catch {
-                console.log('   ⚠️  No preview element found, continuing anyway...');
-            }
-
-            // Extra wait for compilation
-            await page.waitForTimeout(3000);
+            // Step 3: Fast trigger for download
+            // Wait just 1.5 seconds for React to mount the snippet, skipping the long compile waits
+            console.log('   ⚡ Quick wait before clicking download...');
+            await page.waitForTimeout(1500);
 
             // Step 4: Click "Download 4K" button
             const downloadBtnSelector = 'button:has-text("Download 4K")';
