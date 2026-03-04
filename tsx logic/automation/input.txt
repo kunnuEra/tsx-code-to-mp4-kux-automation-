@@ -1,5 +1,3 @@
-Here is a TSX component for Claude Opus intro video:
-
 ```tsx
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, interpolate, Easing, AbsoluteFill } from 'remotion';
@@ -92,3 +90,4 @@ const ClaudeOpusIntro: React.FC = () => {
 
 export default ClaudeOpusIntro;
 ```
+
