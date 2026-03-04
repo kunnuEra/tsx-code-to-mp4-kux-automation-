@@ -37,10 +37,10 @@ function extractTsxBlocks(text) {
 
 // ─── Main Automation ───
 (async () => {
-    // 1. Read input text from a file (prompts.txt)
-    const inputFile = path.join(__dirname, 'prompts.txt');
+    // 1. Read input text from a file (input.txt)
+    const inputFile = path.join(__dirname, 'input.txt');
     if (!fs.existsSync(inputFile)) {
-        console.error('❌ automation/prompts.txt not found! Paste your text with TSX code blocks there.');
+        console.error('❌ automation/input.txt not found!');
         process.exit(1);
     }
 
@@ -48,7 +48,7 @@ function extractTsxBlocks(text) {
     const blocks = extractTsxBlocks(inputText);
 
     if (blocks.length === 0) {
-        console.error('❌ No TSX code blocks found in prompts.txt');
+        console.error('❌ No TSX code blocks found in input.txt');
         process.exit(1);
     }
 
