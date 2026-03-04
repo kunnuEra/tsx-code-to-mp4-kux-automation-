@@ -6,97 +6,163 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-(async () => {
-    const downloadsDir = path.join(__dirname, '../downloads');
-    const inputFile = path.join(__dirname, 'input.txt');
+// ─── TSX Code Extractor (same logic as your App.tsx) ───
+function extractTsxBlocks(text) {
+    const blocks = [];
 
-    if (!fs.existsSync(downloadsDir)) {
-        fs.mkdirSync(downloadsDir);
+    // Pattern 1: Markdown-style code blocks ```tsx ... ```
+    const mdRegex = /```(tsx|typescript|jsx|javascript)\n([\s\S]*?)```/g;
+    let match;
+    while ((match = mdRegex.exec(text)) !== null) {
+        blocks.push({
+            id: `block-${blocks.length + 1}`,
+            type: match[1] === 'typescript' ? 'ts' : match[1],
+            code: match[2].trim()
+        });
     }
 
+    // Pattern 2: Fallback — if no markdown blocks found, treat entire text as one block
+    if (blocks.length === 0) {
+        if (text.includes('import') || (text.includes('<') && text.includes('/>'))) {
+            blocks.push({
+                id: 'auto-1',
+                type: 'tsx',
+                code: text.trim()
+            });
+        }
+    }
+
+    return blocks;
+}
+
+// ─── Main Automation ───
+(async () => {
+    // 1. Read input text from a file (prompts.txt)
+    const inputFile = path.join(__dirname, 'prompts.txt');
     if (!fs.existsSync(inputFile)) {
-        console.error('Error: automation/input.txt not found!');
+        console.error('❌ automation/prompts.txt not found! Paste your text with TSX code blocks there.');
         process.exit(1);
     }
 
     const inputText = fs.readFileSync(inputFile, 'utf-8');
-    console.log('Extracting TSX code blocks...');
-
-    // Use the same regex as the app
-    const mdRegex = /```(tsx|typescript|jsx|javascript)\n([\s\S]*?)```/g;
-    const blocks = [];
-    let match;
-    while ((match = mdRegex.exec(inputText)) !== null) {
-        blocks.push(match[2].trim());
-    }
-
-    // Fallback if no blocks found
-    if (blocks.length === 0 && (inputText.includes('import') || (inputText.includes('<') && inputText.includes('/>')))) {
-        blocks.push(inputText.trim());
-    }
+    const blocks = extractTsxBlocks(inputText);
 
     if (blocks.length === 0) {
-        console.log('No TSX blocks found in input.txt. Please ensure you have code wrapped in ```tsx blocks or paste direct code.');
-        process.exit(0);
+        console.error('❌ No TSX code blocks found in prompts.txt');
+        process.exit(1);
     }
 
-    console.log(`Found ${blocks.length} blocks. Starting automation...`);
+    console.log(`✅ Found ${blocks.length} TSX code block(s). Starting automation...\n`);
 
-    // Launch browser with flags to auto-grant screen recording permission
+    // 2. Setup downloads directory
+    const downloadsDir = path.join(__dirname, '..', 'downloads');
+    if (!fs.existsSync(downloadsDir)) {
+        fs.mkdirSync(downloadsDir, { recursive: true });
+    }
+
+    // 3. Launch browser with flags to auto-grant screen/tab sharing
     const browser = await chromium.launch({
-        headless: false, // Set to true for CI
+        headless: false,
         args: [
             '--use-fake-ui-for-media-stream',
             '--enable-usermedia-screen-capturing',
-            // This flag is crucial to auto-select the tab in the "Share this tab" dialog
-            '--auto-select-desktop-capture-source="kuTSX - Remotion TSX Preview & Export"',
+            '--auto-select-desktop-capture-source=kuTSX',
             '--disable-infobars',
             '--no-sandbox',
-            '--disable-setuid-sandbox'
+            '--disable-setuid-sandbox',
         ]
     });
 
-    const context = await browser.newContext();
+    const context = await browser.newContext({
+        permissions: ['clipboard-read', 'clipboard-write'],
+    });
+
+    // Grant permission for getDisplayMedia automatically
+    context.grantPermissions(['camera', 'microphone']);
+
     const page = await context.newPage();
 
     for (let i = 0; i < blocks.length; i++) {
-        const code = blocks[i];
-        const fileName = `video_${Date.now()}_${i + 1}`;
-        console.log(`\n--- [${i + 1}/${blocks.length}] Processing ---`);
+        const block = blocks[i];
+        const videoName = `video_${i + 1}`;
+        console.log(`\n🎬 [${i + 1}/${blocks.length}] Processing: ${videoName}`);
 
         try {
+            // Step 1: Navigate to the site
             await page.goto('https://kux-three.vercel.app/', { waitUntil: 'networkidle' });
+            await page.waitForTimeout(1000);
 
+            // Step 2: Paste TSX code into the editor
             const editorSelector = 'textarea[placeholder*="Paste Remotion TSX code here"]';
-            await page.waitForSelector(editorSelector);
+            await page.waitForSelector(editorSelector, { timeout: 10000 });
 
-            // Paste the code
-            await page.fill(editorSelector, code);
-            console.log('Code pasted.');
+            // Clear any existing code
+            await page.focus(editorSelector);
+            await page.keyboard.press('Control+A');
+            await page.keyboard.press('Backspace');
 
-            // Minimum wait for rendering then click Download
-            await page.waitForTimeout(500);
+            // Fill with our TSX code
+            await page.fill(editorSelector, block.code);
+            console.log('   ✅ Code pasted');
 
+            // Step 3: IMMEDIATELY click "Download 4K" — DON'T wait for preview
             const downloadBtnSelector = 'button:has-text("Download 4K")';
-
-            // Setup download listener before clicking
-            const downloadPromise = page.waitForEvent('download', { timeout: 300000 });
-
+            await page.waitForSelector(downloadBtnSelector, { timeout: 10000 });
             await page.click(downloadBtnSelector);
-            console.log('Clicked Download. Recording should start automatically...');
+            console.log('   ✅ Download 4K clicked');
 
-            console.log('Waiting for video to finish and download to complete...');
-            const download = await downloadPromise;
-            const downloadPath = path.join(downloadsDir, `${fileName}.mp4`);
-            await download.saveAs(downloadPath);
+            // Step 4: The "Allow kux-three.vercel.app to see this tab?" pop-up
+            // is handled by the --auto-select-desktop-capture-source flag.
+            // If it's a browser-level dialog, Playwright's chromium flags handle it.
+            // Wait a moment for permission to resolve
+            await page.waitForTimeout(2000);
 
-            console.log(`Successfully saved: ${fileName}.mp4`);
+            // Step 5: Wait for the "Stop & Save" button to appear (means recording started)
+            const stopBtnSelector = 'button:has-text("Stop & Save")';
+            try {
+                await page.waitForSelector(stopBtnSelector, { timeout: 15000 });
+                console.log('   ✅ Recording started, waiting for auto-download...');
+            } catch {
+                console.log('   ⚠️  Stop & Save button not found — recording may not have started.');
+                console.log('   Skipping this block...');
+                continue;
+            }
+
+            // Step 6: Wait for auto-download
+            // The video auto-downloads when the animation finishes.
+            // We listen for the download event with a generous timeout.
+            try {
+                const download = await page.waitForEvent('download', { timeout: 120000 }); // 2 min max
+                const downloadPath = path.join(downloadsDir, `${videoName}.mp4`);
+                await download.saveAs(downloadPath);
+                console.log(`   ✅ Video saved: ${videoName}.mp4`);
+            } catch {
+                console.log('   ⚠️  Auto-download did not trigger within timeout.');
+                // Fallback: try clicking Stop & Save manually
+                try {
+                    const stopBtn = await page.$(stopBtnSelector);
+                    if (stopBtn) {
+                        const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
+                        await stopBtn.click();
+                        const download = await downloadPromise;
+                        const downloadPath = path.join(downloadsDir, `${videoName}.mp4`);
+                        await download.saveAs(downloadPath);
+                        console.log(`   ✅ Video saved (manual stop): ${videoName}.mp4`);
+                    }
+                } catch {
+                    console.log('   ❌ Could not save video for this block.');
+                }
+            }
 
         } catch (err) {
-            console.error(`Error processing block ${i + 1}:`, err);
+            console.error(`   ❌ Error: ${err.message}`);
         }
     }
 
     await browser.close();
-    console.log('\nAutomation completed!');
+
+    // Summary
+    const savedFiles = fs.readdirSync(downloadsDir).filter(f => f.endsWith('.mp4'));
+    console.log(`\n\n🎉 Automation complete! ${savedFiles.length}/${blocks.length} videos saved.`);
+    console.log(`📁 Videos location: ${downloadsDir}`);
 })();
