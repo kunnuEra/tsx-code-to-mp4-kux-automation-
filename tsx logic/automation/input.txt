@@ -1,9 +1,28 @@
-Paste your text with code blocks here.
-Example:
+Paste your full text here that contains TSX code blocks.
+The extractor will find all ```tsx ... ``` blocks automatically.
+
+For example:
 
 ```tsx
 import React from 'react';
-export default function Anim() {
-  return <div style={{background: 'red', width: '100%', height: '100%'}}>Hello</div>
+
+export default function App() {
+  return (
+    <div style={{
+      width: '100%',
+      height: '100%',
+      backgroundColor: '#0f172a',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: 'white',
+      fontSize: '4rem',
+      fontWeight: 'bold'
+    }}>
+      Hello Playwright! 🚀
+    </div>
+  );
 }
 ```
+
+You can add more code blocks below. Each one will become a separate video.
