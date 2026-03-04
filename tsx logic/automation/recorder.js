@@ -73,9 +73,9 @@ function parseResolution(code) {
         fs.mkdirSync(downloadsDir, { recursive: true });
     }
 
-    // Force 4K resolution for highest quality
-    const resolution = { width: 3840, height: 2160 };
-    console.log(`🖥️  Target resolution forced to 4K: ${resolution.width}x${resolution.height}\n`);
+    // Parse resolution from first block (most common case)
+    const resolution = parseResolution(blocks[0].code);
+    console.log(`🖥️  Target resolution: ${resolution.width}x${resolution.height}\n`);
 
     const browser = await chromium.launch({
         headless: false,
@@ -87,7 +87,6 @@ function parseResolution(code) {
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-gpu',
-            '--start-maximized',
             `--window-size=${resolution.width},${resolution.height}`,
         ]
     });
@@ -122,10 +121,9 @@ function parseResolution(code) {
             await page.fill(editorSelector, block.code);
             console.log('   ✅ Code pasted');
 
-            // Step 3: Fast trigger for download
-            // Wait just 1.5 seconds for React to mount the snippet, skipping the long compile waits
-            console.log('   ⚡ Quick wait before clicking download...');
-            await page.waitForTimeout(1500);
+            // Step 3: Wait for preview to fully render
+            console.log('   ⏳ Waiting 2 seconds for preview...');
+            await page.waitForTimeout(2000);
 
             // Step 4: Click "Download 4K" button
             const downloadBtnSelector = 'button:has-text("Download 4K")';
