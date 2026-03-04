@@ -1,1061 +1,221 @@
 ```tsx
 import React from 'react';
 import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
+  useCurrentFrame, useVideoConfig, interpolate,
+  Easing, AbsoluteFill,
 } from 'remotion';
 
-// =============================================================================
-// COMPOSITION CONFIG
-// =============================================================================
 export const compositionConfig = {
-  id: 'Ch7Scene46Summary',
-  durationInSeconds: 15,
+  id: 'Ch1Scene6IntelligentKahani',
+  durationInSeconds: 7,
   fps: 30,
   width: 1920,
   height: 1080,
 };
 
-// =============================================================================
-// DESIGN SYSTEM: "LIQUID GLASS" + "NEON AESTHETICS"
-// =============================================================================
-//
-// Background: Deep dark gradient + Floating orbs
-// Cards: Frosted glass (backdrop-filter) + Neon borders
-// Text: Bold, glowing
-// Animation: Smooth interpolations + Easing
-//
-// =============================================================================
-
-// --- UTILS ---
 const seededRandom = (seed: number): number => {
   const x = Math.sin(seed * 9999) * 10000;
   return x - Math.floor(x);
 };
 
-// --- DATA ---
-const SUMMARY_POINTS = [
-  {
-    icon: '🧠',
-    text: 'Intelligence ≠ Protection',
-    sub: 'Awareness = Protection',
-    color: '#FFD966', // Soft Yellow
-  },
-  {
-    icon: '⚠️',
-    text: 'Overconfidence = Blind Spot',
-    sub: 'Sabse bada khatra',
-    color: '#FF6B6B', // Soft Red
-  },
-  {
-    icon: '🚫',
-    text: 'Too Good To Be True?',
-    sub: 'Then it is NOT true.',
-    color: '#A78BFA', // Soft Purple
-  },
-];
+const PARTICLES = new Array(8).fill(0).map((_, i) => ({
+  x: seededRandom(i + 1) * 100,
+  y: seededRandom(i + 50) * 100,
+  size: seededRandom(i + 100) * 120 + 50,
+  opacity: seededRandom(i + 150) * 0.05 + 0.02,
+}));
 
-// --- COMPONENTS ---
-
-const BackgroundOrbs: React.FC<{ frame: number }> = ({ frame }) => {
-  const orbs = new Array(8).fill(0).map((_, i) => {
-    const x = seededRandom(i * 10) * 100;
-    const y = seededRandom(i * 20) * 100;
-    const size = 100 + seededRandom(i * 30) * 200;
-    const color = i % 2 === 0 ? '#FFD966' : '#FF6B6B'; // Yellow/Red theme
-    const speed = 0.02 + seededRandom(i * 40) * 0.03;
-    
-    // Movement
-    const moveX = Math.sin(frame * speed + i) * 30;
-    const moveY = Math.cos(frame * speed + i) * 30;
-
-    return (
-      <div
-        key={i}
-        style={{
-          position: 'absolute',
-          left: `${x}%`,
-          top: `${y}%`,
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-          opacity: 0.15,
-          filter: 'blur(40px)',
-          transform: `translate(${moveX}px, ${moveY}px)`,
-        }}
-      />
-    );
-  });
-
-  return <absolute-fill>{orbs}</absolute-fill>;
-};
-
-
-const SummaryCard: React.FC<{
-  index: number;
-  item: typeof SUMMARY_POINTS[0];
-  frame: number;
-  baseDelay: number;
-}> = ({ index, item, frame, baseDelay }) => {
-  const start = baseDelay + index * 25; // Staggered entry
-  
-  // Animation: Slide Up + Fade In
-  const opacity = interpolate(frame, [start, start + 15], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
-  
-  const translateY = interpolate(frame, [start, start + 20], [50, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.back(1.5)),
-  });
-
-  // Hover Effect (subtle float)
-  const floatY = Math.sin((frame - start) * 0.05) * 5;
-
-  return (
-    <div
-      style={{
-        opacity,
-        transform: `translateY(${translateY + floatY}px)`,
-        background: 'rgba(255, 255, 255, 0.05)', // Liquid Glass
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: `1px solid ${item.color}40`, // Transparent border
-        borderRadius: 24,
-        padding: '24px 32px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 24,
-        width: '100%',
-        maxWidth: 800,
-        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), inset 0 0 0 1px ${item.color}20`,
-        marginBottom: 20,
-      }}
-    >
-      {/* Icon Circle */}
-      <div
-        style={{
-          width: 70,
-          height: 70,
-          borderRadius: '50%',
-          background: `${item.color}20`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 32,
-          border: `1px solid ${item.color}`,
-          boxShadow: `0 0 15px ${item.color}40`,
-        }}
-      >
-        {item.icon}
-      </div>
-
-      {/* Text Content */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <span
-          style={{
-            color: '#FFFFFF',
-            fontSize: 32,
-            fontWeight: 700,
-            fontFamily: 'Space Grotesk, sans-serif',
-            textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          }}
-        >
-          {item.text}
-        </span>
-        <span
-          style={{
-            color: item.color,
-            fontSize: 22,
-            fontWeight: 500,
-            fontFamily: 'DM Sans, sans-serif',
-            letterSpacing: 0.5,
-          }}
-        >
-          {item.sub}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-
-// =============================================================================
-// MAIN COMPONENT
-// =============================================================================
-const Ch7Scene46Summary: React.FC = () => {
+const Ch1Scene6IntelligentKahani: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  // --- Title Animation ---
-  const titleOpacity = interpolate(frame, [10, 30], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  // === LINE 1: "YE BEWAKOOF KI KAHANI NAHI HAI" ===
+  const line1Op = interpolate(frame, [8, 22], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
   });
-  
-  const titleScale = interpolate(frame, [10, 35], [0.8, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.back(1.2)),
+  const line1Y = interpolate(frame, [8, 22], [30, 0], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+
+  // === Strikethrough on "BEWAKOOF" ===
+  const strikeWidth = interpolate(frame, [40, 55], [0, 100], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+
+  // === LINE 2: "YE EK INTELLIGENT INSAAN KI KAHANI HAI" ===
+  const line2Start = 70;
+  const line2Op = interpolate(frame, [line2Start, line2Start + 6], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+  });
+  const line2Scale = interpolate(
+    frame, [line2Start, line2Start + 16], [1.3, 1], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.back(1.6)),
+    }
+  );
+
+  // === "INTELLIGENT" pulse ===
+  const intPulse = frame > line2Start + 16
+    ? interpolate(
+        frame,
+        [line2Start + 16, line2Start + 24, line2Start + 32],
+        [1, 1.06, 1],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+      )
+    : 1;
+
+  // === Yellow accent bar under INTELLIGENT ===
+  const barWidth = interpolate(
+    frame, [line2Start + 20, line2Start + 40], [0, 520], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.cubic),
+    }
+  );
+
+  // === Exit ===
+  const exitOp = interpolate(
+    frame, [durationInFrames - 15, durationInFrames], [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  const wmOp = interpolate(frame, [15, 35], [0, 0.3], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
   });
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: '#050505', // Deep Black
-        fontFamily: 'DM Sans, sans-serif',
+        backgroundColor: '#1C1C1C',
+        fontFamily: 'Inter, Poppins, sans-serif',
         overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}
     >
-      {/* Background Layer */}
-      <BackgroundOrbs frame={frame} />
-      
-      {/* Grid Overlay (Cyberpunk feel) */}
-      <div 
-        style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
-            backgroundSize: '50px 50px',
-            maskImage: 'radial-gradient(circle, black 40%, transparent 100%)',
-        }}
-      />
+      {/* BG particles */}
+      {PARTICLES.map((p, i) => (
+        <div key={i} style={{
+          position: 'absolute',
+          left: `${p.x}%`, top: `${p.y}%`,
+          width: p.size, height: p.size,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #FFD966 0%, transparent 70%)',
+          opacity: p.opacity, filter: 'blur(40px)',
+          transform: `translate(${
+            Math.cos((frame + i * 40) * 0.015) * 5
+          }px, ${
+            Math.sin((frame + i * 60) * 0.02) * 8
+          }px)`,
+          pointerEvents: 'none' as const,
+        }} />
+      ))}
 
-      {/* --- CONTENT --- */}
-      <div style={{ zIndex: 10, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        
-        {/* Title */}
-        <h1
-          style={{
-            opacity: titleOpacity,
-            transform: `scale(${titleScale})`,
-            color: '#FFFFFF',
-            fontSize: 64,
-            fontWeight: 800,
-            fontFamily: 'Space Grotesk, sans-serif',
-            marginBottom: 60,
-            textTransform: 'uppercase',
-            letterSpacing: 4,
-            background: 'linear-gradient(to right, #FFFFFF, #FFD966)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 20px rgba(255, 217, 102, 0.3))',
-          }}
-        >
-          AAJ KYA SAMJHE?
-        </h1>
-
-        {/* Summary Points */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-          {SUMMARY_POINTS.map((item, index) => (
-            <SummaryCard
-              key={index}
-              index={index}
-              item={item}
-              frame={frame}
-              baseDelay={40} // Start showing cards after title
-            />
-          ))}
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        gap: 35, opacity: exitOp,
+      }}>
+        {/* Line 1 */}
+        <div style={{
+          opacity: line1Op,
+          transform: `translateY(${line1Y}px)`,
+          position: 'relative',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye{' '}
+          </span>
+          <span style={{
+            fontSize: 52, fontWeight: 800,
+            color: '#F5F5F5', margin: 0,
+            position: 'relative',
+            display: 'inline-block',
+          }}>
+            BEWAKOOF
+            {/* Strikethrough line */}
+            <div style={{
+              position: 'absolute',
+              top: '52%', left: '-4%',
+              height: 5, borderRadius: 3,
+              width: `${strikeWidth}%`,
+              backgroundColor: '#FF6B6B',
+              boxShadow: '0 0 10px rgba(255,107,107,0.5)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}ki kahani nahi hai
+          </span>
         </div>
 
+        {/* Line 2 */}
+        <div style={{
+          opacity: line2Op,
+          transform: `scale(${line2Scale})`,
+          textAlign: 'center',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye ek{' '}
+          </span>
+          <span style={{
+            fontSize: 64, fontWeight: 900,
+            color: '#FFD966', margin: 0,
+            display: 'inline-block',
+            transform: `scale(${intPulse})`,
+            textShadow: '0 3px 25px rgba(255,217,102,0.4)',
+            position: 'relative',
+          }}>
+            INTELLIGENT
+            {/* Yellow accent bar */}
+            <div style={{
+              position: 'absolute',
+              bottom: -8, left: '50%',
+              height: 4, borderRadius: 2,
+              width: barWidth,
+              maxWidth: '110%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(90deg, transparent, #FFD966, transparent)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}insaan ki kahani hai
+          </span>
+        </div>
       </div>
 
       {/* Vignette */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(circle, transparent 50%, #000000 100%)',
-          pointerEvents: 'none',
-        }}
-      />
-      
-      {/* Watermark */}
       <div style={{
-          position: 'absolute',
-          bottom: 40,
-          right: 60,
-          opacity: 0.4,
-          color: '#FFFFFF',
-          fontFamily: 'Space Grotesk, sans-serif',
-          fontWeight: 600,
-          fontSize: 20,
-      }}>
-          ProBuffet HQ
-      </div>
-
-    </AbsoluteFill>
-  );
-};
-
-export default Ch7Scene46Summary;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-// =============================================================================
-// COMPOSITION CONFIG
-// =============================================================================
-export const compositionConfig = {
-  id: 'Ch7Scene47MungerQuote',
-  durationInSeconds: 15,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-// =============================================================================
-// DESIGN SYSTEM: "NEO-BRUTALISM" + "CYBERPUNK"
-// =============================================================================
-//
-// Background: Dark grid + Glitch effects
-// Typography: Huge, bold, uppercase
-// Colors: High contrast (Black/Yellow/White)
-// Feel: Impactful, serious, definitive
-//
-// =============================================================================
-
-const Ch7Scene47MungerQuote: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // --- Animation Timing ---
-  const part1Start = 10;
-  const part2Start = 120; // "Guaranteed" reveal
-  const part3Start = 250; // Translation
-
-  // Part 1: "The best way..."
-  const opacity1 = interpolate(frame, [part1Start, part1Start + 20], [0, 1]);
-  const y1 = interpolate(frame, [part1Start, part1Start + 25], [50, 0], {
-      easing: Easing.out(Easing.cubic)
-  });
-
-  // Part 2: "GUARANTEED" (Slam Effect)
-  const scale2 = interpolate(frame, [part2Start, part2Start + 10], [2, 1], {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: Easing.out(Easing.bounce)
-  });
-  const opacity2 = interpolate(frame, [part2Start, part2Start + 5], [0, 1]);
-
-  // Part 3: Translation (Slide Up)
-  const opacity3 = interpolate(frame, [part3Start, part3Start + 20], [0, 1]);
-  const y3 = interpolate(frame, [part3Start, part3Start + 20], [100, 0], {
-      easing: Easing.out(Easing.cubic)
-  });
-
-
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#111111', // Almost Black
-        fontFamily: 'Space Grotesk, sans-serif',
-        overflow: 'hidden',
-        color: '#FFFFFF',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: '0 100px',
-      }}
-    >
-      {/* Background Texture: Dot Grid */}
-      <div 
-        style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: 'radial-gradient(#333 1px, transparent 1px)',
-            backgroundSize: '30px 30px',
-            opacity: 0.3,
-        }}
-      />
-
-      {/* Decorative Quote Marks */}
-      <div
-        style={{
-            fontSize: 200,
-            fontFamily: 'Playfair Display, serif',
-            color: '#FFD966',
-            opacity: 0.1,
-            position: 'absolute',
-            top: 50,
-            left: 100,
-            lineHeight: 0,
-        }}
-      >
-          “
-      </div>
-
-      {/* --- CONTENT --- */}
-      
-      {/* Quote Part 1 */}
-      <div style={{ opacity: opacity1, transform: `translateY(${y1}px)`, marginBottom: 40, zIndex: 10 }}>
-          <p style={{ fontSize: 42, fontWeight: 500, maxWidth: 1200, lineHeight: 1.4, margin: 0 }}>
-              "The best way to avoid getting a bad outcome is to recognize what's..."
-          </p>
-      </div>
-
-      {/* Quote Part 2: KEYWORD */}
-      <div style={{ opacity: opacity2, transform: `scale(${scale2})`, zIndex: 10, marginBottom: 60 }}>
-          <h1 
-            style={{ 
-                fontSize: 140, 
-                fontWeight: 900, 
-                color: '#FFD966', 
-                margin: 0, 
-                lineHeight: 1,
-                textTransform: 'uppercase',
-                textShadow: '0 0 30px rgba(255, 217, 102, 0.4)',
-                border: '4px solid #FFD966',
-                padding: '10px 40px',
-                background: 'rgba(255, 217, 102, 0.1)'
-            }}
-          >
-              GUARANTEED
-          </h1>
-          <p style={{ fontSize: 32, marginTop: 10, color: '#888' }}>to produce one.</p>
-      </div>
-
-      {/* Quote Part 3: Translation / Meaning */}
-      <div style={{ opacity: opacity3, transform: `translateY(${y3}px)`, zIndex: 10 }}>
-          <div 
-            style={{ 
-                background: '#222', 
-                borderLeft: '6px solid #FF6B6B', // Red accent
-                padding: '20px 40px',
-                borderRadius: '0 12px 12px 0',
-            }}
-          >
-              <p style={{ fontSize: 36, margin: 0, fontWeight: 600 }}>
-                  <span style={{ color: '#FF6B6B' }}>Simple Mantra:</span> Guaranteed returns ka promise hi guarantee hai ki kuch galat hai.
-              </p>
-          </div>
-      </div>
-
-      {/* Author Name */}
-      <div 
-        style={{ 
-            position: 'absolute', 
-            bottom: 80, 
-            opacity: opacity1,
-            fontSize: 24,
-            letterSpacing: 2,
-            textTransform: 'uppercase',
-            color: '#666'
-        }}
-      >
-          — Charlie Munger
-      </div>
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at center, transparent 45%, rgba(28,28,28,0.5) 100%)',
+        pointerEvents: 'none' as const,
+      }} />
 
       {/* Watermark */}
       <div style={{
-          position: 'absolute',
-          bottom: 40,
-          right: 60,
-          opacity: 0.3,
-          color: '#FFFFFF',
-          fontFamily: 'Space Grotesk, sans-serif',
-          fontWeight: 600,
-          fontSize: 20,
+        position: 'absolute', bottom: 30, right: 45,
+        opacity: wmOp, zIndex: 100,
       }}>
-          ProBuffet HQ
+        <span style={{
+          fontSize: 22, fontWeight: 600,
+          color: '#9E9E9E', letterSpacing: 1,
+        }}>ProBuffet HQ</span>
       </div>
-
     </AbsoluteFill>
   );
 };
 
-export default Ch7Scene47MungerQuote;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-// =============================================================================
-// COMPOSITION CONFIG
-// =============================================================================
-export const compositionConfig = {
-  id: 'Ch7Scene48PersonalStory',
-  durationInSeconds: 20,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-// =============================================================================
-// DESIGN SYSTEM: "MOTION WITH MEANING" + "STRATEGIC MINIMALISM"
-// =============================================================================
-//
-// Background: Warm Pale Yellow (#FFF8E1) - Storytelling vibe
-// Elements: Line art, Stick figures, Clean UI
-// Colors: Black Ink, Yellow Accents
-// Animation: Hand-drawn feel (if possible), smooth transitions
-//
-// =============================================================================
-
-const Ch7Scene48PersonalStory: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // --- Timing ---
-  const splitTime = 150; // When to switch from Past to Present focus
-
-  // Left Side (Past) Animation
-  const pastOpacity = interpolate(frame, [10, 30], [0, 1]);
-  const pastX = interpolate(frame, [10, 30], [-50, 0], { easing: Easing.out(Easing.cubic) });
-  
-  // Right Side (Present) Animation
-  const presentOpacity = interpolate(frame, [splitTime, splitTime + 20], [0, 1]);
-  const presentX = interpolate(frame, [splitTime, splitTime + 20], [50, 0], { easing: Easing.out(Easing.cubic) });
-
-  // Divider Line
-  const lineGrow = interpolate(frame, [splitTime - 10, splitTime + 10], [0, 600], { easing: Easing.inOut(Easing.cubic) });
-
-  // Bottom Text
-  const textOpacity = interpolate(frame, [splitTime + 30, splitTime + 50], [0, 1]);
-
-
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#FFF8E1', // Pale Yellow
-        fontFamily: 'DM Sans, sans-serif',
-        overflow: 'hidden',
-        color: '#1C1C1C',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 80,
-      }}
-    >
-      {/* Background Texture: Paper Grain (simulated with noise) */}
-      <div 
-        style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: 0.4,
-            filter: 'contrast(120%) brightness(100%)',
-            background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E")`,
-        }}
-      />
-
-      {/* --- LEFT SIDE: FOMO MOMENT (Past) --- */}
-      <div 
-        style={{ 
-            opacity: pastOpacity, 
-            transform: `translateX(${pastX}px)`, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            width: 500,
-        }}
-      >
-          {/* Label */}
-          <h2 style={{ fontSize: 32, color: '#666', marginBottom: 20, textTransform: 'uppercase', letterSpacing: 2 }}>The Past</h2>
-          
-          {/* Placeholder for Character Image (You will overlay this in CapCut/Editor) */}
-          <div 
-            style={{ 
-                width: 400, 
-                height: 400, 
-                border: '4px dashed #ccc', 
-                borderRadius: 20, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255,255,255,0.5)',
-                marginBottom: 20
-            }}
-          >
-              <p style={{ color: '#aaa', fontSize: 24, textAlign: 'center' }}>
-                  [IMG: Stick Figure FOMO]<br/>
-                  Reaching for glowing button<br/>
-                  Friend pulling back
-              </p>
-          </div>
-
-          <h1 style={{ fontSize: 48, fontWeight: 700, color: '#FF6B6B' }}>FOMO MOMENT 😰</h1>
-      </div>
-
-
-      {/* --- DIVIDER LINE --- */}
-      <div 
-        style={{ 
-            width: 4, 
-            height: lineGrow, 
-            backgroundColor: '#1C1C1C', 
-            borderRadius: 2, 
-            opacity: 0.2 
-        }} 
-      />
-
-
-      {/* --- RIGHT SIDE: 24h RULE (Present) --- */}
-      <div 
-        style={{ 
-            opacity: presentOpacity, 
-            transform: `translateX(${presentX}px)`, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            width: 500,
-        }}
-      >
-          {/* Label */}
-          <h2 style={{ fontSize: 32, color: '#666', marginBottom: 20, textTransform: 'uppercase', letterSpacing: 2 }}>The Shield</h2>
-
-          {/* Placeholder for Character Image */}
-          <div 
-            style={{ 
-                width: 400, 
-                height: 400, 
-                border: '4px solid #FFD966', 
-                borderRadius: 20, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255,217,102,0.1)',
-                marginBottom: 20
-            }}
-          >
-              <p style={{ color: '#aaa', fontSize: 24, textAlign: 'center' }}>
-                  [IMG: Calm Stick Figure]<br/>
-                  Holding '24H' Shield<br/>
-                  Peaceful expression
-              </p>
-          </div>
-
-          <h1 style={{ fontSize: 48, fontWeight: 700, color: '#1C1C1C' }}>24-HOUR RULE 🛡️</h1>
-      </div>
-
-
-      {/* --- BOTTOM MESSAGE --- */}
-      <div 
-        style={{ 
-            position: 'absolute', 
-            bottom: 80, 
-            opacity: textOpacity,
-            background: '#1C1C1C',
-            color: '#FFD966',
-            padding: '15px 40px',
-            borderRadius: 50,
-            fontSize: 32,
-            fontWeight: 700,
-            boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
-        }}
-      >
-          ACCEPTANCE = SABSE BADA SHIELD
-      </div>
-
-      {/* Watermark */}
-      <div style={{
-          position: 'absolute',
-          bottom: 40,
-          right: 60,
-          opacity: 0.3,
-          color: '#1C1C1C',
-          fontFamily: 'DM Sans, sans-serif',
-          fontWeight: 600,
-          fontSize: 20,
-      }}>
-          ProBuffet HQ
-      </div>
-
-    </AbsoluteFill>
-  );
-};
-
-export default Ch7Scene48PersonalStory;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-// =============================================================================
-// COMPOSITION CONFIG
-// =============================================================================
-export const compositionConfig = {
-  id: 'Ch7Scene49CTA',
-  durationInSeconds: 15,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-// =============================================================================
-// DESIGN SYSTEM: "GAMIFIED UI" + "AI PERSONALIZATION"
-// =============================================================================
-//
-// Background: Deep Dark Blue/Purple (#0F172A)
-// Elements: Floating Bubbles, Interactive-looking Cards
-// Colors: Vibrant gradients
-// Animation: Bounce, Pop, Slide
-//
-// =============================================================================
-
-const Ch7Scene49CTA: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // --- Animations ---
-  
-  // 1. "Comments" Bubble
-  const bubble1Scale = interpolate(frame, [10, 25], [0, 1], { easing: Easing.out(Easing.back(1.5)) });
-  
-  // 2. Question Text
-  const textOpacity = interpolate(frame, [30, 45], [0, 1]);
-  
-  // 3. "No Judgment" Badge
-  const badgeY = interpolate(frame, [60, 80], [20, 0], { easing: Easing.out(Easing.cubic) });
-  const badgeOpacity = interpolate(frame, [60, 70], [0, 1]);
-
-  // 4. "Like & Share" (Later part)
-  const likeScale = interpolate(frame, [250, 270], [0, 1], { easing: Easing.out(Easing.back(2)) }); // Appears late
-  const shareX = interpolate(frame, [270, 290], [-50, 0], { easing: Easing.out(Easing.cubic) });
-  const shareOpacity = interpolate(frame, [270, 280], [0, 1]);
-
-
-  return (
-    <AbsoluteFill
-      style={{
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', // Slate Dark
-        fontFamily: 'DM Sans, sans-serif',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-      }}
-    >
-      
-      {/* Background Particles (Subtle) */}
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.3 }}>
-          {/* You can reuse the bubble component here if available, or simple CSS circles */}
-          <div style={{ position: 'absolute', top: '20%', left: '10%', width: 20, height: 20, background: '#3B82F6', borderRadius: '50%', boxShadow: '0 0 20px #3B82F6' }} />
-          <div style={{ position: 'absolute', bottom: '30%', right: '15%', width: 30, height: 30, background: '#FFD966', borderRadius: '50%', boxShadow: '0 0 20px #FFD966' }} />
-      </div>
-
-      {/* --- PART 1: COMMENT ENGAGEMENT --- */}
-      <div style={{ textAlign: 'center', marginBottom: 80 }}>
-          
-          {/* Icon Bubble */}
-          <div 
-            style={{ 
-                transform: `scale(${bubble1Scale})`,
-                fontSize: 80, 
-                marginBottom: 20 
-            }}
-          >
-              💬
-          </div>
-
-          {/* Main Question */}
-          <h1 
-            style={{ 
-                opacity: textOpacity, 
-                fontSize: 48, 
-                maxWidth: 900, 
-                lineHeight: 1.3,
-                fontWeight: 700 
-            }}
-          >
-              "Tumhare saath ya kisi jaanne wale ke saath kabhi aisa hua?"
-          </h1>
-
-          {/* "No Judgment" Badge */}
-          <div 
-            style={{ 
-                opacity: badgeOpacity, 
-                transform: `translateY(${badgeY}px)`,
-                marginTop: 30,
-                display: 'inline-block',
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: 50,
-                padding: '12px 30px',
-            }}
-          >
-              <span style={{ fontSize: 24, color: '#A78BFA', fontWeight: 600 }}>🛡️ KOI JUDGMENT NAHI YAHAN</span>
-          </div>
-      </div>
-
-
-      {/* --- PART 2: LIKE & SHARE (Lower Section) --- */}
-      <div style={{ display: 'flex', gap: 60, alignItems: 'center' }}>
-          
-          {/* Like Button Visual */}
-          <div 
-            style={{ 
-                transform: `scale(${likeScale})`,
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                gap: 10 
-            }}
-          >
-              <div 
-                style={{
-                    width: 100, height: 100, borderRadius: '50%',
-                    background: '#FFD966',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 40,
-                    color: '#1C1C1C',
-                    boxShadow: '0 10px 30px rgba(255, 217, 102, 0.4)'
-                }}
-              >
-                  👍
-              </div>
-              <span style={{ fontSize: 24, fontWeight: 700, color: '#FFD966' }}>LIKE</span>
-          </div>
-
-          {/* Share Message */}
-          <div 
-            style={{ 
-                opacity: shareOpacity, 
-                transform: `translateX(${shareX}px)`,
-                textAlign: 'left'
-            }}
-          >
-              <p style={{ fontSize: 28, margin: 0, color: '#ccc' }}>Ye video us friend ko bhejo...</p>
-              <h2 style={{ fontSize: 36, margin: '5px 0', color: '#FF6B6B', background: 'white', color: 'black', padding: '0 10px', display: 'inline-block', transform: 'rotate(-2deg)' }}>
-                  "JISKO LAGTA HAI MUJHE KOI NAHI PHASA SAKTA"
-              </h2>
-              <p style={{ fontSize: 20, margin: '10px 0 0', color: '#FFD966' }}>❤️ Pyaar se. Concern se.</p>
-          </div>
-
-      </div>
-
-      {/* Watermark */}
-      <div style={{
-          position: 'absolute',
-          bottom: 40,
-          right: 60,
-          opacity: 0.3,
-          color: '#FFFFFF',
-          fontFamily: 'DM Sans, sans-serif',
-          fontWeight: 600,
-          fontSize: 20,
-      }}>
-          ProBuffet HQ
-      </div>
-
-    </AbsoluteFill>
-  );
-};
-
-export default Ch7Scene49CTA;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-// =============================================================================
-// COMPOSITION CONFIG
-// =============================================================================
-export const compositionConfig = {
-  id: 'Ch7Scene50Outro',
-  durationInSeconds: 15,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-// =============================================================================
-// DESIGN SYSTEM: "BENTO GRID" + "CYBERPUNK GLOW"
-// =============================================================================
-//
-// Background: Deep Black (#000)
-// Layout: Grid-based cards
-// Animation: Smooth sliding panels
-//
-// =============================================================================
-
-const Ch7Scene50Outro: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // --- Animations ---
-  
-  // 1. Logo Reveal (Top Center)
-  const logoOpacity = interpolate(frame, [10, 30], [0, 1]);
-  const logoY = interpolate(frame, [10, 30], [-50, 0], { easing: Easing.out(Easing.cubic) });
-
-  // 2. Subscribe Card (Middle)
-  const subScale = interpolate(frame, [40, 60], [0.8, 1], { easing: Easing.out(Easing.back(1.5)) });
-  const subOpacity = interpolate(frame, [40, 50], [0, 1]);
-
-  // 3. Next Video Teaser (Bottom Left)
-  const nextX = interpolate(frame, [70, 90], [-100, 0], { easing: Easing.out(Easing.cubic) });
-  const nextOpacity = interpolate(frame, [70, 80], [0, 1]);
-
-  // 4. Character Wave (Bottom Right)
-  const charY = interpolate(frame, [80, 100], [100, 0], { easing: Easing.out(Easing.cubic) });
-  const charOpacity = interpolate(frame, [80, 90], [0, 1]);
-
-  // 5. Final Tagline
-  const tagOpacity = interpolate(frame, [120, 140], [0, 1]);
-
-
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#000000',
-        fontFamily: 'Space Grotesk, sans-serif',
-        overflow: 'hidden',
-        color: '#FFFFFF',
-        display: 'grid',
-        gridTemplateRows: '1fr 1fr 1fr',
-        gridTemplateColumns: '1fr 1fr',
-        padding: 60,
-        gap: 30,
-      }}
-    >
-      
-      {/* --- GRID ITEM 1: LOGO (Spans 2 columns) --- */}
-      <div 
-        style={{ 
-            gridColumn: 'span 2', 
-            display: 'flex', 
-            flexDirection: 'column',
-            alignItems: 'center', 
-            justifyContent: 'center',
-            opacity: logoOpacity,
-            transform: `translateY(${logoY}px)`
-        }}
-      >
-          <h1 
-            style={{ 
-                fontSize: 100, 
-                margin: 0, 
-                background: 'linear-gradient(to right, #FFD966, #FFA07A)', 
-                WebkitBackgroundClip: 'text', 
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(255, 217, 102, 0.5))'
-            }}
-          >
-              ProBuffet HQ
-          </h1>
-          <p style={{ fontSize: 28, letterSpacing: 4, color: '#888', marginTop: 10 }}>FINANCE × PSYCHOLOGY</p>
-      </div>
-
-
-      {/* --- GRID ITEM 2: SUBSCRIBE CTA (Spans 2 columns, Center) --- */}
-      <div 
-        style={{ 
-            gridColumn: 'span 2', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            opacity: subOpacity,
-            transform: `scale(${subScale})`
-        }}
-      >
-          <div 
-            style={{
-                background: '#FF6B6B',
-                borderRadius: 20,
-                padding: '20px 80px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 30,
-                boxShadow: '0 0 40px rgba(255, 107, 107, 0.4)',
-                border: '2px solid rgba(255,255,255,0.2)'
-            }}
-          >
-              <span style={{ fontSize: 50 }}>🔔</span>
-              <span style={{ fontSize: 48, fontWeight: 800 }}>SUBSCRIBE NOW</span>
-          </div>
-      </div>
-
-
-      {/* --- GRID ITEM 3: NEXT VIDEO TEASER (Bottom Left) --- */}
-      <div 
-        style={{ 
-            opacity: nextOpacity,
-            transform: `translateX(${nextX}px)`,
-            background: '#1C1C1C',
-            border: '2px solid #FFD966',
-            borderRadius: 20,
-            padding: 30,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center'
-        }}
-      >
-          <p style={{ color: '#FFD966', fontSize: 20, margin: 0, textTransform: 'uppercase', letterSpacing: 2 }}>Coming Next:</p>
-          <h3 style={{ fontSize: 32, margin: '10px 0', lineHeight: 1.2 }}>Buffett Principle × Daily Spending Habits</h3>
-          <p style={{ color: '#666', fontSize: 18, margin: 0 }}>Don't miss this one.</p>
-      </div>
-
-
-      {/* --- GRID ITEM 4: CHARACTER WAVE & TAGLINE (Bottom Right) --- */}
-      <div 
-        style={{ 
-            opacity: charOpacity,
-            transform: `translateY(${charY}px)`,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            justifyContent: 'center'
-        }}
-      >
-          {/* Character Placeholder */}
-          <div style={{ fontSize: 100, marginBottom: 20 }}>👋</div>
-          
-          <h2 style={{ fontSize: 40, margin: 0, color: '#FFD966', textAlign: 'right' }}>
-              PAISA SAMJHO.<br/>DIMAAG SAMJHO.
-          </h2>
-          <p style={{ fontSize: 24, margin: '10px 0 0', color: '#FFF' }}>Milte hain!</p>
-      </div>
-
-    </AbsoluteFill>
-  );
-};
-
-export default Ch7Scene50Outro;
+export default Ch1Scene6IntelligentKahani;
 ```
 
