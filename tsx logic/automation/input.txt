@@ -1,323 +1,221 @@
 ```tsx
 import React from 'react';
 import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
+  useCurrentFrame, useVideoConfig, interpolate,
+  Easing, AbsoluteFill,
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'TheMindOfBuddhaIntro',
-  durationInSeconds: 10,
+  id: 'Ch1Scene6IntelligentKahani',
+  durationInSeconds: 7,
   fps: 30,
   width: 1920,
   height: 1080,
 };
 
-const TheMindOfBuddhaIntro: React.FC = () => {
+const seededRandom = (seed: number): number => {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+};
+
+const PARTICLES = new Array(8).fill(0).map((_, i) => ({
+  x: seededRandom(i + 1) * 100,
+  y: seededRandom(i + 50) * 100,
+  size: seededRandom(i + 100) * 120 + 50,
+  opacity: seededRandom(i + 150) * 0.05 + 0.02,
+}));
+
+const Ch1Scene6IntelligentKahani: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const seededRandom = (seed: number) => {
-    const x = Math.sin(seed * 9301 + 49297) * 49297;
-    return x - Math.floor(x);
-  };
+  // === LINE 1: "YE BEWAKOOF KI KAHANI NAHI HAI" ===
+  const line1Op = interpolate(frame, [8, 22], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+  const line1Y = interpolate(frame, [8, 22], [30, 0], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
 
-  // === EXIT FADE ===
-  const exitOpacity = interpolate(
-    frame,
-    [durationInFrames - 20, durationInFrames],
-    [1, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) }
+  // === Strikethrough on "BEWAKOOF" ===
+  const strikeWidth = interpolate(frame, [40, 55], [0, 100], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+
+  // === LINE 2: "YE EK INTELLIGENT INSAAN KI KAHANI HAI" ===
+  const line2Start = 70;
+  const line2Op = interpolate(frame, [line2Start, line2Start + 6], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+  });
+  const line2Scale = interpolate(
+    frame, [line2Start, line2Start + 16], [1.3, 1], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.back(1.6)),
+    }
   );
 
-  // === BG LAYER 1: GRADIENT SHIFT ===
-  const gradX = interpolate(frame, [0, durationInFrames], [30, 55], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-  });
-  const gradY = interpolate(frame, [0, durationInFrames], [40, 60], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-  });
-  const gradOpacity = interpolate(frame, [0, durationInFrames], [0.04, 0.09], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-  });
+  // === "INTELLIGENT" pulse ===
+  const intPulse = frame > line2Start + 16
+    ? interpolate(
+        frame,
+        [line2Start + 16, line2Start + 24, line2Start + 32],
+        [1, 1.06, 1],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+      )
+    : 1;
 
-  // === TEXT ANIMATIONS ===
-  // "The Mind of Buddha" — blur reveal
-  const titleOpacity = interpolate(frame, [25, 55], [0, 1], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
-  const titleBlur = interpolate(frame, [25, 55], [20, 0], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
-  const titleY = interpolate(frame, [25, 55], [15, 0], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
+  // === Yellow accent bar under INTELLIGENT ===
+  const barWidth = interpolate(
+    frame, [line2Start + 20, line2Start + 40], [0, 520], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.cubic),
+    }
+  );
 
-  // Golden glow pulse after title lands
-  const titleGlow = interpolate(frame, [60, 90, 140], [0, 18, 10], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-  });
+  // === Exit ===
+  const exitOp = interpolate(
+    frame, [durationInFrames - 15, durationInFrames], [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
 
-  // Decorative line expanding
-  const lineWidth = interpolate(frame, [55, 90], [0, 220], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
-  const lineOpacity = interpolate(frame, [55, 75], [0, 0.6], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.quad),
-  });
-
-  // "Stay close." — gentle fade up
-  const stayOpacity = interpolate(frame, [120, 150], [0, 1], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
-  const stayY = interpolate(frame, [120, 150], [20, 0], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
-
-  // Om symbol — very subtle
-  const omOpacity = interpolate(frame, [10, 40], [0, 0.06], {
-    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.quad),
-  });
-  const omScale = interpolate(frame, [10, durationInFrames], [0.95, 1.05], {
+  const wmOp = interpolate(frame, [15, 35], [0, 0.3], {
     extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
   });
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: '#0F0F0F',
-        fontFamily: "'Cormorant Garamond', 'EB Garamond', Georgia, serif",
+        backgroundColor: '#1C1C1C',
+        fontFamily: 'Inter, Poppins, sans-serif',
         overflow: 'hidden',
       }}
     >
-      {/* LAYER 1: Gradient Shift */}
-      <div
-        style={{
+      {/* BG particles */}
+      {PARTICLES.map((p, i) => (
+        <div key={i} style={{
           position: 'absolute',
-          inset: 0,
-          opacity: exitOpacity,
-          background:
-            `radial-gradient(ellipse at ${gradX}% ${gradY}%, ` +
-            `rgba(201,168,76,${gradOpacity}) 0%, transparent 55%), ` +
-            `radial-gradient(ellipse at ${100 - gradX}% ${100 - gradY}%, ` +
-            `rgba(212,129,59,${gradOpacity * 0.7}) 0%, transparent 45%)`,
-        }}
-      />
-
-      {/* LAYER 2: Floating Particles */}
-      {Array.from({ length: 25 }).map((_, i) => {
-        const baseX = seededRandom(i * 7 + 1) * 100;
-        const baseY = seededRandom(i * 13 + 3) * 100;
-        const size = seededRandom(i * 17 + 5) * 4 + 1;
-        const speed = seededRandom(i * 23 + 7) * 0.3 + 0.1;
-        const delay = seededRandom(i * 29 + 11) * 100;
-
-        const particleX = baseX + Math.sin((frame + delay) * speed * 0.02) * 15;
-        const particleY = baseY + Math.cos((frame + delay) * speed * 0.015) * 20;
-        const particleOpacity = interpolate(
-          Math.sin((frame + delay) * 0.03),
-          [-1, 0, 1],
-          [0.02, 0.07, 0.02],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-
-        return (
-          <div
-            key={`particle-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${particleX}%`,
-              top: `${particleY}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#C9A84C',
-              opacity: particleOpacity * exitOpacity,
-              filter: `blur(${size > 3 ? 2 : 1}px)`,
-              pointerEvents: 'none' as const,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3: Aurora Light Flow */}
-      {Array.from({ length: 4 }).map((_, i) => {
-        const waveY = 30 + i * 15;
-        const waveOffset = interpolate(
-          frame,
-          [0, durationInFrames],
-          [0, 360],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        const waveX = Math.sin((waveOffset + i * 90) * (Math.PI / 180)) * 20;
-        const auroraOpacity = interpolate(
-          Math.sin((frame + i * 40) * 0.02),
-          [-1, 1],
-          [0.015, 0.04],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-
-        return (
-          <div
-            key={`aurora-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${10 + waveX}%`,
-              top: `${waveY}%`,
-              width: '80%',
-              height: '120px',
-              background:
-                `linear-gradient(90deg, ` +
-                `transparent 0%, ` +
-                `rgba(201,168,76,${auroraOpacity}) 30%, ` +
-                `rgba(212,129,59,${auroraOpacity * 0.6}) 60%, ` +
-                `transparent 100%)`,
-              filter: 'blur(40px)',
-              borderRadius: '50%',
-              transform: `rotate(${-5 + i * 3}deg)`,
-              opacity: exitOpacity,
-              pointerEvents: 'none' as const,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4: Om Symbol — very faint background */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '42%',
-          transform: `translate(-50%, -50%) scale(${omScale})`,
-          fontSize: 180,
-          color: '#C9A84C',
-          opacity: omOpacity * exitOpacity,
+          left: `${p.x}%`, top: `${p.y}%`,
+          width: p.size, height: p.size,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #FFD966 0%, transparent 70%)',
+          opacity: p.opacity, filter: 'blur(40px)',
+          transform: `translate(${
+            Math.cos((frame + i * 40) * 0.015) * 5
+          }px, ${
+            Math.sin((frame + i * 60) * 0.02) * 8
+          }px)`,
           pointerEvents: 'none' as const,
-          margin: 0,
-        }}
-      >
-        🕉️
+        }} />
+      ))}
+
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        gap: 35, opacity: exitOp,
+      }}>
+        {/* Line 1 */}
+        <div style={{
+          opacity: line1Op,
+          transform: `translateY(${line1Y}px)`,
+          position: 'relative',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye{' '}
+          </span>
+          <span style={{
+            fontSize: 52, fontWeight: 800,
+            color: '#F5F5F5', margin: 0,
+            position: 'relative',
+            display: 'inline-block',
+          }}>
+            BEWAKOOF
+            {/* Strikethrough line */}
+            <div style={{
+              position: 'absolute',
+              top: '52%', left: '-4%',
+              height: 5, borderRadius: 3,
+              width: `${strikeWidth}%`,
+              backgroundColor: '#FF6B6B',
+              boxShadow: '0 0 10px rgba(255,107,107,0.5)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}ki kahani nahi hai
+          </span>
+        </div>
+
+        {/* Line 2 */}
+        <div style={{
+          opacity: line2Op,
+          transform: `scale(${line2Scale})`,
+          textAlign: 'center',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye ek{' '}
+          </span>
+          <span style={{
+            fontSize: 64, fontWeight: 900,
+            color: '#FFD966', margin: 0,
+            display: 'inline-block',
+            transform: `scale(${intPulse})`,
+            textShadow: '0 3px 25px rgba(255,217,102,0.4)',
+            position: 'relative',
+          }}>
+            INTELLIGENT
+            {/* Yellow accent bar */}
+            <div style={{
+              position: 'absolute',
+              bottom: -8, left: '50%',
+              height: 4, borderRadius: 2,
+              width: barWidth,
+              maxWidth: '110%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(90deg, transparent, #FFD966, transparent)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}insaan ki kahani hai
+          </span>
+        </div>
       </div>
 
-      {/* LAYER 5: Main Text Content */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: exitOpacity,
-          zIndex: 10,
-        }}
-      >
-        {/* Title */}
-        <h1
-          style={{
-            fontSize: 82,
-            fontWeight: 700,
-            color: '#C9A84C',
-            letterSpacing: 6,
-            margin: 0,
-            opacity: titleOpacity,
-            filter: `blur(${titleBlur}px)`,
-            transform: `translateY(${titleY}px)`,
-            textShadow: `0 0 ${titleGlow}px rgba(201,168,76,0.4)`,
-            textTransform: 'uppercase',
-          }}
-        >
-          The Mind of Buddha
-        </h1>
+      {/* Vignette */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at center, transparent 45%, rgba(28,28,28,0.5) 100%)',
+        pointerEvents: 'none' as const,
+      }} />
 
-        {/* Decorative Line */}
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#C9A84C',
-            opacity: lineOpacity,
-            marginTop: 22,
-            marginBottom: 22,
-            marginLeft: 0,
-            marginRight: 0,
-          }}
-        />
-
-        {/* Stay close */}
-        <p
-          style={{
-            fontSize: 36,
-            fontWeight: 400,
-            color: '#E8E4D9',
-            letterSpacing: 4,
-            margin: 0,
-            opacity: stayOpacity,
-            transform: `translateY(${stayY}px)`,
-            fontStyle: 'italic',
-          }}
-        >
-          Stay close.
-        </p>
+      {/* Watermark */}
+      <div style={{
+        position: 'absolute', bottom: 30, right: 45,
+        opacity: wmOp, zIndex: 100,
+      }}>
+        <span style={{
+          fontSize: 22, fontWeight: 600,
+          color: '#9E9E9E', letterSpacing: 1,
+        }}>ProBuffet HQ</span>
       </div>
-
-      {/* LAYER 6: Vignette */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at center, transparent 35%, rgba(15,15,15,0.6) 100%)',
-          pointerEvents: 'none' as const,
-        }}
-      />
-
-      {/* LAYER 7: Watermark */}
-      {(() => {
-        const wmOp = interpolate(frame, [20, 45], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-        });
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 30,
-              right: 45,
-              opacity: wmOp * exitOpacity,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 600,
-                color: '#6B6B6B',
-                letterSpacing: 1.5,
-                fontFamily: "'Cormorant Garamond', serif",
-                margin: 0,
-              }}
-            >
-              The Mind of Buddha
-            </span>
-          </div>
-        );
-      })()}
     </AbsoluteFill>
   );
 };
 
-export default TheMindOfBuddhaIntro;
+export default Ch1Scene6IntelligentKahani;
 ```
 
