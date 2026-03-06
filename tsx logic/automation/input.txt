@@ -1,1101 +1,221 @@
 ```tsx
 import React from 'react';
 import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
+  useCurrentFrame, useVideoConfig, interpolate,
+  Easing, AbsoluteFill,
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'mindOfBuddhaChannelTrailer',
-  durationInSeconds: 15,
+  id: 'Ch1Scene6IntelligentKahani',
+  durationInSeconds: 7,
   fps: 30,
   width: 1920,
   height: 1080,
 };
 
-const MindOfBuddhaChannelTrailer: React.FC = () => {
+const seededRandom = (seed: number): number => {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+};
+
+const PARTICLES = new Array(8).fill(0).map((_, i) => ({
+  x: seededRandom(i + 1) * 100,
+  y: seededRandom(i + 50) * 100,
+  size: seededRandom(i + 100) * 120 + 50,
+  opacity: seededRandom(i + 150) * 0.05 + 0.02,
+}));
+
+const Ch1Scene6IntelligentKahani: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const seededRandom = (seed: number) => {
-    const x = Math.sin(seed * 9301 + 49297) * 49297;
-    return x - Math.floor(x);
-  };
+  // === LINE 1: "YE BEWAKOOF KI KAHANI NAHI HAI" ===
+  const line1Op = interpolate(frame, [8, 22], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+  const line1Y = interpolate(frame, [8, 22], [30, 0], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
 
-  // === EXIT FADE ===
-  const exitOpacity = interpolate(
-    frame,
-    [durationInFrames - 20, durationInFrames],
-    [1, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) }
-  );
+  // === Strikethrough on "BEWAKOOF" ===
+  const strikeWidth = interpolate(frame, [40, 55], [0, 100], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
 
-  // === BREATHING MICRO ANIMATIONS ===
-  const breathScale = interpolate(
-    Math.sin(frame * 0.02), [-1, 1], [0.995, 1.005],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const floatY = interpolate(
-    Math.sin(frame * 0.018), [-1, 1], [-2, 2],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const glowSize = interpolate(
-    Math.sin(frame * 0.025), [-1, 1], [4, 18],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const glowOpacity = interpolate(
-    Math.sin(frame * 0.025), [-1, 1], [0.2, 0.5],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const trackBreath = interpolate(
-    Math.sin(frame * 0.015), [-1, 1], [6, 10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const shimmer = interpolate(
-    Math.sin(frame * 0.035), [-1, 1], [0.85, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  // === LINE 2: "YE EK INTELLIGENT INSAAN KI KAHANI HAI" ===
+  const line2Start = 70;
+  const line2Op = interpolate(frame, [line2Start, line2Start + 6], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+  });
+  const line2Scale = interpolate(
+    frame, [line2Start, line2Start + 16], [1.3, 1], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.back(1.6)),
+    }
   );
 
-  // === LOTUS ICON ANIMATION ===
-  const lotusScale = interpolate(
-    frame, [0, 40], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.4)) }
+  // === "INTELLIGENT" pulse ===
+  const intPulse = frame > line2Start + 16
+    ? interpolate(
+        frame,
+        [line2Start + 16, line2Start + 24, line2Start + 32],
+        [1, 1.06, 1],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+      )
+    : 1;
+
+  // === Yellow accent bar under INTELLIGENT ===
+  const barWidth = interpolate(
+    frame, [line2Start + 20, line2Start + 40], [0, 520], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.cubic),
+    }
   );
-  const lotusOpacity = interpolate(
-    frame, [0, 35], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const lotusRotate = interpolate(
-    frame, [0, 40], [-15, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const lotusBreath = interpolate(
-    Math.sin(frame * 0.02), [-1, 1], [0.97, 1.03],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const lotusGlow = interpolate(
-    Math.sin(frame * 0.03), [-1, 1], [0, 20],
+
+  // === Exit ===
+  const exitOp = interpolate(
+    frame, [durationInFrames - 15, durationInFrames], [1, 0],
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
 
-  // === CHANNEL NAME ===
-  const channelNameOpacity = interpolate(
-    frame, [30, 60], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const channelNameY = interpolate(
-    frame, [30, 60], [30, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const channelNameBlur = interpolate(
-    frame, [30, 60], [12, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-
-  // === TAGLINE ===
-  const taglineOpacity = interpolate(
-    frame, [65, 95], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const taglineY = interpolate(
-    frame, [65, 95], [20, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-
-  // === DIVIDER LINE ===
-  const dividerWidth = interpolate(
-    frame, [55, 85], [0, 280],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const dividerOpacity = interpolate(
-    frame, [55, 75], [0, 0.6],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const dividerGlow = interpolate(
-    Math.sin(frame * 0.03), [-1, 1], [0.3, 0.7],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-
-  // === HOOK TEXT: "They called him the wisest man..." ===
-  const hookWords = ['They', 'called', 'him', 'the', 'wisest', 'man', 'in', 'the', 'harbor.'];
-  const hookStart = 140;
-  const hookStagger = 8;
-
-  // === SECOND LINE: "He called himself a fool." ===
-  const foolWords = ['He', 'called', 'himself', 'a', 'fool.'];
-  const foolStart = 230;
-  const foolStagger = 10;
-
-  // === SUBSCRIBE PULSE ===
-  const subOpacity = interpolate(
-    frame, [310, 340], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const subY = interpolate(
-    frame, [310, 340], [15, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const subPulse = interpolate(
-    Math.sin(frame * 0.04), [-1, 1], [0.95, 1.05],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-
-  // === CORNER ORNAMENTS ===
-  const ornamentOpacity = interpolate(
-    frame, [20, 50], [0, 0.15],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const ornamentScale = interpolate(
-    frame, [20, 50], [0.8, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-
-  // === RING PULSE (behind lotus) ===
-  const ringScale = interpolate(
-    frame, [10, 90, 130, 200], [0.5, 1.8, 2.5, 3.5],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const ringOpacity = interpolate(
-    frame, [10, 50, 130, 200], [0.3, 0.15, 0.08, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
+  const wmOp = interpolate(frame, [15, 35], [0, 0.3], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+  });
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: '#050505',
-        fontFamily: "'Cinzel', 'Cormorant Garamond', Georgia, serif",
+        backgroundColor: '#1C1C1C',
+        fontFamily: 'Inter, Poppins, sans-serif',
         overflow: 'hidden',
-        opacity: exitOpacity,
       }}
     >
-      {/* LAYER 1: DEEP CINEMATIC BASE */}
-      <div
-        style={{
+      {/* BG particles */}
+      {PARTICLES.map((p, i) => (
+        <div key={i} style={{
           position: 'absolute',
-          inset: 0,
-          background: `
-            radial-gradient(ellipse 130% 90% at 50% 120%,
-              rgba(45,74,62,0.12) 0%, transparent 55%),
-            radial-gradient(ellipse 100% 70% at 80% -15%,
-              rgba(26,26,46,0.25) 0%, transparent 50%),
-            radial-gradient(ellipse 80% 50% at 15% 50%,
-              rgba(74,26,26,0.08) 0%, transparent 45%),
-            linear-gradient(170deg,
-              #030303 0%, #0A0A0A 25%, #0F0F0F 50%, #0A0A0A 75%, #050505 100%)
-          `,
-        }}
-      />
-
-      {/* CURVED LIGHT SWEEP — PDF style */}
-      {(() => {
-        const sweepX = interpolate(
-          frame, [0, durationInFrames], [-8, 8],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        const sweepOp = interpolate(
-          frame, [0, durationInFrames * 0.4, durationInFrames],
-          [0.04, 0.12, 0.05],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              left: `${-25 + sweepX}%`,
-              bottom: '-35%',
-              width: '150%',
-              height: '85%',
-              borderRadius: '50% 50% 0 0',
-              background: `radial-gradient(ellipse at 50% 100%,
-                rgba(201,168,76,${sweepOp * 0.6}) 0%,
-                rgba(180,200,190,${sweepOp}) 15%,
-                rgba(100,120,115,${sweepOp * 0.35}) 30%,
-                transparent 55%)`,
-              pointerEvents: 'none' as const,
-            }}
-          />
-        );
-      })()}
-
-      {/* SECONDARY TOP SWEEP */}
-      {(() => {
-        const topSweepOp = interpolate(
-          Math.sin(frame * 0.012), [-1, 1], [0.02, 0.06],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              right: '-20%',
-              top: '-40%',
-              width: '120%',
-              height: '70%',
-              borderRadius: '0 0 50% 50%',
-              background: `radial-gradient(ellipse at 60% 0%,
-                rgba(26,26,46,${topSweepOp * 2}) 0%,
-                rgba(201,168,76,${topSweepOp}) 20%,
-                transparent 50%)`,
-              pointerEvents: 'none' as const,
-            }}
-          />
-        );
-      })()}
-
-      {/* LAYER 2: AMBIENT GLOW ORBS — 5 orbs for trailer richness */}
-      {[
-        { x: 12, y: 20, color: '201,168,76', size: 500, speed: 0.006 },
-        { x: 85, y: 65, color: '212,129,59', size: 400, speed: 0.008 },
-        { x: 50, y: 88, color: '45,74,62', size: 600, speed: 0.005 },
-        { x: 30, y: 55, color: '201,112,125', size: 350, speed: 0.009 },
-        { x: 70, y: 15, color: '26,26,46', size: 450, speed: 0.007 },
-      ].map((orb, i) => {
-        const oOp = interpolate(
-          Math.sin(frame * orb.speed + i * 2.5), [-1, 1], [0.015, 0.06],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        const oSc = interpolate(
-          Math.sin(frame * orb.speed * 0.6 + i * 1.3), [-1, 1], [0.85, 1.15],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        const oX = interpolate(
-          Math.sin(frame * orb.speed * 0.3 + i), [-1, 1], [-3, 3],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${orb.x + oX}%`,
-              top: `${orb.y}%`,
-              width: orb.size,
-              height: orb.size,
-              marginLeft: -orb.size / 2,
-              marginTop: -orb.size / 2,
-              borderRadius: '50%',
-              background: `radial-gradient(circle,
-                rgba(${orb.color},${oOp}) 0%, transparent 70%)`,
-              transform: `scale(${oSc})`,
-              filter: 'blur(70px)',
-              pointerEvents: 'none' as const,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3: FLOATING GOLDEN DUST — 30 particles for trailer */}
-      {Array.from({ length: 30 }).map((_, i) => {
-        const bX = seededRandom(i * 7 + 1) * 100;
-        const bY = seededRandom(i * 13 + 3) * 100;
-        const sz = seededRandom(i * 17 + 5) * 3.5 + 1;
-        const sp = seededRandom(i * 23 + 7) * 0.35 + 0.08;
-        const dl = seededRandom(i * 29 + 11) * 120;
-        const px = bX + Math.sin((frame + dl) * sp * 0.02) * 15;
-        const py = bY + Math.cos((frame + dl) * sp * 0.013) * 20;
-        const pOp = interpolate(
-          Math.sin((frame + dl) * 0.028), [-1, 0, 1], [0.008, 0.06, 0.008],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div
-            key={`dust-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${px}%`,
-              top: `${py}%`,
-              width: sz,
-              height: sz,
-              borderRadius: '50%',
-              backgroundColor: i % 3 === 0 ? '#D4813B' : '#C9A84C',
-              opacity: pOp,
-              filter: `blur(${sz > 2.5 ? 1.5 : 0.5}px)`,
-              pointerEvents: 'none' as const,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4: AURORA BANDS — ethereal wisdom feel */}
-      {Array.from({ length: 4 }).map((_, i) => {
-        const wY = 18 + i * 16;
-        const wX = Math.sin((frame * 0.008) + i * 1.8) * 18;
-        const aOp = interpolate(
-          Math.sin((frame + i * 50) * 0.012), [-1, 1], [0.008, 0.035],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div
-            key={`aurora-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${5 + wX}%`,
-              top: `${wY}%`,
-              width: '90%',
-              height: '120px',
-              background: `linear-gradient(90deg,
-                transparent 0%,
-                rgba(201,168,76,${aOp}) 25%,
-                rgba(212,129,59,${aOp * 0.6}) 50%,
-                rgba(201,112,125,${aOp * 0.3}) 75%,
-                transparent 100%)`,
-              filter: 'blur(50px)',
-              borderRadius: '50%',
-              transform: `rotate(${-4 + i * 2.5}deg)`,
-              pointerEvents: 'none' as const,
-            }}
-          />
-        );
-      })}
-
-      {/* CORNER ORNAMENTS — subtle decorative brackets */}
-      {[
-        { top: 40, left: 50, rotate: 0 },
-        { top: 40, right: 50, rotate: 90 },
-        { bottom: 40, left: 50, rotate: 270 },
-        { bottom: 40, right: 50, rotate: 180 },
-      ].map((pos, i) => (
-        <div
-          key={`orn-${i}`}
-          style={{
-            position: 'absolute',
-            ...Object.fromEntries(
-              Object.entries(pos).filter(([k]) => k !== 'rotate')
-            ),
-            width: 60,
-            height: 60,
-            opacity: ornamentOpacity,
-            transform: `scale(${ornamentScale}) rotate(${pos.rotate}deg)`,
-            pointerEvents: 'none' as const,
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: 30,
-              height: 2,
-              backgroundColor: '#C9A84C',
-              borderRadius: 1,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: 2,
-              height: 30,
-              backgroundColor: '#C9A84C',
-              borderRadius: 1,
-            }}
-          />
-        </div>
+          left: `${p.x}%`, top: `${p.y}%`,
+          width: p.size, height: p.size,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #FFD966 0%, transparent 70%)',
+          opacity: p.opacity, filter: 'blur(40px)',
+          transform: `translate(${
+            Math.cos((frame + i * 40) * 0.015) * 5
+          }px, ${
+            Math.sin((frame + i * 60) * 0.02) * 8
+          }px)`,
+          pointerEvents: 'none' as const,
+        }} />
       ))}
 
-      {/* RING PULSE — expanding circle behind lotus */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '32%',
-          left: '50%',
-          width: 120,
-          height: 120,
-          marginLeft: -60,
-          marginTop: -60,
-          borderRadius: '50%',
-          border: '1.5px solid rgba(201,168,76,0.3)',
-          opacity: ringOpacity,
-          transform: `scale(${ringScale})`,
-          pointerEvents: 'none' as const,
-        }}
-      />
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        gap: 35, opacity: exitOp,
+      }}>
+        {/* Line 1 */}
+        <div style={{
+          opacity: line1Op,
+          transform: `translateY(${line1Y}px)`,
+          position: 'relative',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye{' '}
+          </span>
+          <span style={{
+            fontSize: 52, fontWeight: 800,
+            color: '#F5F5F5', margin: 0,
+            position: 'relative',
+            display: 'inline-block',
+          }}>
+            BEWAKOOF
+            {/* Strikethrough line */}
+            <div style={{
+              position: 'absolute',
+              top: '52%', left: '-4%',
+              height: 5, borderRadius: 3,
+              width: `${strikeWidth}%`,
+              backgroundColor: '#FF6B6B',
+              boxShadow: '0 0 10px rgba(255,107,107,0.5)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}ki kahani nahi hai
+          </span>
+        </div>
 
-      {/* SECOND RING — delayed */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '32%',
-          left: '50%',
-          width: 120,
-          height: 120,
-          marginLeft: -60,
-          marginTop: -60,
-          borderRadius: '50%',
-          border: '1px solid rgba(212,129,59,0.2)',
-          opacity: interpolate(
-            frame, [30, 70, 160, 230], [0, 0.2, 0.06, 0],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-          ),
-          transform: `scale(${interpolate(
-            frame, [30, 110, 160, 230], [0.5, 1.5, 2.2, 3],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-          )})`,
-          pointerEvents: 'none' as const,
-        }}
-      />
-
-      {/* === LAYER 5: MAIN CONTENT === */}
-
-      {/* LOTUS SYMBOL — ☸ Dharma Wheel as icon */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '28%',
-          left: '50%',
-          transform: `translateX(-50%) scale(${lotusScale * lotusBreath}) rotate(${lotusRotate}deg)`,
-          opacity: lotusOpacity,
-          pointerEvents: 'none' as const,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 72,
-            color: '#C9A84C',
-            textShadow: `0 0 ${lotusGlow}px rgba(201,168,76,0.5),
-                         0 0 ${lotusGlow * 2}px rgba(201,168,76,0.2)`,
-            margin: 0,
-            lineHeight: 1,
-            fontFamily: 'serif',
-          }}
-        >
-          ☸
+        {/* Line 2 */}
+        <div style={{
+          opacity: line2Op,
+          transform: `scale(${line2Scale})`,
+          textAlign: 'center',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye ek{' '}
+          </span>
+          <span style={{
+            fontSize: 64, fontWeight: 900,
+            color: '#FFD966', margin: 0,
+            display: 'inline-block',
+            transform: `scale(${intPulse})`,
+            textShadow: '0 3px 25px rgba(255,217,102,0.4)',
+            position: 'relative',
+          }}>
+            INTELLIGENT
+            {/* Yellow accent bar */}
+            <div style={{
+              position: 'absolute',
+              bottom: -8, left: '50%',
+              height: 4, borderRadius: 2,
+              width: barWidth,
+              maxWidth: '110%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(90deg, transparent, #FFD966, transparent)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}insaan ki kahani hai
+          </span>
         </div>
       </div>
 
-      {/* CHANNEL NAME: "The Mind of Buddha" */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '42%',
-          left: '50%',
-          transform: `translateX(-50%) translateY(${channelNameY + floatY}px) scale(${breathScale})`,
-          opacity: channelNameOpacity * shimmer,
-          filter: `blur(${channelNameBlur}px)`,
-          pointerEvents: 'none' as const,
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 68,
-            fontWeight: 700,
-            color: '#E8E4D9',
-            letterSpacing: trackBreath,
-            margin: 0,
-            lineHeight: 1.1,
-            fontFamily: "'Cinzel', serif",
-            textShadow: `0 0 ${glowSize}px rgba(201,168,76,${glowOpacity}),
-                         0 2px 20px rgba(0,0,0,0.8)`,
-            textAlign: 'center' as const,
-            whiteSpace: 'nowrap' as const,
-          }}
-        >
-          The Mind of Buddha
-        </h1>
+      {/* Vignette */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at center, transparent 45%, rgba(28,28,28,0.5) 100%)',
+        pointerEvents: 'none' as const,
+      }} />
+
+      {/* Watermark */}
+      <div style={{
+        position: 'absolute', bottom: 30, right: 45,
+        opacity: wmOp, zIndex: 100,
+      }}>
+        <span style={{
+          fontSize: 22, fontWeight: 600,
+          color: '#9E9E9E', letterSpacing: 1,
+        }}>ProBuffet HQ</span>
       </div>
-
-      {/* GOLDEN DIVIDER LINE */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '54%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: dividerWidth,
-          height: 1.5,
-          background: `linear-gradient(90deg,
-            transparent 0%,
-            rgba(201,168,76,${dividerGlow}) 20%,
-            rgba(201,168,76,${dividerGlow}) 80%,
-            transparent 100%)`,
-          opacity: dividerOpacity,
-          borderRadius: 1,
-          pointerEvents: 'none' as const,
-        }}
-      />
-
-      {/* TAGLINE: "Ancient wisdom for the modern mind" */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '57.5%',
-          left: '50%',
-          transform: `translateX(-50%) translateY(${taglineY}px)`,
-          opacity: taglineOpacity,
-          pointerEvents: 'none' as const,
-        }}
-      >
-        <p
-          style={{
-            fontSize: 22,
-            fontWeight: 400,
-            color: '#C9A84C',
-            letterSpacing: 5,
-            margin: 0,
-            lineHeight: 1.4,
-            fontFamily: "'Philosopher', 'EB Garamond', serif",
-            textTransform: 'uppercase' as const,
-            textAlign: 'center' as const,
-            textShadow: '0 0 8px rgba(201,168,76,0.2)',
-          }}
-        >
-          Ancient wisdom for the modern mind
-        </p>
-      </div>
-
-      {/* HOOK LINE 1: "They called him the wisest man in the harbor." */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '68%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: 10,
-          justifyContent: 'center',
-          flexWrap: 'wrap' as const,
-          maxWidth: 900,
-          pointerEvents: 'none' as const,
-        }}
-      >
-        {hookWords.map((word, wi) => {
-          const ws = hookStart + wi * hookStagger;
-          const wOp = interpolate(
-            frame, [ws, ws + 18], [0, 1],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-          );
-          const wY = interpolate(
-            frame, [ws, ws + 18], [20, 0],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-          );
-          const isKey = word === 'wisest' || word === 'harbor.';
-          return (
-            <span
-              key={`hook-${wi}`}
-              style={{
-                fontSize: 32,
-                fontWeight: isKey ? 600 : 400,
-                color: isKey ? '#C9A84C' : '#E8E4D9',
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontStyle: 'italic' as const,
-                margin: 0,
-                opacity: wOp,
-                transform: `translateY(${wY}px)`,
-                textShadow: isKey
-                  ? '0 0 10px rgba(201,168,76,0.3)'
-                  : '0 1px 8px rgba(0,0,0,0.5)',
-              }}
-            >
-              {word}
-            </span>
-          );
-        })}
-      </div>
-
-      {/* HOOK LINE 2: "He called himself a fool." */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '76%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: 10,
-          justifyContent: 'center',
-          pointerEvents: 'none' as const,
-        }}
-      >
-        {foolWords.map((word, wi) => {
-          const ws = foolStart + wi * foolStagger;
-          const wOp = interpolate(
-            frame, [ws, ws + 18], [0, 1],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-          );
-          const wY = interpolate(
-            frame, [ws, ws + 18], [15, 0],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-          );
-          const isKey = word === 'fool.';
-          return (
-            <span
-              key={`fool-${wi}`}
-              style={{
-                fontSize: 30,
-                fontWeight: isKey ? 700 : 400,
-                color: isKey ? '#D4813B' : 'rgba(232,228,217,0.8)',
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontStyle: 'italic' as const,
-                margin: 0,
-                opacity: wOp,
-                transform: `translateY(${wY}px)`,
-                textShadow: isKey
-                  ? '0 0 14px rgba(212,129,59,0.4)'
-                  : 'none',
-              }}
-            >
-              {word}
-            </span>
-          );
-        })}
-      </div>
-
-      {/* SUBSCRIBE HINT */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 70,
-          left: '50%',
-          transform: `translateX(-50%) translateY(${subY}px) scale(${subPulse})`,
-          opacity: subOpacity,
-          pointerEvents: 'none' as const,
-        }}
-      >
-        <p
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#C9A84C',
-            letterSpacing: 4,
-            margin: 0,
-            fontFamily: "'Cinzel', serif",
-            textTransform: 'uppercase' as const,
-            textAlign: 'center' as const,
-            opacity: 0.6,
-            textShadow: '0 0 6px rgba(201,168,76,0.2)',
-          }}
-        >
-          ▽ Subscribe · Stay Close ▽
-        </p>
-      </div>
-
-      {/* VIGNETTE */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at center, transparent 25%, rgba(5,5,5,0.75) 100%)',
-          pointerEvents: 'none' as const,
-        }}
-      />
-
-      {/* FILM GRAIN OVERLAY */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0.03,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E")`,
-          pointerEvents: 'none' as const,
-        }}
-      />
-
-      {/* WATERMARK */}
-      {(() => {
-        const wmOp = interpolate(
-          frame, [20, 45], [0, 0.25],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 30,
-              right: 45,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 16,
-                fontWeight: 600,
-                color: '#6B6B6B',
-                letterSpacing: 1.5,
-                fontFamily: "'Cinzel', serif",
-                margin: 0,
-              }}
-            >
-              The Mind of Buddha
-            </span>
-          </div>
-        );
-      })()}
     </AbsoluteFill>
   );
 };
 
-export default MindOfBuddhaChannelTrailer;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-export const compositionConfig = {
-  id: 'disciplineOfDivision',
-  durationInSeconds: 18,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const DisciplineOfDivision: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  const seededRandom = (seed: number) => {
-    const x = Math.sin(seed * 9301 + 49297) * 49297;
-    return x - Math.floor(x);
-  };
-
-  // === EXIT ===
-  const exitOp = interpolate(
-    frame, [durationInFrames - 18, durationInFrames], [1, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) }
-  );
-
-  // === MICRO ANIMATIONS ===
-  const breathScale = interpolate(
-    Math.sin(frame * 0.022), [-1, 1], [0.996, 1.004],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const floatY = interpolate(
-    Math.sin(frame * 0.018), [-1, 1], [-1.5, 1.5],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const glowSz = interpolate(
-    Math.sin(frame * 0.028), [-1, 1], [3, 14],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const glowOp = interpolate(
-    Math.sin(frame * 0.028), [-1, 1], [0.15, 0.4],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const shimmer = interpolate(
-    Math.sin(frame * 0.035), [-1, 1], [0.88, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-
-  // === QUOTE MARK ===
-  const quoteOp = interpolate(
-    frame, [15, 40], [0, 0.12],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const quoteY = interpolate(
-    frame, [15, 40], [20, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-
-  // === LINE 1: "For thirty years he practiced" ===
-  const line1Op = interpolate(
-    frame, [30, 55], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const line1Y = interpolate(
-    frame, [30, 55], [25, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const line1Blur = interpolate(
-    frame, [30, 55], [10, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-
-  // === LINE 2: "one discipline above all others" ===
-  const line2Op = interpolate(
-    frame, [55, 80], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const line2Y = interpolate(
-    frame, [55, 80], [25, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const line2Blur = interpolate(
-    frame, [55, 80], [10, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-
-  // === EM DASH + "DIVISION" — dramatic reveal ===
-  const divisionOp = interpolate(
-    frame, [100, 130], [0, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const divisionScale = interpolate(
-    frame, [100, 130], [0.85, 1],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.2)) }
-  );
-  const divisionBlur = interpolate(
-    frame, [100, 130], [15, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-
-  // === DASH LINE ===
-  const dashWidth = interpolate(
-    frame, [90, 115], [0, 80],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
-  );
-  const dashOp = interpolate(
-    frame, [90, 110], [0, 0.5],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-
-  // === DIVISION GLOW PULSE — after reveal ===
-  const divGlowSz = frame > 130
-    ? interpolate(Math.sin(frame * 0.03), [-1, 1], [5, 25],
-        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
-    : 0;
-  const divGlowOp = frame > 130
-    ? interpolate(Math.sin(frame * 0.03), [-1, 1], [0.2, 0.5],
-        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
-    : 0;
-
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#050505',
-        fontFamily: "'Cinzel', 'Cormorant Garamond', Georgia, serif",
-        overflow: 'hidden',
-        opacity: exitOp,
-      }}
-    >
-      {/* DARK CINEMATIC BASE */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: `
-          radial-gradient(ellipse 120% 80% at 20% 110%,
-            rgba(45,74,62,0.12) 0%, transparent 50%),
-          radial-gradient(ellipse 100% 60% at 85% -10%,
-            rgba(26,26,46,0.28) 0%, transparent 50%),
-          linear-gradient(175deg,
-            #0A0A0A 0%, #0F0F0F 30%, #0A0A0A 70%, #060606 100%)
-        `,
-      }} />
-
-      {/* CURVED LIGHT SWEEP */}
-      {(() => {
-        const sweepX = interpolate(
-          frame, [0, durationInFrames], [-5, 5],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        const sweepOp = interpolate(
-          frame, [0, durationInFrames / 2, durationInFrames],
-          [0.05, 0.1, 0.05],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div style={{
-            position: 'absolute',
-            left: `${-20 + sweepX}%`, bottom: '-30%',
-            width: '140%', height: '80%',
-            borderRadius: '50% 50% 0 0',
-            background: `radial-gradient(ellipse at 50% 100%,
-              rgba(180,200,190,${sweepOp}) 0%,
-              rgba(100,120,115,${sweepOp * 0.4}) 25%,
-              transparent 55%)`,
-            pointerEvents: 'none' as const,
-          }} />
-        );
-      })()}
-
-      {/* AMBIENT GLOW ORBS */}
-      {[
-        { x: 15, y: 25, color: '201,168,76', size: 400, speed: 0.008 },
-        { x: 80, y: 70, color: '212,129,59', size: 350, speed: 0.006 },
-        { x: 50, y: 85, color: '45,74,62', size: 500, speed: 0.01 },
-      ].map((orb, i) => {
-        const oOp = interpolate(
-          Math.sin(frame * orb.speed + i * 2), [-1, 1], [0.02, 0.05],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        const oSc = interpolate(
-          Math.sin(frame * orb.speed * 0.7 + i), [-1, 1], [0.9, 1.1],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div key={`orb-${i}`} style={{
-            position: 'absolute',
-            left: `${orb.x}%`, top: `${orb.y}%`,
-            width: orb.size, height: orb.size,
-            marginLeft: -orb.size / 2, marginTop: -orb.size / 2,
-            borderRadius: '50%',
-            background: `radial-gradient(circle,
-              rgba(${orb.color},${oOp}) 0%, transparent 70%)`,
-            transform: `scale(${oSc})`,
-            filter: 'blur(60px)',
-            pointerEvents: 'none' as const,
-          }} />
-        );
-      })}
-
-      {/* DUST PARTICLES */}
-      {Array.from({ length: 20 }).map((_, i) => {
-        const bX = seededRandom(i * 7 + 1) * 100;
-        const bY = seededRandom(i * 13 + 3) * 100;
-        const sz = seededRandom(i * 17 + 5) * 3 + 1;
-        const sp = seededRandom(i * 23 + 7) * 0.3 + 0.1;
-        const dl = seededRandom(i * 29 + 11) * 100;
-        const px = bX + Math.sin((frame + dl) * sp * 0.02) * 12;
-        const py = bY + Math.cos((frame + dl) * sp * 0.015) * 16;
-        const pOp = interpolate(
-          Math.sin((frame + dl) * 0.03), [-1, 0, 1], [0.01, 0.05, 0.01],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-        );
-        return (
-          <div key={`dust-${i}`} style={{
-            position: 'absolute',
-            left: `${px}%`, top: `${py}%`,
-            width: sz, height: sz, borderRadius: '50%',
-            backgroundColor: '#C9A84C', opacity: pOp,
-            filter: `blur(${sz > 2.5 ? 1.5 : 0.5}px)`,
-            pointerEvents: 'none' as const,
-          }} />
-        );
-      })}
-
-      {/* === MAIN TEXT CONTENT === */}
-
-      {/* LARGE QUOTE MARK */}
-      <div style={{
-        position: 'absolute',
-        top: '28%', left: '12%',
-        fontSize: 100,
-        fontFamily: "'Cinzel', serif",
-        color: '#C9A84C',
-        opacity: quoteOp,
-        transform: `translateY(${quoteY}px)`,
-        lineHeight: 1, margin: 0,
-        pointerEvents: 'none' as const,
-      }}>
-        "
-      </div>
-
-      {/* LINE 1 */}
-      <div style={{
-        position: 'absolute',
-        top: '38%', left: '50%',
-        transform: `translateX(-50%) translateY(${line1Y + floatY}px) scale(${breathScale})`,
-        opacity: line1Op * shimmer,
-        filter: `blur(${line1Blur}px)`,
-        pointerEvents: 'none' as const,
-      }}>
-        <p style={{
-          fontSize: 38,
-          fontWeight: 400,
-          color: '#E8E4D9',
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontStyle: 'italic' as const,
-          letterSpacing: 1.5,
-          margin: 0, lineHeight: 1.4,
-          textAlign: 'center' as const,
-          textShadow: '0 2px 15px rgba(0,0,0,0.6)',
-        }}>
-          For thirty years he practiced
-        </p>
-      </div>
-
-      {/* LINE 2 */}
-      <div style={{
-        position: 'absolute',
-        top: '47%', left: '50%',
-        transform: `translateX(-50%) translateY(${line2Y + floatY}px) scale(${breathScale})`,
-        opacity: line2Op * shimmer,
-        filter: `blur(${line2Blur}px)`,
-        pointerEvents: 'none' as const,
-      }}>
-        <p style={{
-          fontSize: 38,
-          fontWeight: 400,
-          color: 'rgba(232,228,217,0.85)',
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontStyle: 'italic' as const,
-          letterSpacing: 1.5,
-          margin: 0, lineHeight: 1.4,
-          textAlign: 'center' as const,
-          textShadow: '0 2px 15px rgba(0,0,0,0.6)',
-        }}>
-          one discipline above all others
-        </p>
-      </div>
-
-      {/* DASH LINE */}
-      <div style={{
-        position: 'absolute',
-        top: '57%', left: '50%',
-        transform: 'translateX(-50%)',
-        width: dashWidth, height: 1.5,
-        background: `linear-gradient(90deg,
-          transparent 0%, rgba(201,168,76,${dashOp}) 30%,
-          rgba(201,168,76,${dashOp}) 70%, transparent 100%)`,
-        borderRadius: 1,
-        pointerEvents: 'none' as const,
-      }} />
-
-      {/* "DIVISION" — dramatic keyword */}
-      <div style={{
-        position: 'absolute',
-        top: '61%', left: '50%',
-        transform: `translateX(-50%) scale(${divisionScale * breathScale}) translateY(${floatY}px)`,
-        opacity: divisionOp,
-        filter: `blur(${divisionBlur}px)`,
-        pointerEvents: 'none' as const,
-      }}>
-        <p style={{
-          fontSize: 72,
-          fontWeight: 700,
-          color: '#C9A84C',
-          fontFamily: "'Cinzel', serif",
-          letterSpacing: 12,
-          margin: 0, lineHeight: 1.1,
-          textAlign: 'center' as const,
-          textTransform: 'uppercase' as const,
-          textShadow: `0 0 ${divGlowSz}px rgba(201,168,76,${divGlowOp}),
-                       0 4px 25px rgba(0,0,0,0.8)`,
-        }}>
-          Division
-        </p>
-      </div>
-
-      {/* VIGNETTE */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse at center, transparent 30%, rgba(5,5,5,0.7) 100%)',
-        pointerEvents: 'none' as const,
-      }} />
-
-      {/* WATERMARK */}
-      {(() => {
-        const wmOp = interpolate(frame, [20, 45], [0, 0.25],
-          { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-        return (
-          <div style={{
-            position: 'absolute', bottom: 30, right: 45,
-            opacity: wmOp, zIndex: 100,
-          }}>
-            <span style={{
-              fontSize: 16, fontWeight: 600,
-              color: '#6B6B6B', letterSpacing: 1.5,
-              fontFamily: "'Cinzel', serif", margin: 0,
-            }}>
-              The Mind of Buddha
-            </span>
-          </div>
-        );
-      })()}
-    </AbsoluteFill>
-  );
-};
-
-export default DisciplineOfDivision;
+export default Ch1Scene6IntelligentKahani;
 ```
 
