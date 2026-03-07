@@ -9,8 +9,8 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'Ch2Scene9GalatShare',
-  durationInSeconds: 8,
+  id: 'Ch3Scene20DikhaaweSectionTitle',
+  durationInSeconds: 5,
   fps: 30,
   width: 1920,
   height: 1080,
@@ -21,610 +21,76 @@ const seededRandom = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-const Ch2Scene9GalatShare: React.FC = () => {
+const Ch3Scene20DikhaaweSectionTitle: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const particles = Array.from({ length: 8 }, (_, i) => {
-    const s = seededRandom(i + 40);
+  const particles = Array.from({ length: 7 }, (_, i) => {
+    const s = seededRandom(i + 110);
     return {
-      x: s * 1920 + Math.sin(frame * 0.008 + i) * 25,
-      y: seededRandom(i + 90) * 1080 + Math.cos(frame * 0.006 + i * 2) * 18,
-      size: 80 + s * 180,
-      opacity: 0.02 + s * 0.035,
+      x: s * 1920 + Math.sin(frame * 0.009 + i) * 22,
+      y: seededRandom(i + 120) * 1080 + Math.cos(frame * 0.007 + i * 2) * 16,
+      size: 90 + s * 170, opacity: 0.02 + s * 0.035,
     };
   });
 
-  // Line 1: "ग़लत शेयर ले लिया?"
-  const l1Op = interpolate(frame, [12, 30], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l1Y = interpolate(frame, [12, 30], [35, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  // Label: "ज़हर #2"
+  const labelOp = interpolate(frame, [8, 24], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const labelY = interpolate(frame, [8, 24], [20, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // Line 2: "पैसे डूबे।"
-  const l2Op = interpolate(frame, [40, 58], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l2Scale = interpolate(frame, [40, 60], [1.3, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.6)) });
+  // "दिखावे की भूख" SLAM
+  const mainOp = interpolate(frame, [30, 38], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const mainScale = interpolate(frame, [30, 50], [1.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.8)) });
 
-  // Down arrow icon animation
-  const arrowOp = interpolate(frame, [55, 70], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const arrowY = interpolate(frame, [55, 110], [-20, 40], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.quad) });
-
-  // Line 3: "लेकिन अगली सुबह..." (hope)
-  const l3Op = interpolate(frame, [100, 120], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l3Y = interpolate(frame, [100, 120], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // Line 4: "फिर कमा सकते हो" (amber gold, hopeful)
-  const l4Op = interpolate(frame, [130, 150], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l4Blur = interpolate(frame, [130, 155], [12, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const shakeX = (() => {
+    if (frame < 30 || frame > 44) return 0;
+    const p = frame - 30;
+    return Math.sin(p * 2.8) * 7 * (1 - p / 14);
+  })();
 
   // Accent bar
-  const barW = interpolate(frame, [150, 180], [0, 450], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const barW = interpolate(frame, [48, 75], [0, 480], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // Exit
-  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+  // Subtitle
+  const subOp = interpolate(frame, [60, 78], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const subY = interpolate(frame, [60, 78], [20, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 35% 30%, rgba(232,168,56,0.06) 0%, transparent 55%), radial-gradient(ellipse at 70% 75%, rgba(204,122,46,0.04) 0%, transparent 50%)' }} />
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#E8A838', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
-      ))}
-
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18 }}>
-
-        {/* Line 1 */}
-        <div style={{ opacity: l1Op, transform: `translateY(${l1Y}px)` }}>
-          <span style={{ fontSize: 60, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            ग़लत शेयर ले लिया?
-          </span>
-        </div>
-
-        {/* Line 2 + Down Arrow Icon */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          {/* 2D Down Arrow Icon */}
-          <div style={{
-            opacity: arrowOp,
-            transform: `translateY(${arrowY}px)`,
-            width: 60, height: 60, borderRadius: '50%',
-            backgroundColor: '#D94444',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 32, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>↓</span>
-          </div>
-
-          <div style={{ opacity: l2Op, transform: `scale(${l2Scale})` }}>
-            <span style={{ fontSize: 110, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
-              पैसे डूबे।
-            </span>
-          </div>
-        </div>
-
-        {/* Line 3 */}
-        <div style={{ opacity: l3Op, transform: `translateY(${l3Y}px)`, marginTop: 30 }}>
-          <span style={{ fontSize: 48, fontWeight: 500, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            तकलीफ़ होगी, लेकिन...
-          </span>
-        </div>
-
-        {/* Line 4 */}
-        <div style={{ opacity: l4Op, filter: `blur(${l4Blur}px)` }}>
-          <span style={{ fontSize: 90, fontWeight: 800, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
-            फिर कमा सकते हो
-          </span>
-        </div>
-
-        {/* Accent bar */}
-        <div style={{ width: barW, height: 5, background: 'linear-gradient(90deg, transparent, #E8A838, transparent)', borderRadius: 3 }} />
-      </div>
-
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.6) 100%)', pointerEvents: 'none' as const }} />
-
-      {(() => {
-        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
-      })()}
-    </AbsoluteFill>
-  );
-};
-
-export default Ch2Scene9GalatShare;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-export const compositionConfig = {
-  id: 'Ch2Scene10GalatInsaan',
-  durationInSeconds: 8,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const seededRandom = (seed: number): number => {
-  const x = Math.sin(seed * 9999) * 10000;
-  return x - Math.floor(x);
-};
-
-const Ch2Scene10GalatInsaan: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  const particles = Array.from({ length: 8 }, (_, i) => {
-    const s = seededRandom(i + 55);
-    return {
-      x: s * 1920 + Math.sin(frame * 0.009 + i * 1.5) * 22,
-      y: seededRandom(i + 95) * 1080 + Math.cos(frame * 0.007 + i * 2) * 16,
-      size: 90 + s * 170, opacity: 0.02 + s * 0.03,
-    };
-  });
-
-  // "मगर" label
-  const labelOp = interpolate(frame, [10, 28], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const labelY = interpolate(frame, [10, 28], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // "ग़लत इंसान" SLAM
-  const mainOp = interpolate(frame, [35, 43], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const mainScale = interpolate(frame, [35, 55], [1.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.8)) });
-
-  // Screen shake
-  const shakeX = (() => {
-    if (frame < 35 || frame > 50) return 0;
-    const p = frame - 35;
-    return Math.sin(p * 2.5) * 7 * (1 - p / 15);
-  })();
-
-  // Red glow pulse
-  const glowOp = interpolate(frame, [35, 50, 70], [0, 0.18, 0.06], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  // Warning icon (! in circle)
-  const iconOp = interpolate(frame, [50, 65], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const iconScale = interpolate(frame, [50, 68], [0.6, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.6)) });
-
-  // "नुक़सान बेहिसाब है" 
-  const l2Op = interpolate(frame, [85, 105], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l2Y = interpolate(frame, [85, 105], [35, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // "बेहिसाब" pulse
-  const behisaabScale = interpolate(frame, [110, 120, 130], [1, 1.08, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  // Red underline grows
-  const redBar = interpolate(frame, [105, 140], [0, 600], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // "रुकता ही नहीं" subtitle
-  const subOp = interpolate(frame, [140, 160], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp, transform: `translateX(${shakeX}px)` }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 40%, rgba(217,68,68,0.08) 0%, transparent 55%)' }} />
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#D94444', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
-      ))}
-
-      {/* Red glow center */}
-      <div style={{ position: 'absolute', top: '45%', left: '50%', width: 500, height: 500, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,68,68,0.5) 0%, transparent 65%)', opacity: glowOp, pointerEvents: 'none' as const }} />
-
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
-
-        {/* "मगर..." */}
-        <div style={{ opacity: labelOp, transform: `translateY(${labelY}px)` }}>
-          <span style={{ fontSize: 40, fontWeight: 500, color: '#8C8278', letterSpacing: 4, margin: 0, fontFamily: "'Mukta', sans-serif" }}>मगर...</span>
-        </div>
-
-        {/* "ग़लत इंसान" + Warning Icon */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28, opacity: mainOp, transform: `scale(${mainScale})` }}>
-          {/* 2D Warning Icon */}
-          <div style={{
-            opacity: iconOp, transform: `scale(${iconScale})`,
-            width: 72, height: 72, borderRadius: '50%', backgroundColor: '#D94444',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            boxShadow: '0 0 30px rgba(217,68,68,0.4)',
-          }}>
-            <span style={{ fontSize: 42, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>!</span>
-          </div>
-
-          <span style={{ fontSize: 120, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 40px rgba(217,68,68,0.3)' }}>
-            ग़लत इंसान
-          </span>
-        </div>
-
-        {/* "नुक़सान बेहिसाब है" */}
-        <div style={{ opacity: l2Op, transform: `translateY(${l2Y}px)`, marginTop: 20 }}>
-          <span style={{ fontSize: 55, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            नुक़सान{' '}
-          </span>
-          <span style={{ fontSize: 75, fontWeight: 900, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif", display: 'inline-block', transform: `scale(${behisaabScale})` }}>
-            बेहिसाब
-          </span>
-          <span style={{ fontSize: 55, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            {' '}है
-          </span>
-        </div>
-
-        {/* Red underline */}
-        <div style={{ width: redBar, height: 5, backgroundColor: '#D94444', borderRadius: 3, boxShadow: '0 0 15px rgba(217,68,68,0.4)' }} />
-
-        {/* Subtitle */}
-        <div style={{ opacity: subOp, marginTop: 8 }}>
-          <span style={{ fontSize: 36, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            किसी एक रक़म पर रुकता ही नहीं
-          </span>
-        </div>
-      </div>
-
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.6) 100%)', pointerEvents: 'none' as const }} />
-
-      {(() => {
-        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
-      })()}
-    </AbsoluteFill>
-  );
-};
-
-export default Ch2Scene10GalatInsaan;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-export const compositionConfig = {
-  id: 'Ch2Scene11DamageList',
-  durationInSeconds: 8,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const Ch2Scene11DamageList: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // 2D Icon Component
-  const CircleIcon = ({ symbol, delay }: { symbol: string; delay: number }) => {
-    const s = interpolate(frame, [delay, delay + 16], [0.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.6)) });
-    const o = interpolate(frame, [delay, delay + 12], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-    return (
-      <div style={{
-        width: 64, height: 64, borderRadius: '50%', backgroundColor: '#D94444',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        opacity: o, transform: `scale(${s})`,
-        boxShadow: '0 0 20px rgba(217,68,68,0.3)',
-      }}>
-        <span style={{ fontSize: 30, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>{symbol}</span>
-      </div>
-    );
-  };
-
-  const items = [
-    { text: 'बचत ख़ाली', symbol: '₹', subtext: 'सब कुछ ख़र्च' },
-    { text: 'तबीयत चौपट', symbol: '+', subtext: 'शरीर टूटा' },
-    { text: 'बच्चों से दूरी', symbol: '◔', subtext: 'रिश्ते बिखरे' },
-    { text: 'दिमाग़ में शोर', symbol: '~', subtext: '24 घंटे, 365 दिन' },
-  ];
-
-  const itemAnims = items.map((_, i) => {
-    const start = 25 + i * 30;
-    const opacity = interpolate(frame, [start, start + 18], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-    const x = interpolate(frame, [start, start + 20], [60, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-    return { opacity, x, start };
-  });
-
-  // Title
-  const titleOp = interpolate(frame, [5, 22], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const titleY = interpolate(frame, [5, 22], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // Red overlay pulse on last item
-  const pulseOp = interpolate(frame, [145, 165, 185], [0, 0.08, 0.03], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp }}>
-      {/* Warm red background tint */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(217,68,68,0.06) 0%, transparent 60%)' }} />
-
-      {/* Pulse overlay */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: '#D94444', opacity: pulseOp, pointerEvents: 'none' as const }} />
-
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', paddingLeft: 200, justifyContent: 'center', gap: 8 }}>
-
-        {/* Title */}
-        <div style={{ opacity: titleOp, transform: `translateY(${titleY}px)`, marginBottom: 40 }}>
-          <span style={{ fontSize: 42, fontWeight: 700, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif", letterSpacing: 2 }}>
-            नुक़सान की सूची
-          </span>
-          <div style={{ width: 80, height: 4, backgroundColor: '#D94444', marginTop: 12, borderRadius: 2 }} />
-        </div>
-
-        {/* Items */}
-        {items.map((item, i) => (
-          <div key={i} style={{
-            opacity: itemAnims[i].opacity,
-            transform: `translateX(${itemAnims[i].x}px)`,
-            display: 'flex', alignItems: 'center', gap: 28,
-            marginBottom: 28,
-          }}>
-            <CircleIcon symbol={item.symbol} delay={itemAnims[i].start - 5} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: 52, fontWeight: 800, color: '#F0EDE5', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
-                {item.text}
-              </span>
-              <span style={{ fontSize: 28, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-                {item.subtext}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Right side — large faded X mark */}
-      <div style={{
-        position: 'absolute', right: 120, top: '50%', transform: 'translateY(-50%)',
-        opacity: interpolate(frame, [80, 120], [0, 0.06], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
-      }}>
-        <span style={{ fontSize: 500, fontWeight: 900, color: '#D94444', margin: 0, lineHeight: 1 }}>✕</span>
-      </div>
-
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.6) 100%)', pointerEvents: 'none' as const }} />
-
-      {(() => {
-        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
-      })()}
-    </AbsoluteFill>
-  );
-};
-
-export default Ch2Scene11DamageList;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-export const compositionConfig = {
-  id: 'Ch2Scene13KaalaGaddha',
-  durationInSeconds: 8,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const seededRandom = (seed: number): number => {
-  const x = Math.sin(seed * 9999) * 10000;
-  return x - Math.floor(x);
-};
-
-const Ch2Scene13KaalaGaddha: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // "समझदारी ने नहीं बचाया" — strikethrough
-  const l1Op = interpolate(frame, [10, 28], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l1Y = interpolate(frame, [10, 28], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const strike1 = interpolate(frame, [35, 50], [0, 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // "दौलत ने नहीं बचाया" — strikethrough
-  const l2Op = interpolate(frame, [45, 63], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l2Y = interpolate(frame, [45, 63], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const strike2 = interpolate(frame, [70, 85], [0, 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // Both fade to dim
-  const dimOp = interpolate(frame, [90, 110], [1, 0.25], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  // Black hole visual — center dark circle grows
-  const holeScale = interpolate(frame, [100, 145], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const holeOp = interpolate(frame, [100, 125], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  // "काला गड्ढा" text
-  const kgOp = interpolate(frame, [130, 148], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const kgScale = interpolate(frame, [130, 150], [1.4, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.6)) });
-
-  // "रोज़ निगलता जाता था" subtitle
-  const subOp = interpolate(frame, [155, 175], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // Suction effect — particles moving toward center
-  const suctionParticles = Array.from({ length: 12 }, (_, i) => {
-    const angle = (i / 12) * Math.PI * 2;
-    const startDist = 500;
-    const dist = interpolate(frame, [110, 200], [startDist, 40], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.quad) });
-    const x = 960 + Math.cos(angle + frame * 0.02) * dist;
-    const y = 540 + Math.sin(angle + frame * 0.02) * dist;
-    const op = interpolate(frame, [110, 130, 190, 200], [0, 0.3, 0.3, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-    return { x, y, op };
-  });
-
-  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(26,26,46,0.4) 0%, transparent 60%)' }} />
-
-      {/* Suction particles */}
-      {suctionParticles.map((p, i) => (
-        <div key={i} style={{
-          position: 'absolute', left: p.x - 6, top: p.y - 6,
-          width: 12, height: 12, borderRadius: '50%',
-          backgroundColor: '#D94444', opacity: p.op,
-          filter: 'blur(3px)', pointerEvents: 'none' as const,
-        }} />
-      ))}
-
-      {/* Strikethrough texts — upper area */}
-      <div style={{ position: 'absolute', top: 180, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, opacity: dimOp }}>
-        {/* Line 1 */}
-        <div style={{ opacity: l1Op, transform: `translateY(${l1Y}px)`, position: 'relative' }}>
-          <span style={{ fontSize: 55, fontWeight: 700, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            समझदारी ने नहीं बचाया
-          </span>
-          <div style={{ position: 'absolute', top: '52%', left: 0, width: `${strike1}%`, height: 5, backgroundColor: '#D94444', borderRadius: 2 }} />
-        </div>
-        {/* Line 2 */}
-        <div style={{ opacity: l2Op, transform: `translateY(${l2Y}px)`, position: 'relative' }}>
-          <span style={{ fontSize: 55, fontWeight: 700, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            दौलत ने नहीं बचाया
-          </span>
-          <div style={{ position: 'absolute', top: '52%', left: 0, width: `${strike2}%`, height: 5, backgroundColor: '#D94444', borderRadius: 2 }} />
-        </div>
-      </div>
-
-      {/* Black Hole Center */}
-      <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: `translate(-50%, -50%) scale(${holeScale})`,
-        opacity: holeOp,
-      }}>
-        {/* Outer ring */}
-        <div style={{
-          width: 280, height: 280, borderRadius: '50%',
-          background: 'radial-gradient(circle, #0D0D0D 40%, rgba(217,68,68,0.3) 70%, transparent 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 0 80px rgba(217,68,68,0.2), inset 0 0 60px rgba(0,0,0,0.8)',
-        }}>
-          {/* Inner dark */}
-          <div style={{ width: 140, height: 140, borderRadius: '50%', backgroundColor: '#050505' }} />
-        </div>
-      </div>
-
-      {/* "काला गड्ढा" text */}
-      <div style={{
-        position: 'absolute', bottom: 220, left: 0, right: 0,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-      }}>
-        <div style={{ opacity: kgOp, transform: `scale(${kgScale})` }}>
-          <span style={{ fontSize: 100, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 40px rgba(217,68,68,0.4)' }}>
-            काला गड्ढा
-          </span>
-        </div>
-        <div style={{ opacity: subOp }}>
-          <span style={{ fontSize: 36, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            जो रोज़ सब कुछ निगलता जाता था
-          </span>
-        </div>
-      </div>
-
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(13,13,13,0.7) 100%)', pointerEvents: 'none' as const }} />
-
-      {(() => {
-        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
-      })()}
-    </AbsoluteFill>
-  );
-};
-
-export default Ch2Scene13KaalaGaddha;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-export const compositionConfig = {
-  id: 'Ch2Scene14RukoIsePachao',
-  durationInSeconds: 4,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const seededRandom = (seed: number): number => {
-  const x = Math.sin(seed * 9999) * 10000;
-  return x - Math.floor(x);
-};
-
-const Ch2Scene14RukoIsePachao: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  const particles = Array.from({ length: 6 }, (_, i) => {
-    const s = seededRandom(i + 70);
-    return {
-      x: s * 1920 + Math.sin(frame * 0.01 + i) * 20,
-      y: seededRandom(i + 100) * 1080 + Math.cos(frame * 0.008 + i * 2) * 15,
-      size: 100 + s * 160, opacity: 0.02 + s * 0.03,
-    };
-  });
-
-  // "रुको" SLAM
-  const rukoOp = interpolate(frame, [8, 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const rukoScale = interpolate(frame, [8, 26], [1.6, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(2.0)) });
-
-  const shakeX = (() => {
-    if (frame < 8 || frame > 22) return 0;
-    const p = frame - 8;
-    return Math.sin(p * 3) * 8 * (1 - p / 14);
-  })();
-
-  // Dash
-  const dashOp = interpolate(frame, [25, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const dashW = interpolate(frame, [25, 45], [0, 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // "इसे पचाओ"
-  const pachaaoOp = interpolate(frame, [38, 58], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const pachaaoBlur = interpolate(frame, [38, 60], [14, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const pachaaoY = interpolate(frame, [38, 58], [20, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-
-  // Gold glow
-  const glowOp = interpolate(frame, [8, 20, 40], [0, 0.15, 0.05], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // Red glow
+  const glowOp = interpolate(frame, [30, 45, 65], [0, 0.15, 0.05], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   const exitOp = interpolate(frame, [durationInFrames - 12, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp, transform: `translateX(${shakeX}px)` }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 45%, rgba(232,168,56,0.07) 0%, transparent 55%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 45%, rgba(217,68,68,0.07) 0%, transparent 55%)' }} />
 
       {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#E8A838', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
+        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#D94444', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
       ))}
 
-      {/* Center glow */}
-      <div style={{ position: 'absolute', top: '45%', left: '50%', width: 400, height: 400, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,168,56,0.4) 0%, transparent 65%)', opacity: glowOp, pointerEvents: 'none' as const }} />
+      <div style={{ position: 'absolute', top: '45%', left: '50%', width: 450, height: 450, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,68,68,0.4) 0%, transparent 65%)', opacity: glowOp, pointerEvents: 'none' as const }} />
 
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 30 }}>
-        {/* "रुको" */}
-        <div style={{ opacity: rukoOp, transform: `scale(${rukoScale})` }}>
-          <span style={{ fontSize: 150, fontWeight: 900, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 50px rgba(232,168,56,0.3)' }}>
-            रुको
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        {/* Label */}
+        <div style={{ opacity: labelOp, transform: `translateY(${labelY}px)`, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#D94444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 26, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>!</span>
+          </div>
+          <span style={{ fontSize: 36, fontWeight: 600, color: '#8C8278', letterSpacing: 5, margin: 0, fontFamily: "'Mukta', sans-serif" }}>ज़हर #2</span>
+        </div>
+
+        {/* Main */}
+        <div style={{ opacity: mainOp, transform: `scale(${mainScale})` }}>
+          <span style={{ fontSize: 130, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 50px rgba(217,68,68,0.3)' }}>
+            दिखावे की भूख
           </span>
         </div>
 
-        {/* Dash */}
-        <div style={{ width: dashW, height: 6, backgroundColor: '#8C8278', borderRadius: 3, opacity: dashOp, flexShrink: 0 }} />
+        <div style={{ width: barW, height: 5, backgroundColor: '#D94444', borderRadius: 3, boxShadow: '0 0 15px rgba(217,68,68,0.3)' }} />
 
-        {/* "इसे पचाओ" */}
-        <div style={{ opacity: pachaaoOp, filter: `blur(${pachaaoBlur}px)`, transform: `translateY(${pachaaoY}px)` }}>
-          <span style={{ fontSize: 100, fontWeight: 700, color: '#F0EDE5', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
-            इसे पचाओ
+        <div style={{ opacity: subOp, transform: `translateY(${subY}px)` }}>
+          <span style={{ fontSize: 38, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
+            भारत में रग-रग में बसी बीमारी
           </span>
         </div>
       </div>
@@ -639,7 +105,7 @@ const Ch2Scene14RukoIsePachao: React.FC = () => {
   );
 };
 
-export default Ch2Scene14RukoIsePachao;
+export default Ch3Scene20DikhaaweSectionTitle;
 ```
 
 ```tsx
@@ -653,122 +119,352 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'Ch2Scene17CompoundLoss',
+  id: 'Ch3Scene21LifestyleInflation',
   durationInSeconds: 8,
   fps: 30,
   width: 1920,
   height: 1080,
 };
 
-const Ch2Scene17CompoundLoss: React.FC = () => {
+const Ch3Scene21LifestyleInflation: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
+
+  const CircleIcon = ({ symbol, delay, color }: { symbol: string; delay: number; color: string }) => {
+    const s = interpolate(frame, [delay, delay + 16], [0.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.6)) });
+    const o = interpolate(frame, [delay, delay + 12], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    return (
+      <div style={{ width: 60, height: 60, borderRadius: '50%', backgroundColor: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: o, transform: `scale(${s})` }}>
+        <span style={{ fontSize: 28, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>{symbol}</span>
+      </div>
+    );
+  };
+
+  const items = [
+    { text: 'बड़ा मकान चाहिए', symbol: '⌂', sub: 'ज़रूरत से ज़्यादा' },
+    { text: 'नई गाड़ी चाहिए', symbol: '◈', sub: 'पड़ोसी से बड़ी' },
+    { text: 'महँगा विद्यालय', symbol: '▲', sub: 'शर्मा जी का बेटा जाता है' },
+    { text: 'दिखावटी छुट्टियाँ', symbol: '✈', sub: 'गोवा, दुबई, थाईलैंड' },
+  ];
+
+  const itemAnims = items.map((_, i) => {
+    const start = 30 + i * 28;
+    const opacity = interpolate(frame, [start, start + 18], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+    const x = interpolate(frame, [start, start + 20], [50, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+    return { opacity, x, start };
+  });
 
   // Title
   const titleOp = interpolate(frame, [5, 22], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
   const titleY = interpolate(frame, [5, 22], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // Year counters - staggered
-  const years = [
-    { label: '5 साल', value: 1825, suffix: ' दिन', color: '#E8A838' },
-    { label: '10 साल', value: 3650, suffix: ' दिन', color: '#CC7A2E' },
-    { label: '20 साल', value: 7300, suffix: ' दिन', color: '#D94444' },
-  ];
+  // Right side — rupee with wings (money flying away) — 2D
+  const rupeeOp = interpolate(frame, [100, 130], [0, 0.1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const rupeeY = interpolate(frame, [100, 200], [0, -60], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.quad) });
 
-  const yearAnims = years.map((y, i) => {
-    const start = 30 + i * 40;
-    const op = interpolate(frame, [start, start + 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-    const scaleIn = interpolate(frame, [start, start + 18], [0.8, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.4)) });
-    const count = interpolate(frame, [start + 5, start + 50], [0, y.value], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.quad) });
-    return { op, scaleIn, count: Math.floor(count), start };
+  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: '#F0EDE5', overflow: 'hidden', opacity: exitOp }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, #FFFFFF 0%, #F0EDE5 70%)' }} />
+
+      {/* Right side decorative rupee */}
+      <div style={{ position: 'absolute', right: 120, top: '40%', opacity: rupeeOp, transform: `translateY(${rupeeY}px)` }}>
+        <span style={{ fontSize: 400, fontWeight: 900, color: '#D94444', margin: 0, lineHeight: 1 }}>₹</span>
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', paddingLeft: 160, justifyContent: 'center', gap: 8 }}>
+        {/* Title */}
+        <div style={{ opacity: titleOp, transform: `translateY(${titleY}px)`, marginBottom: 35 }}>
+          <span style={{ fontSize: 50, fontWeight: 800, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
+            थोड़ा पैसा आया नहीं कि...
+          </span>
+          <div style={{ width: 90, height: 5, backgroundColor: '#D94444', marginTop: 14, borderRadius: 3 }} />
+        </div>
+
+        {items.map((item, i) => (
+          <div key={i} style={{
+            opacity: itemAnims[i].opacity,
+            transform: `translateX(${itemAnims[i].x}px)`,
+            display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24,
+          }}>
+            <CircleIcon symbol={item.symbol} delay={itemAnims[i].start - 5} color="#D94444" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span style={{ fontSize: 48, fontWeight: 800, color: '#0D0D0D', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>{item.text}</span>
+              <span style={{ fontSize: 28, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>{item.sub}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 50%, rgba(240,237,229,0.5) 100%)', pointerEvents: 'none' as const }} />
+
+      {(() => {
+        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+export default Ch3Scene21LifestyleInflation;
+```
+
+```tsx
+import React from 'react';
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from 'remotion';
+
+export const compositionConfig = {
+  id: 'Ch3Scene23GhulamBanJaate',
+  durationInSeconds: 8,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const seededRandom = (seed: number): number => {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+};
+
+const Ch3Scene23GhulamBanJaate: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  const particles = Array.from({ length: 8 }, (_, i) => {
+    const s = seededRandom(i + 130);
+    return {
+      x: s * 1920 + Math.sin(frame * 0.008 + i * 1.5) * 22,
+      y: seededRandom(i + 140) * 1080 + Math.cos(frame * 0.006 + i * 2.5) * 16,
+      size: 80 + s * 170, opacity: 0.02 + s * 0.03,
+    };
   });
 
-  // "ऊर्जा चोरी" label for each
-  const labelOp = interpolate(frame, [35, 50], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // "तुम" fade
+  const tumOp = interpolate(frame, [10, 28], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const tumY = interpolate(frame, [10, 28], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // Bottom slam: "करोड़ लाभ गँवाया"
-  const slamStart = 160;
-  const slamOp = interpolate(frame, [slamStart, slamStart + 8], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const slamScale = interpolate(frame, [slamStart, slamStart + 18], [1.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.8)) });
+  // "ग़ुलाम" SLAM
+  const ghulamOp = interpolate(frame, [35, 43], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const ghulamScale = interpolate(frame, [35, 55], [1.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.8)) });
 
-  // Shake on slam
-  const shakeY = (() => {
-    if (frame < slamStart || frame > slamStart + 12) return 0;
-    const p = frame - slamStart;
-    return Math.sin(p * 2.5) * 6 * (1 - p / 12);
+  const shakeX = (() => {
+    if (frame < 35 || frame > 48) return 0;
+    const p = frame - 35;
+    return Math.sin(p * 2.5) * 7 * (1 - p / 13);
   })();
 
-  // Red pulse
-  const pulseOp = interpolate(frame, [slamStart, slamStart + 10, slamStart + 25], [0, 0.1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // Chain links drawing in — decorative
+  const chainOp = interpolate(frame, [45, 70], [0, 0.15], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chainW = interpolate(frame, [45, 90], [0, 1200], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // "बन जाते हो" 
+  const banOp = interpolate(frame, [60, 78], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Second line: "आज़ादी बेच देते हो"
+  const l2Op = interpolate(frame, [100, 120], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const l2Blur = interpolate(frame, [100, 125], [12, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const l2Y = interpolate(frame, [100, 120], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // "किसी और की शान" subtitle
+  const subOp = interpolate(frame, [135, 155], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Red glow
+  const glowOp = interpolate(frame, [35, 50, 70], [0, 0.14, 0.04], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp, transform: `translateX(${shakeX}px)` }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 45%, rgba(217,68,68,0.07) 0%, transparent 55%)' }} />
+
+      {particles.map((p, i) => (
+        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#D94444', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
+      ))}
+
+      <div style={{ position: 'absolute', top: '45%', left: '50%', width: 450, height: 450, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,68,68,0.4) 0%, transparent 65%)', opacity: glowOp, pointerEvents: 'none' as const }} />
+
+      {/* Decorative chain line */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: chainW, height: 6,
+        transform: 'translate(-50%,-50%)',
+        opacity: chainOp,
+        background: 'repeating-linear-gradient(90deg, #D94444 0px, #D94444 20px, transparent 20px, transparent 30px)',
+        borderRadius: 3,
+        pointerEvents: 'none' as const,
+      }} />
+
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+
+        {/* "तुम" */}
+        <div style={{ opacity: tumOp, transform: `translateY(${tumY}px)` }}>
+          <span style={{ fontSize: 55, fontWeight: 500, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>तुम</span>
+        </div>
+
+        {/* "ग़ुलाम" */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, opacity: ghulamOp, transform: `scale(${ghulamScale})` }}>
+          {/* Chain icon */}
+          <div style={{ width: 64, height: 64, borderRadius: '50%', backgroundColor: '#D94444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 25px rgba(217,68,68,0.4)' }}>
+            <span style={{ fontSize: 32, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>⛓</span>
+          </div>
+          <span style={{ fontSize: 140, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 50px rgba(217,68,68,0.3)' }}>
+            ग़ुलाम
+          </span>
+        </div>
+
+        {/* "बन जाते हो" */}
+        <div style={{ opacity: banOp }}>
+          <span style={{ fontSize: 65, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>बन जाते हो</span>
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: 120, height: 3, backgroundColor: '#8C8278', borderRadius: 2, marginTop: 20, marginBottom: 10, opacity: l2Op }} />
+
+        {/* "आज़ादी बेच देते हो" */}
+        <div style={{ opacity: l2Op, filter: `blur(${l2Blur}px)`, transform: `translateY(${l2Y}px)` }}>
+          <span style={{ fontSize: 70, fontWeight: 800, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
+            आज़ादी बेच देते हो
+          </span>
+        </div>
+
+        {/* Subtitle */}
+        <div style={{ opacity: subOp }}>
+          <span style={{ fontSize: 36, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
+            किसी और की शान के लिए
+          </span>
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.6) 100%)', pointerEvents: 'none' as const }} />
+
+      {(() => {
+        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+export default Ch3Scene23GhulamBanJaate;
+```
+
+```tsx
+import React from 'react';
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from 'remotion';
+
+export const compositionConfig = {
+  id: 'Ch3Scene24NeevCollapse',
+  durationInSeconds: 8,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const Ch3Scene24NeevCollapse: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  // Title
+  const titleOp = interpolate(frame, [5, 22], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Bar chart — debt growing bars
+  const bars = [
+    { label: 'साल 1', height: 80, color: '#E8A838' },
+    { label: 'साल 3', height: 160, color: '#CC7A2E' },
+    { label: 'साल 5', height: 280, color: '#D94444' },
+    { label: 'साल 10', height: 420, color: '#D94444' },
+  ];
+
+  const barAnims = bars.map((b, i) => {
+    const start = 25 + i * 22;
+    const h = interpolate(frame, [start, start + 30], [0, b.height], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+    const op = interpolate(frame, [start, start + 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    const labelOp = interpolate(frame, [start + 20, start + 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    return { h, op, labelOp };
+  });
+
+  // Foundation line
+  const lineW = interpolate(frame, [20, 50], [0, 800], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Crack lines on foundation — after bars complete
+  const crackOp = interpolate(frame, [130, 150], [0, 0.6], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const crackW1 = interpolate(frame, [130, 155], [0, 180], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const crackW2 = interpolate(frame, [140, 165], [0, 120], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // "ढहती है" slam
+  const slamStart = 155;
+  const slamOp = interpolate(frame, [slamStart, slamStart + 8], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const slamScale = interpolate(frame, [slamStart, slamStart + 18], [1.4, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.6)) });
+
+  // Shake on crack
+  const shakeY = (() => {
+    if (frame < 130 || frame > 145) return 0;
+    const p = frame - 130;
+    return Math.sin(p * 3) * 5 * (1 - p / 15);
+  })();
 
   const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#F0EDE5', overflow: 'hidden', opacity: exitOp, transform: `translateY(${shakeY}px)` }}>
-      {/* Subtle warm gradient */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, #FFFFFF 0%, #F0EDE5 70%)' }} />
 
-      {/* Red pulse overlay */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: '#D94444', opacity: pulseOp, pointerEvents: 'none' as const }} />
-
       {/* Title */}
-      <div style={{ position: 'absolute', top: 80, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: titleOp, transform: `translateY(${titleY}px)` }}>
-        <span style={{ fontSize: 48, fontWeight: 800, color: '#0D0D0D', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
-          रोज़ाना ऊर्जा की चोरी
+      <div style={{ position: 'absolute', top: 70, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: titleOp }}>
+        <span style={{ fontSize: 50, fontWeight: 800, color: '#0D0D0D', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
+          क़र्ज़ बढ़ता गया
         </span>
-        <div style={{ width: 100, height: 5, backgroundColor: '#D94444', marginTop: 14, borderRadius: 3 }} />
+        <div style={{ width: 80, height: 5, backgroundColor: '#D94444', marginTop: 14, borderRadius: 3 }} />
       </div>
 
-      {/* Three year counters */}
-      <div style={{ position: 'absolute', top: 250, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 80 }}>
-        {years.map((y, i) => (
-          <div key={i} style={{
-            opacity: yearAnims[i].op, transform: `scale(${yearAnims[i].scaleIn})`,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-            background: '#FFFFFF', borderRadius: 24, padding: '40px 50px',
-            boxShadow: `0 4px 30px ${y.color}20`,
-            border: `3px solid ${y.color}30`,
-          }}>
-            {/* 2D Clock Icon */}
+      {/* Bar Chart Area */}
+      <div style={{ position: 'absolute', bottom: 260, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'flex-end', gap: 60 }}>
+        {bars.map((b, i) => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: barAnims[i].op }}>
             <div style={{
-              width: 56, height: 56, borderRadius: '50%', border: `3px solid ${y.color}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: 8,
-            }}>
-              <span style={{ fontSize: 24, fontWeight: 800, color: y.color, margin: 0, lineHeight: 1 }}>⧖</span>
-            </div>
-            <span style={{ fontSize: 32, fontWeight: 600, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>{y.label}</span>
-            <span style={{ fontSize: 72, fontWeight: 900, color: y.color, margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
-              {yearAnims[i].count.toLocaleString()}
-            </span>
-            <span style={{ fontSize: 28, fontWeight: 500, color: '#6B6B6B', margin: 0, fontFamily: "'Mukta', sans-serif", opacity: labelOp }}>{y.suffix} बर्बाद</span>
+              width: 100, height: barAnims[i].h,
+              backgroundColor: b.color,
+              borderRadius: '12px 12px 0 0',
+              boxShadow: `0 4px 20px ${b.color}30`,
+            }} />
+            <span style={{ fontSize: 26, fontWeight: 600, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif", opacity: barAnims[i].labelOp }}>{b.label}</span>
           </div>
         ))}
       </div>
 
-      {/* Bottom Slam */}
-      <div style={{
-        position: 'absolute', bottom: 100, left: 0, right: 0,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-        opacity: slamOp, transform: `scale(${slamScale})`,
-      }}>
-        {/* 2D Rupee Loss Icon */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{
-            width: 60, height: 60, borderRadius: '50%', backgroundColor: '#D94444',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 32, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>₹</span>
-          </div>
-          <span style={{ fontSize: 70, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
-            करोड़ लाभ गँवाया
-          </span>
-        </div>
+      {/* Foundation line */}
+      <div style={{ position: 'absolute', bottom: 250, left: '50%', transform: 'translateX(-50%)', width: lineW, height: 6, backgroundColor: '#1A1A2E', borderRadius: 3 }} />
+
+      {/* Crack lines */}
+      <div style={{ position: 'absolute', bottom: 248, left: '42%', opacity: crackOp }}>
+        <div style={{ width: crackW1, height: 3, backgroundColor: '#D94444', transform: 'rotate(15deg)', borderRadius: 2 }} />
+        <div style={{ width: crackW2, height: 3, backgroundColor: '#D94444', transform: 'rotate(-20deg) translateY(8px)', borderRadius: 2, marginTop: 4 }} />
       </div>
 
-      {/* Source */}
-      <div style={{ position: 'absolute', bottom: 55, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
-        <span style={{ fontSize: 22, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-          ऊर्जा × समय = खोया हुआ मुनाफ़ा
+      {/* Neev label */}
+      <div style={{ position: 'absolute', bottom: 210, left: '50%', transform: 'translateX(-50%)', opacity: crackOp }}>
+        <span style={{ fontSize: 28, fontWeight: 600, color: '#D94444', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
+          ← नींव कमज़ोर →
+        </span>
+      </div>
+
+      {/* "ढहती है" slam text */}
+      <div style={{ position: 'absolute', bottom: 100, left: 0, right: 0, display: 'flex', justifyContent: 'center', opacity: slamOp, transform: `scale(${slamScale})` }}>
+        <span style={{ fontSize: 75, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 30px rgba(217,68,68,0.25)' }}>
+          एक दिन ढहती है
         </span>
       </div>
 
@@ -782,7 +478,7 @@ const Ch2Scene17CompoundLoss: React.FC = () => {
   );
 };
 
-export default Ch2Scene17CompoundLoss;
+export default Ch3Scene24NeevCollapse;
 ```
 
 ```tsx
@@ -796,7 +492,142 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'Ch2Scene19EngineNeverRan',
+  id: 'Ch3Scene25SaadgiVsDikhaawa',
+  durationInSeconds: 8,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const Ch3Scene25SaadgiVsDikhaawa: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  // Divider
+  const divH = interpolate(frame, [10, 45], [0, 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Left panel
+  const leftOp = interpolate(frame, [20, 48], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const leftX = interpolate(frame, [20, 48], [-50, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Right panel
+  const rightOp = interpolate(frame, [30, 58], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const rightX = interpolate(frame, [30, 58], [50, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Left items
+  const leftItems = ['बड़ा मकान', 'नई गाड़ी', 'दिखावटी छुट्टी', 'लोग क्या कहेंगे'];
+  const leftAnims = leftItems.map((_, i) => {
+    const s = 55 + i * 14;
+    return {
+      op: interpolate(frame, [s, s + 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
+      x: interpolate(frame, [s, s + 15], [-25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }),
+    };
+  });
+
+  // Right items
+  const rightItems = ['सादगी में ख़ुशी', 'नींव पक्की', 'कोई क़र्ज़ नहीं', 'शान्ति से निर्माण'];
+  const rightAnims = rightItems.map((_, i) => {
+    const s = 65 + i * 14;
+    return {
+      op: interpolate(frame, [s, s + 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
+      x: interpolate(frame, [s, s + 15], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }),
+    };
+  });
+
+  // Bottom quote
+  const quoteOp = interpolate(frame, [150, 175], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const quoteBlur = interpolate(frame, [150, 175], [10, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp }}>
+
+      {/* LEFT — Red/Warning */}
+      <div style={{
+        position: 'absolute', left: 0, top: 0, width: '50%', height: '100%',
+        backgroundColor: '#1A1014',
+        opacity: leftOp, transform: `translateX(${leftX}px)`,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        paddingLeft: 100, paddingRight: 50,
+      }}>
+        <div style={{ marginBottom: 35 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#D94444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 26, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>✕</span>
+            </div>
+            <span style={{ fontSize: 46, fontWeight: 800, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>दिखावे का रास्ता</span>
+          </div>
+          <div style={{ width: 60, height: 4, backgroundColor: '#D94444', borderRadius: 2 }} />
+        </div>
+        {leftItems.map((item, i) => (
+          <div key={i} style={{ opacity: leftAnims[i].op, transform: `translateX(${leftAnims[i].x}px)`, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#D94444', flexShrink: 0 }} />
+            <span style={{ fontSize: 38, fontWeight: 500, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif", opacity: 0.8 }}>{item}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* RIGHT — Gold/Positive */}
+      <div style={{
+        position: 'absolute', right: 0, top: 0, width: '50%', height: '100%',
+        backgroundColor: '#141810',
+        opacity: rightOp, transform: `translateX(${rightX}px)`,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        paddingLeft: 70, paddingRight: 50,
+      }}>
+        <div style={{ marginBottom: 35 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#E8A838', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 26, fontWeight: 900, color: '#0D0D0D', margin: 0, lineHeight: 1 }}>✓</span>
+            </div>
+            <span style={{ fontSize: 46, fontWeight: 800, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>सादगी का रास्ता</span>
+          </div>
+          <div style={{ width: 60, height: 4, backgroundColor: '#E8A838', borderRadius: 2 }} />
+        </div>
+        {rightItems.map((item, i) => (
+          <div key={i} style={{ opacity: rightAnims[i].op, transform: `translateX(${rightAnims[i].x}px)`, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#E8A838', flexShrink: 0 }} />
+            <span style={{ fontSize: 38, fontWeight: 500, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>{item}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Center Divider */}
+      <div style={{ position: 'absolute', left: '50%', top: 0, width: 4, height: `${divH}%`, backgroundColor: '#E8A838', transform: 'translateX(-50%)', borderRadius: 2, boxShadow: '0 0 20px rgba(232,168,56,0.3)' }} />
+
+      {/* Bottom quote */}
+      <div style={{ position: 'absolute', bottom: 60, left: 0, right: 0, display: 'flex', justifyContent: 'center', opacity: quoteOp, filter: `blur(${quoteBlur}px)` }}>
+        <span style={{ fontSize: 38, fontWeight: 700, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 25px rgba(232,168,56,0.2)' }}>
+          "पहले नींव पक्की करो, शान बाद में आएगी"
+        </span>
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 45%, rgba(13,13,13,0.5) 100%)', pointerEvents: 'none' as const }} />
+
+      {(() => {
+        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+export default Ch3Scene25SaadgiVsDikhaawa;
+```
+
+```tsx
+import React from 'react';
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from 'remotion';
+
+export const compositionConfig = {
+  id: 'Ch3Scene26Thehraav',
   durationInSeconds: 8,
   fps: 30,
   width: 1920,
@@ -808,116 +639,101 @@ const seededRandom = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-const Ch2Scene19EngineNeverRan: React.FC = () => {
+const Ch3Scene26Thehraav: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const particles = Array.from({ length: 8 }, (_, i) => {
-    const s = seededRandom(i + 85);
+  const particles = Array.from({ length: 10 }, (_, i) => {
+    const s = seededRandom(i + 150);
     return {
-      x: s * 1920 + Math.sin(frame * 0.008 + i * 1.5) * 22,
-      y: seededRandom(i + 105) * 1080 + Math.cos(frame * 0.006 + i * 2.5) * 16,
-      size: 80 + s * 180, opacity: 0.02 + s * 0.03,
+      x: s * 1920 + Math.sin(frame * 0.007 + i * 1.3) * 25,
+      y: seededRandom(i + 160) * 1080 + Math.cos(frame * 0.005 + i * 2) * 18,
+      size: 90 + s * 200, opacity: 0.02 + s * 0.04,
     };
   });
 
-  // Speed gauge background — half-circle at center
-  const gaugeOp = interpolate(frame, [5, 25], [0, 0.12], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // Setup line
+  const l1Op = interpolate(frame, [12, 32], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const l1Y = interpolate(frame, [12, 32], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // Gauge needle — stuck at low position
-  const needleAngle = interpolate(frame, [15, 60], [-90, -55], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.quad) });
-  const needleOp = interpolate(frame, [15, 30], [0, 0.2], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // "सबसे ताक़तवर हथियार"
+  const l2Op = interpolate(frame, [40, 60], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const l2Y = interpolate(frame, [40, 60], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // "तुम्हारा इंजन"
-  const l1Op = interpolate(frame, [20, 40], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l1Y = interpolate(frame, [20, 40], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  // "ठहराव" — THE word — massive SLAM
+  const slamStart = 85;
+  const wordOp = interpolate(frame, [slamStart, slamStart + 6], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const wordScale = interpolate(frame, [slamStart, slamStart + 22], [1.6, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(2.0)) });
 
-  // "कभी पूरी रफ़्तार से"
-  const l2Op = interpolate(frame, [50, 70], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  const l2Y = interpolate(frame, [50, 70], [30, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  // Golden burst on slam
+  const burstOp = interpolate(frame, [slamStart, slamStart + 10, slamStart + 35], [0, 0.25, 0.06], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const burstScale = interpolate(frame, [slamStart, slamStart + 25], [0.5, 1.5], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // "चला ही नहीं" SLAM
-  const slamStart = 90;
-  const slamOp = interpolate(frame, [slamStart, slamStart + 8], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const slamScale = interpolate(frame, [slamStart, slamStart + 18], [1.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.8)) });
-
-  const shakeX = (() => {
-    if (frame < slamStart || frame > slamStart + 12) return 0;
+  // Screen shake
+  const shakeY = (() => {
+    if (frame < slamStart || frame > slamStart + 14) return 0;
     const p = frame - slamStart;
-    return Math.sin(p * 2.5) * 6 * (1 - p / 12);
+    return Math.sin(p * 2.5) * 8 * (1 - p / 14);
   })();
 
-  // Red glow on slam
-  const redGlow = interpolate(frame, [slamStart, slamStart + 12, slamStart + 30], [0, 0.12, 0.04], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // Accent bars (two converging)
+  const barW = interpolate(frame, [slamStart + 15, slamStart + 40], [0, 350], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // Accent bar
-  const barW = interpolate(frame, [slamStart + 15, slamStart + 40], [0, 550], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  // Subtitle
+  const subOp = interpolate(frame, [130, 150], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
 
-  // Lingering stillness — hold on text, then exit
   const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp, transform: `translateX(${shakeX}px)` }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 55%, rgba(217,68,68,0.06) 0%, transparent 55%)' }} />
+    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp, transform: `translateY(${shakeY}px)` }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(232,168,56,0.08) 0%, transparent 55%)' }} />
 
       {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#D94444', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
+        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#E8A838', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
       ))}
 
-      {/* Red glow */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: '#D94444', opacity: redGlow, pointerEvents: 'none' as const }} />
-
-      {/* Background gauge arc (decorative) */}
+      {/* Golden burst */}
       <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        width: 600, height: 300,
-        transform: 'translate(-50%, -50%)',
-        borderTop: '4px solid rgba(140,130,120,0.08)',
-        borderLeft: '4px solid rgba(140,130,120,0.08)',
-        borderRight: '4px solid rgba(140,130,120,0.08)',
-        borderBottom: 'none',
-        borderRadius: '300px 300px 0 0',
-        opacity: gaugeOp,
-        pointerEvents: 'none' as const,
+        position: 'absolute', top: '48%', left: '50%',
+        width: 500, height: 500,
+        transform: `translate(-50%,-50%) scale(${burstScale})`,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(232,168,56,0.5) 0%, transparent 60%)',
+        opacity: burstOp, pointerEvents: 'none' as const,
       }} />
 
-      {/* Gauge needle — stuck at low */}
-      <div style={{
-        position: 'absolute', top: '52%', left: '50%',
-        width: 4, height: 180,
-        backgroundColor: '#D94444',
-        transformOrigin: 'bottom center',
-        transform: `translate(-50%, -100%) rotate(${needleAngle}deg)`,
-        opacity: needleOp,
-        borderRadius: 2,
-        pointerEvents: 'none' as const,
-      }} />
-
-      {/* Text stack */}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
 
         <div style={{ opacity: l1Op, transform: `translateY(${l1Y}px)` }}>
-          <span style={{ fontSize: 55, fontWeight: 500, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            तुम्हारा इंजन
-          </span>
+          <span style={{ fontSize: 46, fontWeight: 500, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>दुनिया का</span>
         </div>
 
         <div style={{ opacity: l2Op, transform: `translateY(${l2Y}px)` }}>
-          <span style={{ fontSize: 65, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
-            कभी पूरी रफ़्तार से
+          <span style={{ fontSize: 60, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>सबसे ताक़तवर हथियार</span>
+        </div>
+
+        {/* THE WORD */}
+        <div style={{ opacity: wordOp, transform: `scale(${wordScale})`, marginTop: 10, marginBottom: 5 }}>
+          <span style={{ fontSize: 170, fontWeight: 900, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 60px rgba(232,168,56,0.4)' }}>
+            ठहराव
           </span>
         </div>
 
-        <div style={{ opacity: slamOp, transform: `scale(${slamScale})` }}>
-          <span style={{ fontSize: 130, fontWeight: 900, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 50px rgba(217,68,68,0.3)' }}>
-            चला ही नहीं
-          </span>
+        {/* Twin accent bars */}
+        <div style={{ display: 'flex', gap: 30, alignItems: 'center' }}>
+          <div style={{ width: barW, height: 4, background: 'linear-gradient(90deg, transparent, #E8A838)', borderRadius: 2 }} />
+          <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#E8A838', opacity: wordOp }} />
+          <div style={{ width: barW, height: 4, background: 'linear-gradient(270deg, transparent, #E8A838)', borderRadius: 2 }} />
         </div>
 
-        <div style={{ width: barW, height: 5, background: 'linear-gradient(90deg, transparent, #D94444, transparent)', borderRadius: 3 }} />
+        <div style={{ opacity: subOp, marginTop: 15 }}>
+          <span style={{ fontSize: 36, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
+            जब घर शांत — तो सही मौक़े का इंतज़ार मुमकिन
+          </span>
+        </div>
       </div>
 
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.65) 100%)', pointerEvents: 'none' as const }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.6) 100%)', pointerEvents: 'none' as const }} />
 
       {(() => {
         const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
@@ -927,6 +743,502 @@ const Ch2Scene19EngineNeverRan: React.FC = () => {
   );
 };
 
-export default Ch2Scene19EngineNeverRan;
+export default Ch3Scene26Thehraav;
+```
+
+```tsx
+import React from 'react';
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from 'remotion';
+
+export const compositionConfig = {
+  id: 'Ch3Scene28ChakravriddhiPeace',
+  durationInSeconds: 8,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const seededRandom = (seed: number): number => {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+};
+
+const Ch3Scene28ChakravriddhiPeace: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  const particles = Array.from({ length: 9 }, (_, i) => {
+    const s = seededRandom(i + 170);
+    return {
+      x: s * 1920 + Math.sin(frame * 0.007 + i * 1.4) * 22,
+      y: seededRandom(i + 180) * 1080 + Math.cos(frame * 0.005 + i * 2.2) * 16,
+      size: 90 + s * 190, opacity: 0.02 + s * 0.04,
+    };
+  });
+
+  // Compounding curve — subtle background
+  const curvePoints = Array.from({ length: 40 }, (_, i) => {
+    const progress = interpolate(frame, [20, 180], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    const visibleCount = Math.floor(progress * 40);
+    if (i > visibleCount) return null;
+    const x = 260 + (i / 39) * 1400;
+    const y = 800 - Math.pow(i / 39, 2.5) * 550;
+    return { x, y };
+  }).filter(Boolean);
+
+  const curveOp = interpolate(frame, [20, 50], [0, 0.12], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  // "ठहराव" label
+  const l1Op = interpolate(frame, [15, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const l1Y = interpolate(frame, [15, 35], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // "= चक्रवृद्धि" main
+  const l2Op = interpolate(frame, [45, 65], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const l2Scale = interpolate(frame, [45, 65], [0.9, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.4)) });
+
+  // Equals sign between
+  const eqOp = interpolate(frame, [38, 50], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  // "पैसा चुपचाप बढ़ता है"
+  const l3Op = interpolate(frame, [90, 112], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const l3Blur = interpolate(frame, [90, 115], [12, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Subtitle
+  const subOp = interpolate(frame, [125, 148], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 55%, rgba(232,168,56,0.08) 0%, transparent 55%)' }} />
+
+      {particles.map((p, i) => (
+        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#E8A838', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
+      ))}
+
+      {/* Compounding curve — background decoration */}
+      <svg style={{ position: 'absolute', inset: 0, opacity: curveOp, pointerEvents: 'none' as const }} viewBox="0 0 1920 1080">
+        {curvePoints.length > 1 && (
+          <polyline
+            points={curvePoints.map(p => `${p!.x},${p!.y}`).join(' ')}
+            fill="none"
+            stroke="#E8A838"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+      </svg>
+
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+
+        {/* Row 1: ठहराव = चक्रवृद्धि */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+          <div style={{ opacity: l1Op, transform: `translateY(${l1Y}px)` }}>
+            <span style={{ fontSize: 80, fontWeight: 800, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>ठहराव</span>
+          </div>
+          <div style={{ opacity: eqOp }}>
+            <span style={{ fontSize: 70, fontWeight: 300, color: '#8C8278', margin: 0 }}>=</span>
+          </div>
+          <div style={{ opacity: l2Op, transform: `scale(${l2Scale})` }}>
+            <span style={{ fontSize: 80, fontWeight: 800, color: '#F0EDE5', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>चक्रवृद्धि</span>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: 140, height: 3, backgroundColor: '#E8A838', borderRadius: 2, marginTop: 15, marginBottom: 15, opacity: l3Op }} />
+
+        {/* "पैसा चुपचाप बढ़ता है" */}
+        <div style={{ opacity: l3Op, filter: `blur(${l3Blur}px)` }}>
+          <span style={{ fontSize: 65, fontWeight: 700, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
+            पैसा चुपचाप बढ़ता है
+          </span>
+        </div>
+
+        <div style={{ opacity: subOp }}>
+          <span style={{ fontSize: 38, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
+            जब कोई बीच में तोड़ने वाला नहीं होता
+          </span>
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.6) 100%)', pointerEvents: 'none' as const }} />
+
+      {(() => {
+        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+export default Ch3Scene28ChakravriddhiPeace;
+```
+
+```tsx
+import React from 'react';
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from 'remotion';
+
+export const compositionConfig = {
+  id: 'Ch3Scene29LangarVsTufaan',
+  durationInSeconds: 8,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const Ch3Scene29LangarVsTufaan: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  const divH = interpolate(frame, [10, 45], [0, 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  const leftOp = interpolate(frame, [20, 48], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const rightOp = interpolate(frame, [30, 58], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  // Left: "कंधा दिया" — positive
+  const leftTitle = interpolate(frame, [35, 55], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const leftItems = ['"घबराओ मत"', 'होश में फ़ैसले', 'पूँजी बचाई', 'मज़बूत लौटा'];
+  const leftAnims = leftItems.map((_, i) => {
+    const s = 60 + i * 16;
+    return {
+      op: interpolate(frame, [s, s + 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
+      x: interpolate(frame, [s, s + 15], [-25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }),
+    };
+  });
+
+  // Right: "तूफ़ान बना" — negative
+  const rightTitle = interpolate(frame, [45, 65], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const rightItems = ['"तुमसे कुछ नहीं होता"', 'डर में बेचा', 'सस्ते दाम पर', 'दोहरा नुक़सान'];
+  const rightAnims = rightItems.map((_, i) => {
+    const s = 70 + i * 16;
+    return {
+      op: interpolate(frame, [s, s + 15], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
+      x: interpolate(frame, [s, s + 15], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }),
+    };
+  });
+
+  // Bottom verdict
+  const verdictOp = interpolate(frame, [160, 185], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp }}>
+
+      {/* LEFT — Golden/Positive */}
+      <div style={{
+        position: 'absolute', left: 0, top: 0, width: '50%', height: '100%',
+        backgroundColor: '#141810', opacity: leftOp,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        paddingLeft: 90, paddingRight: 40,
+      }}>
+        <div style={{ marginBottom: 30, opacity: leftTitle }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 10 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', backgroundColor: '#E8A838', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: '#0D0D0D', margin: 0, lineHeight: 1 }}>⚓</span>
+            </div>
+            <span style={{ fontSize: 44, fontWeight: 800, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>लंगर वाला साथी</span>
+          </div>
+          <div style={{ width: 60, height: 4, backgroundColor: '#E8A838', borderRadius: 2 }} />
+        </div>
+        {leftItems.map((item, i) => (
+          <div key={i} style={{ opacity: leftAnims[i].op, transform: `translateX(${leftAnims[i].x}px)`, marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#E8A838', flexShrink: 0 }} />
+            <span style={{ fontSize: 36, fontWeight: 500, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>{item}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* RIGHT — Red/Negative */}
+      <div style={{
+        position: 'absolute', right: 0, top: 0, width: '50%', height: '100%',
+        backgroundColor: '#1A1014', opacity: rightOp,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        paddingLeft: 70, paddingRight: 40,
+      }}>
+        <div style={{ marginBottom: 30, opacity: rightTitle }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 10 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', backgroundColor: '#D94444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>⚡</span>
+            </div>
+            <span style={{ fontSize: 44, fontWeight: 800, color: '#D94444', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>तूफ़ान वाला साथी</span>
+          </div>
+          <div style={{ width: 60, height: 4, backgroundColor: '#D94444', borderRadius: 2 }} />
+        </div>
+        {rightItems.map((item, i) => (
+          <div key={i} style={{ opacity: rightAnims[i].op, transform: `translateX(${rightAnims[i].x}px)`, marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#D94444', flexShrink: 0 }} />
+            <span style={{ fontSize: 36, fontWeight: 500, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif", opacity: 0.8 }}>{item}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Center Divider */}
+      <div style={{ position: 'absolute', left: '50%', top: 0, width: 4, height: `${divH}%`, backgroundColor: '#8C8278', transform: 'translateX(-50%)', borderRadius: 2 }} />
+
+      {/* Bottom verdict */}
+      <div style={{ position: 'absolute', bottom: 55, left: 0, right: 0, display: 'flex', justifyContent: 'center', opacity: verdictOp }}>
+        <span style={{ fontSize: 36, fontWeight: 700, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
+          बाज़ार ने मारा और घर ने भी — दोहरा नुक़सान
+        </span>
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 45%, rgba(13,13,13,0.5) 100%)', pointerEvents: 'none' as const }} />
+
+      {(() => {
+        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+export default Ch3Scene29LangarVsTufaan;
+```
+
+```tsx
+import React from 'react';
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from 'remotion';
+
+export const compositionConfig = {
+  id: 'Ch3Scene30ChhottiParakh',
+  durationInSeconds: 8,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const Ch3Scene30ChhottiParakh: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  const CircleIcon = ({ symbol, delay, color }: { symbol: string; delay: number; color: string }) => {
+    const s = interpolate(frame, [delay, delay + 16], [0.5, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.6)) });
+    const o = interpolate(frame, [delay, delay + 12], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    return (
+      <div style={{ width: 58, height: 58, borderRadius: '50%', backgroundColor: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: o, transform: `scale(${s})` }}>
+        <span style={{ fontSize: 26, fontWeight: 900, color: color === '#E8A838' ? '#0D0D0D' : '#F0EDE5', margin: 0, lineHeight: 1 }}>{symbol}</span>
+      </div>
+    );
+  };
+
+  const items = [
+    { text: 'रेल छूट गई', sub: 'कैसे पेश आया?', symbol: '→', color: '#E8A838' },
+    { text: 'ऑटो वाले ने ज़्यादा माँगे', sub: 'क्या बवाल मचाया?', symbol: '₹', color: '#E8A838' },
+    { text: 'नमक ज़्यादा हो गया', sub: 'पूरी शाम ख़राब?', symbol: '◉', color: '#E8A838' },
+  ];
+
+  const itemAnims = items.map((_, i) => {
+    const start = 30 + i * 30;
+    return {
+      op: interpolate(frame, [start, start + 18], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }),
+      x: interpolate(frame, [start, start + 20], [50, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }),
+      start,
+    };
+  });
+
+  const titleOp = interpolate(frame, [5, 22], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const titleY = interpolate(frame, [5, 22], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  // Bottom verdict
+  const verdictOp = interpolate(frame, [140, 165], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const verdictScale = interpolate(frame, [140, 162], [0.9, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.4)) });
+
+  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: '#FFF5E4', overflow: 'hidden', opacity: exitOp }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, #FFFFFF 0%, #FFF5E4 70%)' }} />
+
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', paddingLeft: 180, justifyContent: 'center', gap: 8 }}>
+
+        {/* Title */}
+        <div style={{ opacity: titleOp, transform: `translateY(${titleY}px)`, marginBottom: 35 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', border: '3px solid #E8A838', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 26, fontWeight: 900, color: '#E8A838', margin: 0, lineHeight: 1 }}>?</span>
+            </div>
+            <span style={{ fontSize: 50, fontWeight: 800, color: '#0D0D0D', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>
+              छोटी परख
+            </span>
+          </div>
+          <div style={{ width: 80, height: 5, backgroundColor: '#E8A838', marginTop: 14, borderRadius: 3, marginLeft: 68 }} />
+        </div>
+
+        {items.map((item, i) => (
+          <div key={i} style={{
+            opacity: itemAnims[i].op, transform: `translateX(${itemAnims[i].x}px)`,
+            display: 'flex', alignItems: 'center', gap: 22, marginBottom: 26,
+            background: '#FFFFFF', borderRadius: 18, padding: '18px 30px',
+            boxShadow: '0 2px 15px rgba(0,0,0,0.05)',
+            border: '2px solid #E8A83820',
+            maxWidth: 800,
+          }}>
+            <CircleIcon symbol={item.symbol} delay={itemAnims[i].start - 5} color={item.color} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span style={{ fontSize: 42, fontWeight: 700, color: '#0D0D0D', margin: 0, fontFamily: "'Yatra One', sans-serif" }}>{item.text}</span>
+              <span style={{ fontSize: 26, fontWeight: 400, color: '#8C8278', margin: 0, fontFamily: "'Mukta', sans-serif" }}>{item.sub}</span>
+            </div>
+          </div>
+        ))}
+
+        {/* Verdict */}
+        <div style={{ opacity: verdictOp, transform: `scale(${verdictScale})`, marginTop: 25, maxWidth: 850 }}>
+          <div style={{ background: '#D9444415', borderRadius: 16, padding: '16px 28px', border: '2px solid #D9444430', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: '#D94444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 24, fontWeight: 900, color: '#F0EDE5', margin: 0, lineHeight: 1 }}>!</span>
+            </div>
+            <span style={{ fontSize: 34, fontWeight: 700, color: '#D94444', margin: 0, fontFamily: "'Mukta', sans-serif" }}>
+              छोटी तकलीफ़ में आपा खोए → बड़ी मार में तबाह करेगा
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 50%, rgba(255,245,228,0.5) 100%)', pointerEvents: 'none' as const }} />
+
+      {(() => {
+        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+export default Ch3Scene30ChhottiParakh;
+```
+
+```tsx
+import React from 'react';
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from 'remotion';
+
+export const compositionConfig = {
+  id: 'Ch3Scene31AsliSuraksha',
+  durationInSeconds: 8,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const seededRandom = (seed: number): number => {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+};
+
+const Ch3Scene31AsliSuraksha: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  const particles = Array.from({ length: 10 }, (_, i) => {
+    const s = seededRandom(i + 200);
+    return {
+      x: s * 1920 + Math.sin(frame * 0.007 + i * 1.3) * 22,
+      y: seededRandom(i + 210) * 1080 + Math.cos(frame * 0.005 + i * 2.2) * 16,
+      size: 90 + s * 190, opacity: 0.02 + s * 0.04,
+    };
+  });
+
+  // Strikethrough items
+  const strikes = [
+    { text: 'बीमा', delay: 12 },
+    { text: 'निवेश', delay: 30 },
+  ];
+
+  const strikeAnims = strikes.map((s) => {
+    const op = interpolate(frame, [s.delay, s.delay + 16], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+    const y = interpolate(frame, [s.delay, s.delay + 16], [25, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+    const sw = interpolate(frame, [s.delay + 18, s.delay + 32], [0, 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+    const dim = interpolate(frame, [s.delay + 25, s.delay + 40], [1, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    return { op, y, sw, dim };
+  });
+
+  // "बस वो एक इंसान" — SLAM
+  const slamStart = 80;
+  const mainOp = interpolate(frame, [slamStart, slamStart + 8], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const mainScale = interpolate(frame, [slamStart, slamStart + 20], [1.4, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.8)) });
+
+  // Glow
+  const glowOp = interpolate(frame, [slamStart, slamStart + 12, slamStart + 35], [0, 0.2, 0.06], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  // Quote: "रुको, सोचो..."
+  const quoteOp = interpolate(frame, [125, 148], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  const quoteBlur = interpolate(frame, [125, 150], [12, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+
+  const exitOp = interpolate(frame, [durationInFrames - 14, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic) });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: '#0D0D0D', overflow: 'hidden', opacity: exitOp }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 48%, rgba(232,168,56,0.08) 0%, transparent 55%)' }} />
+
+      {particles.map((p, i) => (
+        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', background: '#E8A838', opacity: p.opacity, filter: 'blur(50px)', pointerEvents: 'none' as const }} />
+      ))}
+
+      {/* Glow */}
+      <div style={{ position: 'absolute', top: '48%', left: '50%', width: 500, height: 500, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,168,56,0.5) 0%, transparent 60%)', opacity: glowOp, pointerEvents: 'none' as const }} />
+
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+
+        {/* Strikethroughs */}
+        <div style={{ display: 'flex', gap: 50, marginBottom: 20 }}>
+          {strikes.map((s, i) => (
+            <div key={i} style={{ opacity: strikeAnims[i].op * strikeAnims[i].dim, transform: `translateY(${strikeAnims[i].y}px)`, position: 'relative' }}>
+              <span style={{ fontSize: 55, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif" }}>{s.text}</span>
+              <div style={{ position: 'absolute', top: '52%', left: 0, width: `${strikeAnims[i].sw}%`, height: 4, backgroundColor: '#D94444', borderRadius: 2 }} />
+            </div>
+          ))}
+        </div>
+
+        {/* "बस वो एक इंसान" */}
+        <div style={{ opacity: mainOp, transform: `scale(${mainScale})` }}>
+          <span style={{ fontSize: 110, fontWeight: 900, color: '#E8A838', margin: 0, fontFamily: "'Yatra One', sans-serif", textShadow: '0 0 50px rgba(232,168,56,0.3)' }}>
+            बस वो एक इंसान
+          </span>
+        </div>
+
+        {/* Quote */}
+        <div style={{ opacity: quoteOp, filter: `blur(${quoteBlur}px)`, marginTop: 20, padding: '18px 40px', borderLeft: '5px solid #E8A838', background: 'rgba(232,168,56,0.06)', borderRadius: '0 12px 12px 0' }}>
+          <span style={{ fontSize: 42, fontWeight: 600, color: '#F0EDE5', margin: 0, fontFamily: "'Mukta', sans-serif", fontStyle: 'italic' }}>
+            "रुको, सोचो, अभी कोई जल्दबाज़ी नहीं"
+          </span>
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(13,13,13,0.6) 100%)', pointerEvents: 'none' as const }} />
+
+      {(() => {
+        const wmOp = interpolate(frame, [15, 35], [0, 0.3], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+        return (<div style={{ position: 'absolute', bottom: 30, right: 45, opacity: wmOp, zIndex: 100 }}><span style={{ fontSize: 22, fontWeight: 600, color: '#8C8278', letterSpacing: 1, fontFamily: 'Inter, sans-serif', margin: 0 }}>ProBuffet HQ</span></div>);
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+export default Ch3Scene31AsliSuraksha;
 ```
 
