@@ -1,258 +1,221 @@
 ```tsx
-import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
-import React from "react";
+import React from 'react';
+import {
+  useCurrentFrame, useVideoConfig, interpolate,
+  Easing, AbsoluteFill,
+} from 'remotion';
 
-function seededRandom(seed: number): number {
-  const x = Math.sin(seed * 9301 + 49297) * 233280;
+export const compositionConfig = {
+  id: 'Ch1Scene6IntelligentKahani',
+  durationInSeconds: 7,
+  fps: 30,
+  width: 1920,
+  height: 1080,
+};
+
+const seededRandom = (seed: number): number => {
+  const x = Math.sin(seed * 9999) * 10000;
   return x - Math.floor(x);
-}
+};
 
-export const CapituloUnoVerdadQueNoDices: React.FC = () => {
+const PARTICLES = new Array(8).fill(0).map((_, i) => ({
+  x: seededRandom(i + 1) * 100,
+  y: seededRandom(i + 50) * 100,
+  size: seededRandom(i + 100) * 120 + 50,
+  opacity: seededRandom(i + 150) * 0.05 + 0.02,
+}));
+
+const Ch1Scene6IntelligentKahani: React.FC = () => {
   const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
 
-  // ═══ LAYER 1: BACKGROUND TEXTURE ═══
-  const bgGradient = `
-    radial-gradient(ellipse at 30% 40%, #1A1510 0%, #0D0D0D 60%),
-    radial-gradient(ellipse at 70% 60%, #151210 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, #12100D 0%, transparent 40%)
-  `;
-
-  const dots = Array.from({ length: 45 }, (_, i) => ({
-    x: seededRandom(i * 7 + 1) * 100,
-    y: seededRandom(i * 7 + 2) * 100,
-    size: 1 + seededRandom(i * 7 + 3) * 2,
-    opacity: 0.02 + seededRandom(i * 7 + 4) * 0.03,
-  }));
-
-  // ═══ LAYER 2: STAR FIELD ═══
-  const stars = Array.from({ length: 15 }, (_, i) => {
-    const baseX = seededRandom(i * 11 + 100) * 100;
-    const baseY = seededRandom(i * 11 + 101) * 100;
-    const size = 1 + seededRandom(i * 11 + 102) * 3;
-    const phase = seededRandom(i * 11 + 103) * Math.PI * 2;
-    const speed = 0.03 + seededRandom(i * 11 + 104) * 0.04;
-    const twinkle = 0.1 + 0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase));
-    const driftX = baseX + Math.sin(frame * 0.008 + phase) * 7;
-    const driftY = baseY + Math.cos(frame * 0.01 + phase) * 6;
-    return { x: driftX, y: driftY, size, opacity: twinkle, blur: size * 0.3 };
+  // === LINE 1: "YE BEWAKOOF KI KAHANI NAHI HAI" ===
+  const line1Op = interpolate(frame, [8, 22], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+  const line1Y = interpolate(frame, [8, 22], [30, 0], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
   });
 
-  // ═══ LAYER 3: SLOW DRIFT PARTICLES ═══
-  const orbs = Array.from({ length: 5 }, (_, i) => {
-    const baseX = seededRandom(i * 13 + 200) * 100;
-    const baseY = seededRandom(i * 13 + 201) * 100;
-    const size = 50 + seededRandom(i * 13 + 202) * 60;
-    const phase = seededRandom(i * 13 + 203) * Math.PI * 2;
-    const driftX = baseX + Math.sin(frame * 0.004 + phase) * 45;
-    const driftY = baseY + Math.cos(frame * 0.005 + phase) * 35;
-    return { x: driftX, y: driftY, size, opacity: 0.03 + seededRandom(i * 13 + 204) * 0.03, blur: size * 0.6 };
+  // === Strikethrough on "BEWAKOOF" ===
+  const strikeWidth = interpolate(frame, [40, 55], [0, 100], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
   });
 
-  // ═══ LAYER 4: RADIAL GLOW BREATHING ═══
-  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2 / 120)));
-
-  // ═══ LAYER 5: ACCENT ELEMENTS ═══
-  const accentRot1 = frame * 0.15;
-  const accentRot2 = frame * -0.1;
-  const accentDrift = Math.sin(frame * 0.008) * 12;
-
-  // ═══ CONCEPT: CRACKED MIRROR — reveals truth behind surface ═══
-  const crackProgress = interpolate(frame, [10, 60], [0, 1], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  // === LINE 2: "YE EK INTELLIGENT INSAAN KI KAHANI HAI" ===
+  const line2Start = 70;
+  const line2Op = interpolate(frame, [line2Start, line2Start + 6], [0, 1], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
   });
-  const crackOpacity = interpolate(frame, [10, 25], [0, 0.12], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp",
-  });
+  const line2Scale = interpolate(
+    frame, [line2Start, line2Start + 16], [1.3, 1], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.back(1.6)),
+    }
+  );
 
-  // ═══ FLOATING PARTICLES — dust rising from cracks ═══
-  const dustParticles = Array.from({ length: 12 }, (_, i) => {
-    const startFrame = 20 + i * 3;
-    const px = 35 + seededRandom(i * 5 + 900) * 30;
-    const baseY = 70 - seededRandom(i * 5 + 901) * 20;
-    const rise = interpolate(frame, [startFrame, startFrame + 80], [0, -40 - seededRandom(i * 5 + 902) * 30], {
-      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
-    });
-    const dustOp = interpolate(frame, [startFrame, startFrame + 15, startFrame + 60, startFrame + 80], [0, 0.15, 0.1, 0], {
-      extrapolateLeft: "clamp", extrapolateRight: "clamp",
-    });
-    const sway = Math.sin(frame * 0.02 + i) * 8;
-    const sz = 2 + seededRandom(i * 5 + 903) * 3;
-    return { x: px + sway, y: baseY + rise, opacity: dustOp, size: sz };
-  });
-
-  // ═══ TEXT ANIMATIONS ═══
-  // Chapter number — slide from left with blur + rotation
-  const chapterOpacity = interpolate(frame, [18, 35], [0, 1], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
-  });
-  const chapterBlur = interpolate(frame, [18, 35], [20, 0], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
-  });
-  const chapterX = interpolate(frame, [18, 35], [-30, 0], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.2)),
-  });
-  const chapterRotate = interpolate(frame, [18, 35], [-3, 0], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
-  });
-
-  // Decorative line — draws from center with glow
-  const lineWidth = interpolate(frame, [34, 52], [0, 140], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
-  });
-  const lineOpacity = interpolate(frame, [34, 52], [0, 0.7], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp",
-  });
-  const lineGlow = interpolate(frame, [34, 52, 70], [0, 8, 3], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp",
-  });
-
-  // Title — word by word with stagger, scale bounce, and vertical drift
-  const titleWords = ["La", "Verdad", "Que", "No", "Te"];
-  const titleWords2 = ["Atreves", "a", "Decir"];
-
-  const wordAnims = (words: string[], lineStart: number) =>
-    words.map((word, i) => {
-      const s = lineStart + i * 6;
-      const opacity = interpolate(frame, [s, s + 10], [0, 1], {
-        extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.4)),
-      });
-      const scale = interpolate(frame, [s, s + 10], [1.15, 1.0], {
-        extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.4)),
-      });
-      const y = interpolate(frame, [s, s + 10], [12, 0], {
-        extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
-      });
-      const blur = interpolate(frame, [s, s + 6], [6, 0], {
-        extrapolateLeft: "clamp", extrapolateRight: "clamp",
-      });
-      return { word, opacity, scale, y, blur };
-    });
-
-  const line1Anims = wordAnims(titleWords, 48);
-  const line2Anims = wordAnims(titleWords2, 48 + titleWords.length * 6 + 4);
-
-  // Glow pulse on title after fully visible
-  const allWordsVisible = 48 + (titleWords.length + titleWords2.length) * 6 + 20;
-  const glowPulse = frame > allWordsVisible ? 0.25 + 0.2 * Math.sin(frame * 0.04) : 0;
-
-  // Subtle title breathing
-  const titleBreathe = frame > allWordsVisible
-    ? 1 + 0.003 * Math.sin(frame * 0.03)
+  // === "INTELLIGENT" pulse ===
+  const intPulse = frame > line2Start + 16
+    ? interpolate(
+        frame,
+        [line2Start + 16, line2Start + 24, line2Start + 32],
+        [1, 1.06, 1],
+        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+      )
     : 1;
 
-  // ═══ FADE OUT ═══
-  const fadeOut = interpolate(frame, [288, 300], [1, 0], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.ease),
+  // === Yellow accent bar under INTELLIGENT ===
+  const barWidth = interpolate(
+    frame, [line2Start + 20, line2Start + 40], [0, 520], {
+      extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+      easing: Easing.out(Easing.cubic),
+    }
+  );
+
+  // === Exit ===
+  const exitOp = interpolate(
+    frame, [durationInFrames - 15, durationInFrames], [1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  const wmOp = interpolate(frame, [15, 35], [0, 0.3], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
   });
 
-  // ═══ WATERMARK ═══
-  const watermarkOpacity = interpolate(frame, [15, 35], [0, 0.25], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp",
-  }) * fadeOut;
-
-  const fontStack = "Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif";
-
   return (
-    <AbsoluteFill style={{ overflow: "hidden", background: bgGradient, backgroundColor: "#0D0D0D", opacity: fadeOut }}>
-      {/* Layer 1: Texture Dots */}
-      {dots.map((dot, i) => (
-        <div key={`d${i}`} style={{ position: "absolute", left: `${dot.x}%`, top: `${dot.y}%`, width: dot.size, height: dot.size, borderRadius: "50%", backgroundColor: "#6B5B3E", opacity: dot.opacity }} />
+    <AbsoluteFill
+      style={{
+        backgroundColor: '#1C1C1C',
+        fontFamily: 'Inter, Poppins, sans-serif',
+        overflow: 'hidden',
+      }}
+    >
+      {/* BG particles */}
+      {PARTICLES.map((p, i) => (
+        <div key={i} style={{
+          position: 'absolute',
+          left: `${p.x}%`, top: `${p.y}%`,
+          width: p.size, height: p.size,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #FFD966 0%, transparent 70%)',
+          opacity: p.opacity, filter: 'blur(40px)',
+          transform: `translate(${
+            Math.cos((frame + i * 40) * 0.015) * 5
+          }px, ${
+            Math.sin((frame + i * 60) * 0.02) * 8
+          }px)`,
+          pointerEvents: 'none' as const,
+        }} />
       ))}
 
-      {/* Layer 2: Stars */}
-      {stars.map((s, i) => (
-        <div key={`s${i}`} style={{ position: "absolute", left: `${s.x}%`, top: `${s.y}%`, width: s.size, height: s.size, borderRadius: "50%", backgroundColor: "#6B5B3E", opacity: s.opacity, filter: `blur(${s.blur}px)` }} />
-      ))}
-
-      {/* Layer 3: Orbs */}
-      {orbs.map((o, i) => (
-        <div key={`o${i}`} style={{ position: "absolute", left: `${o.x}%`, top: `${o.y}%`, width: o.size, height: o.size, borderRadius: "50%", backgroundColor: "#6B5B3E", opacity: o.opacity, filter: `blur(${o.blur}px)`, transform: "translate(-50%,-50%)" }} />
-      ))}
-
-      {/* Layer 4: Glow */}
-      <div style={{ position: "absolute", top: "50%", left: "50%", width: 650, height: 650, borderRadius: "50%", background: "radial-gradient(circle, #1A1510 0%, transparent 70%)", opacity: glowOpacity, transform: "translate(-50%,-50%)" }} />
-
-      {/* Layer 5: Accents */}
-      <div style={{ position: "absolute", top: "18%", left: "14%", width: 85, height: 85, border: "1px solid #6B5B3E", borderRadius: "50%", opacity: 0.05, transform: `rotate(${accentRot1}deg) translateY(${accentDrift}px)` }} />
-      <div style={{ position: "absolute", bottom: "22%", right: "11%", width: 0, height: 0, borderLeft: "22px solid transparent", borderRight: "22px solid transparent", borderBottom: "38px solid #6B5B3E", opacity: 0.04, transform: `rotate(${accentRot2}deg)` }} />
-      <div style={{ position: "absolute", top: "68%", left: "82%", width: 100, height: 1, backgroundColor: "#6B5B3E", opacity: 0.06, transform: `rotate(${accentRot1 * 0.5}deg)` }} />
-
-      {/* CONCEPT: Cracked Mirror Lines */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: crackOpacity }} viewBox="0 0 1920 1080">
-        <line x1="960" y1="540" x2={960 + 300 * crackProgress} y2={540 - 200 * crackProgress} stroke="#6B5B3E" strokeWidth="0.8" />
-        <line x1="960" y1="540" x2={960 - 250 * crackProgress} y2={540 + 180 * crackProgress} stroke="#6B5B3E" strokeWidth="0.6" />
-        <line x1="960" y1="540" x2={960 + 150 * crackProgress} y2={540 + 250 * crackProgress} stroke="#6B5B3E" strokeWidth="0.5" />
-        <line x1="960" y1="540" x2={960 - 180 * crackProgress} y2={540 - 150 * crackProgress} stroke="#6B5B3E" strokeWidth="0.7" />
-        <line x1={960 + 300 * crackProgress} y1={540 - 200 * crackProgress} x2={960 + 350 * crackProgress} y2={540 - 280 * crackProgress} stroke="#6B5B3E" strokeWidth="0.4" />
-        <line x1={960 - 250 * crackProgress} y1={540 + 180 * crackProgress} x2={960 - 320 * crackProgress} y2={540 + 220 * crackProgress} stroke="#6B5B3E" strokeWidth="0.4" />
-      </svg>
-
-      {/* Dust Particles Rising */}
-      {dustParticles.map((p, i) => (
-        <div key={`dust${i}`} style={{ position: "absolute", left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, borderRadius: "50%", backgroundColor: "#8B7B5E", opacity: p.opacity, filter: `blur(${p.size * 0.4}px)` }} />
-      ))}
-
-      {/* Layer 6: Vignette */}
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, transparent 40%, #0D0D0D 100%)" }} />
-
-      {/* Chapter Number */}
       <div style={{
-        position: "absolute", top: "31%", width: "100%", textAlign: "center",
-        opacity: chapterOpacity, filter: `blur(${chapterBlur}px)`,
-        transform: `translateX(${chapterX}px) rotate(${chapterRotate}deg)`,
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        gap: 35, opacity: exitOp,
       }}>
-        <span style={{ fontFamily: fontStack, fontSize: 46, fontWeight: 500, fontStyle: "italic", color: "#FF1E00", letterSpacing: 6, margin: 0 }}>
-          Capítulo 1
-        </span>
+        {/* Line 1 */}
+        <div style={{
+          opacity: line1Op,
+          transform: `translateY(${line1Y}px)`,
+          position: 'relative',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye{' '}
+          </span>
+          <span style={{
+            fontSize: 52, fontWeight: 800,
+            color: '#F5F5F5', margin: 0,
+            position: 'relative',
+            display: 'inline-block',
+          }}>
+            BEWAKOOF
+            {/* Strikethrough line */}
+            <div style={{
+              position: 'absolute',
+              top: '52%', left: '-4%',
+              height: 5, borderRadius: 3,
+              width: `${strikeWidth}%`,
+              backgroundColor: '#FF6B6B',
+              boxShadow: '0 0 10px rgba(255,107,107,0.5)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}ki kahani nahi hai
+          </span>
+        </div>
+
+        {/* Line 2 */}
+        <div style={{
+          opacity: line2Op,
+          transform: `scale(${line2Scale})`,
+          textAlign: 'center',
+        }}>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            Ye ek{' '}
+          </span>
+          <span style={{
+            fontSize: 64, fontWeight: 900,
+            color: '#FFD966', margin: 0,
+            display: 'inline-block',
+            transform: `scale(${intPulse})`,
+            textShadow: '0 3px 25px rgba(255,217,102,0.4)',
+            position: 'relative',
+          }}>
+            INTELLIGENT
+            {/* Yellow accent bar */}
+            <div style={{
+              position: 'absolute',
+              bottom: -8, left: '50%',
+              height: 4, borderRadius: 2,
+              width: barWidth,
+              maxWidth: '110%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(90deg, transparent, #FFD966, transparent)',
+            }} />
+          </span>
+          <span style={{
+            fontSize: 44, fontWeight: 500,
+            color: '#F5F5F5', margin: 0,
+          }}>
+            {' '}insaan ki kahani hai
+          </span>
+        </div>
       </div>
 
-      {/* Decorative Line */}
+      {/* Vignette */}
       <div style={{
-        position: "absolute", top: "40%", left: "50%", transform: "translateX(-50%)",
-        width: lineWidth, height: 1, backgroundColor: "#FF1E00", opacity: lineOpacity,
-        boxShadow: `0 0 ${lineGlow}px rgba(255,30,0,0.4)`,
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at center, transparent 45%, rgba(28,28,28,0.5) 100%)',
+        pointerEvents: 'none' as const,
       }} />
-
-      {/* Title Line 1 */}
-      <div style={{
-        position: "absolute", top: "45%", width: "100%", textAlign: "center",
-        display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", padding: "0 60px",
-        transform: `scale(${titleBreathe})`,
-      }}>
-        {line1Anims.map((w, i) => (
-          <span key={i} style={{
-            fontFamily: fontStack, fontSize: 90, fontWeight: 700, color: "#FCFAEE", letterSpacing: 2,
-            opacity: w.opacity, transform: `scale(${w.scale}) translateY(${w.y}px)`,
-            filter: `blur(${w.blur}px)`, display: "inline-block", margin: 0,
-            textShadow: glowPulse > 0 ? `0 0 ${glowPulse * 35}px rgba(107,91,62,${glowPulse})` : "none",
-          }}>{w.word}</span>
-        ))}
-      </div>
-
-      {/* Title Line 2 */}
-      <div style={{
-        position: "absolute", top: "58%", width: "100%", textAlign: "center",
-        display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", padding: "0 60px",
-        transform: `scale(${titleBreathe})`,
-      }}>
-        {line2Anims.map((w, i) => (
-          <span key={i} style={{
-            fontFamily: fontStack, fontSize: 90, fontWeight: 700, color: "#FCFAEE", letterSpacing: 2,
-            opacity: w.opacity, transform: `scale(${w.scale}) translateY(${w.y}px)`,
-            filter: `blur(${w.blur}px)`, display: "inline-block", margin: 0,
-            textShadow: glowPulse > 0 ? `0 0 ${glowPulse * 35}px rgba(107,91,62,${glowPulse})` : "none",
-          }}>{w.word}</span>
-        ))}
-      </div>
 
       {/* Watermark */}
       <div style={{
-        position: "absolute", bottom: 28, right: 40,
-        fontFamily: fontStack, fontSize: 20, fontStyle: "italic",
-        color: "#6B5B3E", opacity: watermarkOpacity, margin: 0,
-      }}>Mentor by Elisa</div>
+        position: 'absolute', bottom: 30, right: 45,
+        opacity: wmOp, zIndex: 100,
+      }}>
+        <span style={{
+          fontSize: 22, fontWeight: 600,
+          color: '#9E9E9E', letterSpacing: 1,
+        }}>ProBuffet HQ</span>
+      </div>
     </AbsoluteFill>
   );
 };
+
+export default Ch1Scene6IntelligentKahani;
 ```
 
