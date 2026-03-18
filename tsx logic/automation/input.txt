@@ -1,1337 +1,1338 @@
 ```tsx
-import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring, AbsoluteFill } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
 
-export const compositionConfig = {
-  id: 'CH3_S1_FlyOnWall',
-  durationInSeconds: 12,
-  fps: 30,
-  width: 1920,
-  height: 1080,
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
 };
 
-const CH3_S1_FlyOnWall: React.FC = () => {
+export const chapterOneTitle: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
 
-  const sp = (delay: number, config?: object) =>
-    spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 12, mass: 0.4, stiffness: 120, ...config } });
-
-  const cameraScale = interpolate(frame, [0, 150, durationInFrames], [1, 1.08, 1.04], { extrapolateRight: 'clamp' });
-  const cameraY = interpolate(frame, [0, durationInFrames], [8, -12], { extrapolateRight: 'clamp' });
-  const exitOpacity = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const stanIn = sp(8);
-  const thinkBubble1 = sp(30);
-  const thinkBubble2 = sp(50);
-  const thinkBubble3 = sp(65);
-  const wallIn = sp(80);
-  const flyX = interpolate(frame, [80, 280], [1450, 1380], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const flyY = interpolate(frame, [80, 180, 280], [250, 420, 350], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const flyWing = Math.sin(frame * 0.8) * 6;
-  const bulbIn = sp(160, { damping: 8, stiffness: 80 });
-  const bulbGlow = Math.sin(frame * 0.1) * 10 + 30;
-  const ideaTextIn = sp(200);
-  const eyeTrack = interpolate(frame, [80, 200], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const particles = Array.from({ length: 14 }, (_, i) => ({
-    x: (i * 143 + 55) % 1920 + Math.sin(frame * 0.025 + i * 0.9) * 12,
-    y: (i * 89 + 40) % 1080 + Math.cos(frame * 0.03 + i * 0.6) * 10,
-    size: 2 + (i % 3),
-    opacity: 0.08 + (i % 4) * 0.02,
+  // --- LAYER 1: Background Texture ---
+  const bgBase = "#1A0A05";
+  const dots = Array.from({ length: 40 }, (_, i) => ({
+    x: seededRandom(i * 7 + 1) * 100,
+    y: seededRandom(i * 7 + 2) * 100,
+    size: 1 + seededRandom(i * 7 + 3) * 2,
+    opacity: 0.02 + seededRandom(i * 7 + 4) * 0.03,
   }));
 
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#1C1C1C', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 35% 45%, #2D2D2D 0%, #1C1C1C 70%)' }} />
-
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.03 }}>
-        {Array.from({ length: 8 }, (_, i) => (
-          <div key={i} style={{ position: 'absolute', left: 0, right: 0, top: i * 135, height: 1, backgroundColor: '#FFD966' }} />
-        ))}
-      </div>
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', backgroundColor: i % 3 === 0 ? '#FFD966' : '#F5F5F5', opacity: p.opacity }} />
-      ))}
-
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.6) 100%)' }} />
-
-      <div style={{ position: 'absolute', inset: 0, transform: `scale(${cameraScale}) translateY(${cameraY}px)`, opacity: exitOpacity }}>
-
-        {/* Stan Lee sitting and thinking */}
-        <div style={{ position: 'absolute', left: 250, top: 340, opacity: stanIn, transform: `scale(${stanIn})` }}>
-          <svg width="180" height="280" viewBox="0 0 180 280">
-            <circle cx="90" cy="32" r="22" stroke="#F5F5F5" strokeWidth="3" fill="none" />
-            <circle cx={80 + eyeTrack * 8} cy="28" r="2.5" fill="#FFD966" />
-            <circle cx={96 + eyeTrack * 8} cy="28" r="2.5" fill="#FFD966" />
-            <path d="M82 40 Q90 44 98 40" stroke="#F5F5F5" strokeWidth="1.5" fill="none" />
-            <line x1="90" y1="54" x2="90" y2="140" stroke="#F5F5F5" strokeWidth="3" />
-            {/* Seated posture - bent legs */}
-            <line x1="90" y1="80" x2="55" y2="70" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="55" y1="70" x2="50" y2="50" stroke="#F5F5F5" strokeWidth="3" />
-            <circle cx="48" cy="47" r="3" fill="#9E9E9E" />
-            <line x1="90" y1="80" x2="125" y2="95" stroke="#F5F5F5" strokeWidth="3" />
-            {/* Legs bent sitting */}
-            <line x1="90" y1="140" x2="65" y2="170" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="65" y1="170" x2="55" y2="210" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="90" y1="140" x2="115" y2="170" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="115" y1="170" x2="125" y2="210" stroke="#F5F5F5" strokeWidth="3" />
-            {/* Chair */}
-            <rect x="55" y="135" width="70" height="8" rx="3" stroke="#9E9E9E" strokeWidth="2" fill="none" />
-            <line x1="55" y1="143" x2="50" y2="230" stroke="#9E9E9E" strokeWidth="2" />
-            <line x1="125" y1="143" x2="130" y2="230" stroke="#9E9E9E" strokeWidth="2" />
-          </svg>
-        </div>
-
-        {/* Thinking bubbles */}
-        {[thinkBubble1, thinkBubble2, thinkBubble3].map((b, i) => (
-          <div key={i} style={{
-            position: 'absolute',
-            left: 380 + i * 40,
-            top: 280 - i * 50,
-            width: 12 + i * 14,
-            height: 12 + i * 14,
-            borderRadius: '50%',
-            border: '2px solid rgba(255,217,102,0.4)',
-            backgroundColor: 'rgba(255,217,102,0.06)',
-            transform: `scale(${b})`,
-            opacity: b,
-          }} />
-        ))}
-
-        <div style={{
-          position: 'absolute', left: 350, top: 130,
-          opacity: thinkBubble3,
-          transform: `scale(${thinkBubble3})`,
-        }}>
-          <div style={{
-            padding: '14px 24px', borderRadius: 20, borderBottomLeftRadius: 4,
-            backgroundColor: 'rgba(45,45,45,0.9)',
-            border: '2px solid rgba(255,217,102,0.3)',
-            fontFamily: "'Noto Sans Devanagari'", fontSize: 20, color: '#F5F5F5',
-          }}>
-            ताक़त क्या होगी? 🤔
-          </div>
-        </div>
-
-        {/* Wall section */}
-        <div style={{
-          position: 'absolute', right: 0, top: 0, width: 550, height: '100%',
-          opacity: wallIn,
-        }}>
-          {/* Brick wall pattern */}
-          {Array.from({ length: 12 }, (_, row) => (
-            Array.from({ length: 4 }, (_, col) => (
-              <div key={`${row}-${col}`} style={{
-                position: 'absolute',
-                left: 20 + col * 130 + (row % 2) * 65,
-                top: row * 90,
-                width: 120, height: 80, borderRadius: 4,
-                border: '1px solid rgba(158,158,158,0.08)',
-                backgroundColor: 'rgba(45,45,45,0.3)',
-              }} />
-            ))
-          ))}
-        </div>
-
-        {/* Fly on the wall */}
-        <div style={{
-          position: 'absolute', left: flyX, top: flyY,
-          opacity: interpolate(frame, [80, 100], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
-        }}>
-          <svg width="40" height="30" viewBox="0 0 40 30">
-            <ellipse cx="20" cy="18" rx="8" ry="5" fill="#9E9E9E" />
-            <circle cx="20" cy="10" r="5" fill="#9E9E9E" />
-            <ellipse cx={12 - flyWing} cy="10" rx="8" ry="3" fill="rgba(245,245,245,0.2)" stroke="rgba(245,245,245,0.3)" strokeWidth="0.5" />
-            <ellipse cx={28 + flyWing} cy="10" rx="8" ry="3" fill="rgba(245,245,245,0.2)" stroke="rgba(245,245,245,0.3)" strokeWidth="0.5" />
-            <line x1="15" y1="20" x2="8" y2="28" stroke="#9E9E9E" strokeWidth="1" />
-            <line x1="25" y1="20" x2="32" y2="28" stroke="#9E9E9E" strokeWidth="1" />
-            <line x1="18" y1="22" x2="12" y2="30" stroke="#9E9E9E" strokeWidth="1" />
-            <line x1="22" y1="22" x2="28" y2="30" stroke="#9E9E9E" strokeWidth="1" />
-          </svg>
-        </div>
-
-        {/* Lightbulb moment */}
-        <div style={{
-          position: 'absolute', left: 310, top: 80,
-          transform: `scale(${bulbIn})`,
-          opacity: bulbIn,
-        }}>
-          <div style={{
-            width: 70, height: 70, borderRadius: '50%',
-            background: `radial-gradient(circle, rgba(255,217,102,0.4), rgba(255,217,102,0.05))`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `0 0 ${bulbGlow}px rgba(255,217,102,0.3)`,
-            fontSize: 36,
-          }}>
-            💡
-          </div>
-        </div>
-
-        {/* Idea text */}
-        <div style={{
-          position: 'absolute', left: '50%', bottom: 120,
-          transform: `translateX(-50%) translateY(${interpolate(ideaTextIn, [0, 1], [30, 0])}px)`,
-          opacity: ideaTextIn, textAlign: 'center',
-        }}>
-          <div style={{
-            fontFamily: "'Yantra One'", fontSize: 40, color: '#FFD966',
-            textShadow: '0 0 25px rgba(255,217,102,0.3)', marginBottom: 8,
-          }}>
-            दीवार पर चिपककर चलने वाला हीरो!
-          </div>
-          <div style={{
-            fontFamily: "'Noto Sans Devanagari'", fontSize: 20, color: '#9E9E9E',
-          }}>
-            एक मक्खी → अरबों डॉलर का विचार
-          </div>
-        </div>
-      </div>
-
-      <div style={{ position: 'absolute', right: 30, bottom: 20, fontFamily: "'Poppins'", fontSize: 14, fontWeight: 600, color: 'rgba(255,217,102,0.35)', letterSpacing: 2 }}>
-        ProBuffet HQ
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-export default CH3_S1_FlyOnWall;
-```
-
-```tsx
-import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring, AbsoluteFill } from 'remotion';
-
-export const compositionConfig = {
-  id: 'CH3_S2_SmallToBig',
-  durationInSeconds: 14,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const CH3_S2_SmallToBig: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
-
-  const sp = (delay: number, config?: object) =>
-    spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 12, mass: 0.4, stiffness: 120, ...config } });
-
-  const cameraX = interpolate(frame, [0, durationInFrames], [25, -25], { extrapolateRight: 'clamp' });
-  const cameraScale = interpolate(frame, [0, durationInFrames], [1.02, 1], { extrapolateRight: 'clamp' });
-  const exitOpacity = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const flyIn = sp(5);
-  const arrowGrow = interpolate(sp(40), [0, 1], [0, 1]);
-  const dollarIn = sp(70, { damping: 8, stiffness: 80 });
-  const dollarScale = interpolate(dollarIn, [0, 0.5, 0.8, 1], [0, 1.3, 0.95, 1]);
-  const textIn = sp(100);
-  const investTextIn = sp(160);
-  const shimmer = (frame * 3) % 600;
-  const dollarGlow = Math.sin(frame * 0.08) * 15 + 40;
-
-  const growDots = Array.from({ length: 12 }, (_, i) => {
-    const t = i / 11;
-    const progress = interpolate(arrowGrow, [t * 0.3, t * 0.3 + 0.4], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-    return {
-      x: 450 + t * 1020,
-      y: 540 - t * t * 200 - Math.sin(t * Math.PI) * 60,
-      opacity: progress,
-      size: 4 + t * 6,
-    };
+  // --- LAYER 2: Star Field ---
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const baseX = seededRandom(i * 13 + 100) * 100;
+    const baseY = seededRandom(i * 13 + 101) * 100;
+    const size = 1 + seededRandom(i * 13 + 102) * 3;
+    const phase = seededRandom(i * 13 + 103) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 13 + 104) * 0.04;
+    const driftAmpX = 5 + seededRandom(i * 13 + 105) * 3;
+    const driftAmpY = 5 + seededRandom(i * 13 + 106) * 3;
+    const opacity = 0.1 + 0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase));
+    const x = baseX + Math.sin(frame * 0.015 + phase) * driftAmpX;
+    const y = baseY + Math.cos(frame * 0.012 + phase) * driftAmpY;
+    return { x, y, size, opacity };
   });
 
-  const particles = Array.from({ length: 18 }, (_, i) => ({
-    x: (i * 113 + 45) % 1920 + Math.sin(frame * 0.02 + i * 0.7) * 14,
-    y: (i * 67 + 30) % 1080 + Math.cos(frame * 0.025 + i) * 10,
-    size: 2 + (i % 3), opacity: 0.07,
-  }));
+  // --- LAYER 3: Slow Drift Particles ---
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const size = 40 + seededRandom(i * 19 + 200) * 60;
+    const baseX = seededRandom(i * 19 + 201) * 100;
+    const baseY = seededRandom(i * 19 + 202) * 100;
+    const phase = seededRandom(i * 19 + 203) * Math.PI * 2;
+    const x = baseX + Math.sin(frame * 0.008 + phase) * 40;
+    const y = baseY + Math.cos(frame * 0.006 + phase * 1.3) * 35;
+    const opacity = 0.03 + seededRandom(i * 19 + 204) * 0.03;
+    return { x, y, size, opacity };
+  });
+
+  // --- LAYER 4: Radial Glow Breathing ---
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 120));
+
+  // --- LAYER 5: Accent Texture Elements ---
+  const accentRotation1 = frame * 0.3;
+  const accentRotation2 = frame * -0.2;
+  const accentDriftY = Math.sin(frame * 0.01) * 8;
+
+  // --- LAYER 6: Vignette (applied via radial gradient) ---
+
+  // --- TEXT ANIMATIONS ---
+  const chapterNumOpacity = interpolate(frame, [20, 35], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.ease),
+  });
+  const chapterNumBlur = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.ease),
+  });
+  const chapterNumY = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.ease),
+  });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.ease),
+  });
+  const lineOpacity = interpolate(frame, [35, 50], [0, 0.6], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.ease),
+  });
+
+  const titleWords = ["The", "Brightest", "Mask"];
+  const wordAnimations = titleWords.map((word, i) => {
+    const startFrame = 50 + i * 5;
+    const opacity = interpolate(frame, [startFrame, startFrame + 12], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.back(1.3)),
+    });
+    const scale = interpolate(frame, [startFrame, startFrame + 12], [1.1, 1.0], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.back(1.3)),
+    });
+    return { word, opacity, scale };
+  });
+
+  const allWordsVisible = frame > 50 + (titleWords.length - 1) * 5 + 12;
+  const glowPulse = allWordsVisible
+    ? 3 + 4 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 90))
+    : 0;
+
+  // Fade out last 10 frames
+  const fadeOut = interpolate(frame, [290, 300], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.in(Easing.ease),
+  });
+
+  // Watermark
+  const watermarkOpacity = interpolate(frame, [15, 35], [0, 0.25], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.ease),
+  });
+
+  const fontFamily =
+    "Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif";
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#1C1C1C', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 60% 35%, #2D2D2D 0%, #1C1C1C 75%)' }} />
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', backgroundColor: i % 2 === 0 ? '#FFC107' : '#FFD966', opacity: p.opacity }} />
+    <AbsoluteFill
+      style={{
+        overflow: "hidden",
+        backgroundColor: bgBase,
+        opacity: fadeOut,
+      }}
+    >
+      {/* LAYER 1: Texture Dots */}
+      <AbsoluteFill
+        style={{
+          background: `
+            radial-gradient(ellipse at 30% 40%, #2D120522 0%, transparent 60%),
+            radial-gradient(ellipse at 70% 60%, #1A0A0544 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, #2D120533 0%, transparent 70%)
+          `,
+        }}
+      />
+      {dots.map((dot, i) => (
+        <div
+          key={`dot-${i}`}
+          style={{
+            position: "absolute",
+            left: `${dot.x}%`,
+            top: `${dot.y}%`,
+            width: dot.size,
+            height: dot.size,
+            borderRadius: "50%",
+            backgroundColor: "#FF8C38",
+            opacity: dot.opacity,
+          }}
+        />
       ))}
 
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.6) 100%)' }} />
+      {/* LAYER 2: Star Field */}
+      {stars.map((star, i) => (
+        <div
+          key={`star-${i}`}
+          style={{
+            position: "absolute",
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: star.size,
+            height: star.size,
+            borderRadius: "50%",
+            backgroundColor: "#FF8C38",
+            opacity: star.opacity,
+            filter: `blur(${star.size * 0.3}px)`,
+          }}
+        />
+      ))}
 
-      <div style={{ position: 'absolute', inset: 0, transform: `translateX(${cameraX}px) scale(${cameraScale})`, opacity: exitOpacity }}>
+      {/* LAYER 3: Slow Drift Particles */}
+      {orbs.map((orb, i) => (
+        <div
+          key={`orb-${i}`}
+          style={{
+            position: "absolute",
+            left: `${orb.x}%`,
+            top: `${orb.y}%`,
+            width: orb.size,
+            height: orb.size,
+            borderRadius: "50%",
+            backgroundColor: "#FF8C38",
+            opacity: orb.opacity,
+            filter: `blur(${orb.size * 0.6}px)`,
+          }}
+        />
+      ))}
 
-        {/* Small fly on left */}
-        <div style={{
-          position: 'absolute', left: 250, top: 430,
-          opacity: flyIn, transform: `scale(${flyIn})`,
-        }}>
-          <div style={{
-            width: 120, height: 120, borderRadius: '50%',
-            border: '2px solid rgba(158,158,158,0.3)',
-            backgroundColor: 'rgba(45,45,45,0.6)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="50" height="40" viewBox="0 0 50 40">
-              <ellipse cx="25" cy="22" rx="10" ry="6" fill="#9E9E9E" />
-              <circle cx="25" cy="12" r="6" fill="#9E9E9E" />
-              <ellipse cx="14" cy="12" rx="9" ry="4" fill="rgba(245,245,245,0.15)" stroke="rgba(245,245,245,0.2)" strokeWidth="0.5" />
-              <ellipse cx="36" cy="12" rx="9" ry="4" fill="rgba(245,245,245,0.15)" stroke="rgba(245,245,245,0.2)" strokeWidth="0.5" />
-            </svg>
-            <div style={{ fontFamily: "'Noto Sans Devanagari'", fontSize: 12, color: '#9E9E9E', marginTop: 4 }}>मक्खी</div>
-          </div>
+      {/* LAYER 4: Radial Glow Breathing */}
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(circle at 50% 50%, #FF8C38 0%, transparent 55%)`,
+          opacity: glowOpacity,
+        }}
+      />
+
+      {/* LAYER 5: Accent Texture Elements */}
+      <div
+        style={{
+          position: "absolute",
+          left: "15%",
+          top: "20%",
+          width: 80,
+          height: 80,
+          border: "1px solid #FF8C38",
+          borderRadius: "50%",
+          opacity: 0.05,
+          transform: `rotate(${accentRotation1}deg)`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          right: "18%",
+          bottom: "25%",
+          width: 0,
+          height: 0,
+          borderLeft: "30px solid transparent",
+          borderRight: "30px solid transparent",
+          borderBottom: "52px solid #FF8C38",
+          opacity: 0.04,
+          transform: `rotate(${accentRotation2}deg) translateY(${accentDriftY}px)`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: "60%",
+          top: "70%",
+          width: 120,
+          height: 1,
+          backgroundColor: "#FF8C38",
+          opacity: 0.06,
+          transform: `rotate(${accentRotation1 * 0.5}deg)`,
+        }}
+      />
+
+      {/* LAYER 6: Vignette */}
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bgBase} 100%)`,
+          opacity: 0.9,
+        }}
+      />
+
+      {/* TEXT CONTENT */}
+      <AbsoluteFill
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {/* Chapter Number */}
+        <div
+          style={{
+            color: "#FF1E00",
+            fontFamily,
+            fontSize: 46,
+            fontWeight: 500,
+            fontStyle: "italic",
+            letterSpacing: 6,
+            textTransform: "uppercase",
+            margin: 0,
+            opacity: chapterNumOpacity,
+            filter: `blur(${chapterNumBlur}px)`,
+            transform: `translateY(${chapterNumY}px)`,
+          }}
+        >
+          Chapter 1
         </div>
 
-        {/* Growth curve dots */}
-        <svg style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-          {growDots.map((d, i) => (
-            <circle key={i} cx={d.x} cy={d.y} r={d.size} fill="#FFC107" opacity={d.opacity * 0.7} />
+        {/* Decorative Line */}
+        <div
+          style={{
+            width: lineWidth,
+            height: 1,
+            backgroundColor: "#FF1E00",
+            opacity: lineOpacity,
+            marginTop: 16,
+            marginBottom: 20,
+          }}
+        />
+
+        {/* Title Words */}
+        <div
+          style={{
+            display: "flex",
+            gap: 20,
+            justifyContent: "center",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          {wordAnimations.map((w, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily,
+                fontSize: 110,
+                fontWeight: 700,
+                color: "#FCFAEE",
+                letterSpacing: 2,
+                lineHeight: 1.1,
+                margin: 0,
+                opacity: w.opacity,
+                transform: `scale(${w.scale})`,
+                display: "inline-block",
+                textShadow: allWordsVisible
+                  ? `0 0 ${glowPulse}px #FF8C3866, 0 0 ${glowPulse * 2}px #FF8C3833`
+                  : "none",
+              }}
+            >
+              {w.word}
+            </span>
           ))}
-          {arrowGrow > 0.1 && (
-            <path
-              d={`M450 540 ${growDots.map(d => `L${d.x} ${d.y}`).join(' ')}`}
-              stroke="#FFC107" strokeWidth="3" fill="none"
-              strokeDasharray={1200}
-              strokeDashoffset={1200 - arrowGrow * 1200}
-              opacity="0.4"
-            />
-          )}
-        </svg>
-
-        {/* Billion dollar result on right */}
-        <div style={{
-          position: 'absolute', right: 150, top: 180,
-          transform: `scale(${dollarScale})`,
-          opacity: dollarIn,
-        }}>
-          <div style={{
-            width: 260, height: 260, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255,193,7,0.15), rgba(255,193,7,0.03))',
-            border: '3px solid rgba(255,193,7,0.4)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `0 0 ${dollarGlow}px rgba(255,193,7,0.2)`,
-          }}>
-            <div style={{ fontFamily: "'Inter'", fontSize: 52, fontWeight: 800, color: '#FFC107' }}>$B+</div>
-            <div style={{ fontFamily: "'Noto Sans Devanagari'", fontSize: 16, color: '#FFD966', marginTop: 4 }}>अरबों डॉलर</div>
-          </div>
         </div>
+      </AbsoluteFill>
 
-        {/* Stick figure with magnifying glass */}
-        <div style={{ position: 'absolute', left: 100, top: 600, opacity: sp(10) }}>
-          <svg width="120" height="170" viewBox="0 0 120 170">
-            <circle cx="60" cy="24" r="18" stroke="#F5F5F5" strokeWidth="2.5" fill="none" />
-            <circle cx="53" cy="21" r="2" fill="#FFD966" />
-            <circle cx="67" cy="21" r="2" fill="#FFD966" />
-            <line x1="60" y1="42" x2="60" y2="95" stroke="#F5F5F5" strokeWidth="2.5" />
-            <line x1="60" y1="60" x2="35" y2="78" stroke="#F5F5F5" strokeWidth="2.5" />
-            <line x1="60" y1="60" x2="88" y2="50" stroke="#F5F5F5" strokeWidth="2.5" />
-            <circle cx="96" cy="42" r="12" stroke="#FFD966" strokeWidth="2" fill="none" />
-            <line x1="104" y1="51" x2="112" y2="62" stroke="#FFD966" strokeWidth="2" />
-            <line x1="60" y1="95" x2="45" y2="135" stroke="#F5F5F5" strokeWidth="2.5" />
-            <line x1="60" y1="95" x2="75" y2="135" stroke="#F5F5F5" strokeWidth="2.5" />
-          </svg>
-        </div>
+      {/* WATERMARK */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 28,
+          right: 40,
+          fontFamily,
+          fontSize: 20,
+          fontStyle: "italic",
+          color: "#FF8C38",
+          opacity: watermarkOpacity * fadeOut,
+          margin: 0,
+        }}
+      >
+        Mentor by Elisa
+      </div>
+    </AbsoluteFill>
+  );
+};
+```
 
-        {/* Title text */}
-        <div style={{
-          position: 'absolute', left: 100, top: 100,
-          opacity: textIn,
-          transform: `translateY(${interpolate(textIn, [0, 1], [25, 0])}px)`,
-        }}>
-          <div style={{
-            fontFamily: "'Yantra One'", fontSize: 46, color: '#FFD966',
-            textShadow: '0 0 25px rgba(255,217,102,0.3)', lineHeight: 1.3,
-          }}>
-            छोटी चीज़ → बड़ा किरदार
-          </div>
-          <div style={{
-            width: interpolate(sp(110), [0, 1], [0, 380]),
-            height: 2, backgroundColor: '#FFC107', marginTop: 10, opacity: 0.5,
-          }} />
-        </div>
+```tsx
+import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
 
-        {/* Investment parallel text */}
-        <div style={{
-          position: 'absolute', left: '50%', bottom: 100,
-          transform: `translateX(-50%) translateY(${interpolate(investTextIn, [0, 1], [25, 0])}px)`,
-          opacity: investTextIn, textAlign: 'center',
-        }}>
-          <div style={{
-            padding: '16px 36px', borderRadius: 14,
-            backgroundColor: 'rgba(45,45,45,0.8)',
-            border: '1px solid rgba(255,217,102,0.25)',
-          }}>
-            <div style={{ fontFamily: "'Noto Sans Devanagari'", fontSize: 24, color: '#F5F5F5' }}>
-              सबसे बड़े विचार <span style={{ color: '#FFD966' }}>चुपचाप</span> रोज़मर्रा में आते हैं
-            </div>
-          </div>
-        </div>
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
+};
 
-        {/* Shimmer line */}
-        <div style={{
-          position: 'absolute', left: shimmer - 200, top: '50%', width: 200, height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(255,217,102,0.15), transparent)',
+export const chapterTwoTitle: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  const bgBase = "#0D0D0D";
+  const particleColor = "#6B5B3E";
+  const glowColor = "#1A1510";
+
+  const dots = Array.from({ length: 45 }, (_, i) => ({
+    x: seededRandom(i * 11 + 300) * 100,
+    y: seededRandom(i * 11 + 301) * 100,
+    size: 1 + seededRandom(i * 11 + 302) * 2,
+    opacity: 0.02 + seededRandom(i * 11 + 303) * 0.03,
+  }));
+
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const baseX = seededRandom(i * 17 + 400) * 100;
+    const baseY = seededRandom(i * 17 + 401) * 100;
+    const size = 1 + seededRandom(i * 17 + 402) * 3;
+    const phase = seededRandom(i * 17 + 403) * Math.PI * 2;
+    const speed = 0.025 + seededRandom(i * 17 + 404) * 0.035;
+    const opacity = 0.1 + 0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase));
+    const x = baseX + Math.sin(frame * 0.013 + phase) * 6;
+    const y = baseY + Math.cos(frame * 0.01 + phase) * 7;
+    return { x, y, size, opacity };
+  });
+
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const size = 50 + seededRandom(i * 23 + 500) * 50;
+    const baseX = seededRandom(i * 23 + 501) * 100;
+    const baseY = seededRandom(i * 23 + 502) * 100;
+    const phase = seededRandom(i * 23 + 503) * Math.PI * 2;
+    const x = baseX + Math.sin(frame * 0.007 + phase) * 35;
+    const y = baseY + Math.cos(frame * 0.005 + phase * 1.2) * 30;
+    const opacity = 0.03 + seededRandom(i * 23 + 504) * 0.03;
+    return { x, y, size, opacity };
+  });
+
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 120));
+  const accentRotation1 = frame * 0.25;
+  const accentRotation2 = frame * -0.15;
+  const accentDriftY = Math.sin(frame * 0.012) * 6;
+
+  const chapterNumOpacity = interpolate(frame, [20, 35], [0, 1], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumBlur = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumY = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const lineOpacity = interpolate(frame, [35, 50], [0, 0.6], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const titleWords = ["The", "Slow", "Weaver"];
+  const wordAnimations = titleWords.map((word, i) => {
+    const startFrame = 50 + i * 5;
+    const opacity = interpolate(frame, [startFrame, startFrame + 12], [0, 1], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    const scale = interpolate(frame, [startFrame, startFrame + 12], [1.1, 1.0], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    return { word, opacity, scale };
+  });
+
+  const allWordsVisible = frame > 50 + (titleWords.length - 1) * 5 + 12;
+  const glowPulse = allWordsVisible ? 3 + 4 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 90)) : 0;
+
+  const fadeOut = interpolate(frame, [290, 300], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.ease),
+  });
+
+  const watermarkOpacity = interpolate(frame, [15, 35], [0, 0.25], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const fontFamily = "Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif";
+
+  return (
+    <AbsoluteFill style={{ overflow: "hidden", backgroundColor: bgBase, opacity: fadeOut }}>
+      {/* LAYER 1 */}
+      <AbsoluteFill
+        style={{
+          background: `
+            radial-gradient(ellipse at 25% 35%, ${glowColor}44 0%, transparent 55%),
+            radial-gradient(ellipse at 75% 65%, ${bgBase}66 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, ${glowColor}33 0%, transparent 65%)
+          `,
+        }}
+      />
+      {dots.map((dot, i) => (
+        <div key={`dot-${i}`} style={{
+          position: "absolute", left: `${dot.x}%`, top: `${dot.y}%`,
+          width: dot.size, height: dot.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: dot.opacity,
         }} />
-      </div>
-
-      <div style={{ position: 'absolute', right: 30, bottom: 20, fontFamily: "'Poppins'", fontSize: 14, fontWeight: 600, color: 'rgba(255,217,102,0.35)', letterSpacing: 2 }}>
-        ProBuffet HQ
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-export default CH3_S2_SmallToBig;
-```
-
-```tsx
-import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring, AbsoluteFill } from 'remotion';
-
-export const compositionConfig = {
-  id: 'CH3_S3_EverydayClues',
-  durationInSeconds: 15,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const CH3_S3_EverydayClues: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
-
-  const sp = (delay: number, config?: object) =>
-    spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 12, mass: 0.4, stiffness: 120, ...config } });
-
-  const cameraRotate = interpolate(frame, [0, durationInFrames], [0.4, -0.4], { extrapolateRight: 'clamp' });
-  const cameraScale = interpolate(frame, [0, durationInFrames], [1, 1.06], { extrapolateRight: 'clamp' });
-  const exitOpacity = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const clues = [
-    { icon: '🥛', text: 'अमूल दूध की लाइन बढ़ गई?', delay: 15, x: 150, y: 160, color: '#F5F5F5' },
-    { icon: '📱', text: 'नया पेमेंट ऐप आया?', delay: 65, x: 980, y: 160, color: '#FFD966' },
-    { icon: '🛵', text: 'इलेक्ट्रिक स्कूटर बढ़ रहे?', delay: 115, x: 150, y: 520, color: '#66BB6A' },
-    { icon: '🫒', text: 'मौसी का नया तेल?', delay: 165, x: 980, y: 520, color: '#FFC107' },
-  ];
-
-  const figureIn = sp(5);
-  const figureFloat = Math.sin(frame * 0.04) * 5;
-
-  const particles = Array.from({ length: 16 }, (_, i) => ({
-    x: (i * 127 + 50) % 1920 + Math.sin(frame * 0.025 + i * 0.8) * 12,
-    y: (i * 73 + 35) % 1080 + Math.cos(frame * 0.03 + i) * 10,
-    size: 2 + (i % 3), opacity: 0.06,
-  }));
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#1C1C1C', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, #2D2D2D 0%, #1C1C1C 75%)' }} />
-
-      {/* Subtle grid */}
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.025 }}>
-        {Array.from({ length: 20 }, (_, i) => (
-          <React.Fragment key={i}>
-            <div style={{ position: 'absolute', left: i * 96, top: 0, width: 1, height: '100%', backgroundColor: '#FFD966' }} />
-            <div style={{ position: 'absolute', left: 0, top: i * 54, width: '100%', height: 1, backgroundColor: '#FFD966' }} />
-          </React.Fragment>
-        ))}
-      </div>
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', backgroundColor: '#FFD966', opacity: p.opacity }} />
       ))}
 
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.6) 100%)' }} />
-
-      <div style={{ position: 'absolute', inset: 0, transform: `rotate(${cameraRotate}deg) scale(${cameraScale})`, opacity: exitOpacity }}>
-
-        {/* Title */}
-        <div style={{
-          position: 'absolute', left: '50%', top: 55,
-          transform: 'translateX(-50%)',
-          opacity: sp(5),
-        }}>
-          <div style={{
-            fontFamily: "'Yantra One'", fontSize: 36, color: '#FFD966',
-            textAlign: 'center', textShadow: '0 0 20px rgba(255,217,102,0.25)',
-          }}>
-            रोज़मर्रा के संकेत 👀
-          </div>
-        </div>
-
-        {/* 4 Clue cards in grid */}
-        {clues.map((clue, i) => {
-          const s = sp(clue.delay);
-          const float = Math.sin(frame * 0.04 + i * 1.5) * 6;
-          const questionPulse = Math.sin(frame * 0.1 + i * 0.8) * 2;
-          return (
-            <div key={i} style={{
-              position: 'absolute', left: clue.x, top: clue.y + float,
-              transform: `scale(${s}) translateY(${interpolate(s, [0, 1], [30, 0])}px)`,
-              opacity: s,
-            }}>
-              <div style={{
-                width: 700, height: 280, borderRadius: 20,
-                background: `linear-gradient(135deg, rgba(45,45,45,0.9), rgba(45,45,45,0.6))`,
-                border: `2px solid ${clue.color}30`,
-                padding: 30, display: 'flex', alignItems: 'center', gap: 24,
-                boxShadow: `0 8px 30px rgba(0,0,0,0.3)`,
-              }}>
-                <div style={{
-                  width: 100, height: 100, borderRadius: '50%',
-                  backgroundColor: `${clue.color}12`,
-                  border: `2px solid ${clue.color}30`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 48, flexShrink: 0,
-                }}>
-                  {clue.icon}
-                </div>
-                <div>
-                  <div style={{
-                    fontFamily: "'Noto Sans Devanagari'", fontSize: 26, color: '#F5F5F5',
-                    lineHeight: 1.5, marginBottom: 8,
-                  }}>
-                    {clue.text}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Inter'", fontSize: 36 + questionPulse, fontWeight: 800,
-                    color: clue.color, opacity: 0.6,
-                  }}>
-                    ?
-                  </div>
-                </div>
-
-                {/* Magnifying glass icon */}
-                <svg width="50" height="50" viewBox="0 0 50 50" style={{ position: 'absolute', right: 20, top: 20, opacity: 0.2 }}>
-                  <circle cx="22" cy="22" r="14" stroke={clue.color} strokeWidth="2" fill="none" />
-                  <line x1="32" y1="32" x2="45" y2="45" stroke={clue.color} strokeWidth="2" />
-                </svg>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Stick figure observing */}
-        <div style={{
-          position: 'absolute', left: 870, top: 420 + figureFloat,
-          opacity: figureIn, transform: `scale(${figureIn * 0.8})`,
-        }}>
-          <svg width="80" height="120" viewBox="0 0 80 120">
-            <circle cx="40" cy="16" r="12" stroke="#F5F5F5" strokeWidth="2" fill="none" />
-            <circle cx="35" cy="14" r="1.5" fill="#FFD966" />
-            <circle cx="45" cy="14" r="1.5" fill="#FFD966" />
-            <line x1="40" y1="28" x2="40" y2="65" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="42" x2="22" y2="55" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="42" x2="58" y2="55" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="65" x2="28" y2="95" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="65" x2="52" y2="95" stroke="#F5F5F5" strokeWidth="2" />
-          </svg>
-        </div>
-      </div>
-
-      <div style={{ position: 'absolute', right: 30, bottom: 20, fontFamily: "'Poppins'", fontSize: 14, fontWeight: 600, color: 'rgba(255,217,102,0.35)', letterSpacing: 2 }}>
-        ProBuffet HQ
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-export default CH3_S3_EverydayClues;
-```
-
-```tsx
-import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring, AbsoluteFill } from 'remotion';
-
-export const compositionConfig = {
-  id: 'CH3_S4_NextMultibagger',
-  durationInSeconds: 10,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const CH3_S4_NextMultibagger: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
-
-  const sp = (delay: number, config?: object) =>
-    spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 12, mass: 0.4, stiffness: 120, ...config } });
-
-  const cameraScale = interpolate(frame, [0, 100, durationInFrames], [1, 1.1, 1.06], { extrapolateRight: 'clamp' });
-  const cameraPan = interpolate(frame, [0, durationInFrames], [-15, 15], { extrapolateRight: 'clamp' });
-  const exitOpacity = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const flyBubbles = [
-    { emoji: '🥛', x: 300, y: 300, delay: 5 },
-    { emoji: '📱', x: 620, y: 250, delay: 15 },
-    { emoji: '🛵', x: 480, y: 450, delay: 25 },
-    { emoji: '🫒', x: 200, y: 480, delay: 35 },
-  ];
-
-  const companies = [
-    { name: 'TITAN', color: '#FFD966', delay: 80, x: 1050, y: 200 },
-    { name: 'ASIAN PAINTS', color: '#FF6B6B', delay: 110, x: 1050, y: 380 },
-    { name: 'BAJAJ FINANCE', color: '#FFC107', delay: 140, x: 1050, y: 560 },
-  ];
-
-  const arrowIn = sp(60);
-  const titleIn = sp(170);
-  const eyeIn = sp(200);
-  const eyeGlow = Math.sin(frame * 0.1) * 10 + 25;
-
-  const particles = Array.from({ length: 12 }, (_, i) => ({
-    x: (i * 167 + 45) % 1920 + Math.sin(frame * 0.025 + i) * 10,
-    y: (i * 97 + 30) % 1080 + Math.cos(frame * 0.03 + i * 0.7) * 8,
-    size: 2 + (i % 3), opacity: 0.08,
-  }));
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#1C1C1C', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 55% 40%, #2D2D2D 0%, #1C1C1C 70%)' }} />
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', backgroundColor: '#FFD966', opacity: p.opacity }} />
-      ))}
-
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
-
-      <div style={{ position: 'absolute', inset: 0, transform: `scale(${cameraScale}) translateX(${cameraPan}px)`, opacity: exitOpacity }}>
-
-        {/* Title */}
-        <div style={{
-          position: 'absolute', left: '50%', top: 50,
-          transform: 'translateX(-50%)', opacity: sp(5),
-        }}>
-          <div style={{
-            fontFamily: "'Yantra One'", fontSize: 38, color: '#FFD966',
-            textShadow: '0 0 20px rgba(255,217,102,0.25)',
-          }}>
-            ये सब मक्खियाँ हैं दोस्त 🪰
-          </div>
-        </div>
-
-        {/* Fly bubbles on left = everyday clues */}
-        {flyBubbles.map((fb, i) => {
-          const s = sp(fb.delay);
-          const float = Math.sin(frame * 0.05 + i * 1.5) * 8;
-          return (
-            <div key={i} style={{
-              position: 'absolute', left: fb.x, top: fb.y + float,
-              transform: `scale(${s})`, opacity: s,
-            }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: '50%',
-                backgroundColor: 'rgba(45,45,45,0.7)',
-                border: '2px solid rgba(158,158,158,0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 36,
-              }}>
-                {fb.emoji}
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Arrow from clues to companies */}
-        <svg style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-          <defs>
-            <linearGradient id="arrowGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#9E9E9E" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#FFD966" stopOpacity="0.6" />
-            </linearGradient>
-          </defs>
-          <line x1="700" y1="400" x2={700 + arrowIn * 300} y2="400"
-            stroke="url(#arrowGrad)" strokeWidth="3" strokeDasharray="10 5" />
-          {arrowIn > 0.8 && (
-            <polygon points={`${1000},385 ${1030},400 ${1000},415`} fill="#FFD966" opacity={arrowIn} />
-          )}
-        </svg>
-
-        {/* Company cards on right */}
-        {companies.map((comp, i) => {
-          const s = sp(comp.delay);
-          const glow = Math.sin(frame * 0.06 + i * 1.2) * 8;
-          return (
-            <div key={i} style={{
-              position: 'absolute', left: comp.x, top: comp.y,
-              transform: `scale(${s}) translateX(${interpolate(s, [0, 1], [50, 0])}px)`,
-              opacity: s,
-            }}>
-              <div style={{
-                width: 550, height: 130, borderRadius: 16,
-                background: `linear-gradient(135deg, ${comp.color}10, ${comp.color}05)`,
-                border: `2px solid ${comp.color}40`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
-                boxShadow: `0 0 ${20 + glow}px ${comp.color}10`,
-              }}>
-                <div style={{
-                  fontFamily: "'Inter'", fontSize: 14, fontWeight: 600,
-                  color: '#9E9E9E', letterSpacing: 3,
-                }}>
-                  अगला
-                </div>
-                <div style={{
-                  fontFamily: "'Inter'", fontSize: 36, fontWeight: 800,
-                  color: comp.color, letterSpacing: 4,
-                }}>
-                  {comp.name}
-                </div>
-                <div style={{ fontSize: 28 }}>📈</div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* "बस देखने की नज़र चाहिए" with eye */}
-        <div style={{
-          position: 'absolute', left: '50%', bottom: 80,
-          transform: `translateX(-50%) translateY(${interpolate(titleIn, [0, 1], [25, 0])}px)`,
-          opacity: titleIn, textAlign: 'center',
-        }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 16,
-            padding: '16px 40px', borderRadius: 16,
-            backgroundColor: 'rgba(45,45,45,0.8)',
-            border: '2px solid rgba(255,217,102,0.3)',
-            boxShadow: `0 0 ${eyeGlow}px rgba(255,217,102,0.1)`,
-          }}>
-            <div style={{
-              fontSize: 40, opacity: eyeIn,
-              transform: `scale(${eyeIn})`,
-            }}>👁️</div>
-            <div style={{
-              fontFamily: "'Yantra One'", fontSize: 32, color: '#FFD966',
-            }}>
-              बस देखने की नज़र चाहिए
-            </div>
-          </div>
-        </div>
-
-        {/* Stick figure */}
-        <div style={{ position: 'absolute', left: 100, bottom: 200, opacity: sp(8) }}>
-          <svg width="80" height="120" viewBox="0 0 80 120">
-            <circle cx="40" cy="16" r="13" stroke="#F5F5F5" strokeWidth="2" fill="none" />
-            <circle cx="34" cy="14" r="2" fill="#FFD966" />
-            <circle cx="46" cy="14" r="2" fill="#FFD966" />
-            <path d="M35 22 Q40 26 45 22" stroke="#F5F5F5" strokeWidth="1.5" fill="none" />
-            <line x1="40" y1="29" x2="40" y2="68" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="45" x2="58" y2="38" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="45" x2="22" y2="58" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="68" x2="28" y2="100" stroke="#F5F5F5" strokeWidth="2" />
-            <line x1="40" y1="68" x2="52" y2="100" stroke="#F5F5F5" strokeWidth="2" />
-          </svg>
-        </div>
-      </div>
-
-      <div style={{ position: 'absolute', right: 30, bottom: 20, fontFamily: "'Poppins'", fontSize: 14, fontWeight: 600, color: 'rgba(255,217,102,0.35)', letterSpacing: 2 }}>
-        ProBuffet HQ
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-export default CH3_S4_NextMultibagger;
-```
-
-```tsx
-import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring, AbsoluteFill } from 'remotion';
-
-export const compositionConfig = {
-  id: 'CH4_S1_NamingGame',
-  durationInSeconds: 15,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const CH4_S1_NamingGame: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
-
-  const sp = (delay: number, config?: object) =>
-    spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 12, mass: 0.4, stiffness: 120, ...config } });
-
-  const cameraScale = interpolate(frame, [0, durationInFrames], [1, 1.05], { extrapolateRight: 'clamp' });
-  const cameraX = interpolate(frame, [0, durationInFrames], [15, -20], { extrapolateRight: 'clamp' });
-  const exitOpacity = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const rejectedNames = [
-    { name: 'FLY MAN', hindi: 'फ़्लाईमैन', delay: 20, crossDelay: 50 },
-    { name: 'MOSQUITO MAN', hindi: 'मॉस्किटोमैन', delay: 60, crossDelay: 90 },
-  ];
-  const winnerIn = sp(120, { damping: 8, stiffness: 80 });
-  const winnerGlow = Math.sin(frame * 0.09) * 12 + 35;
-  const questionIn = sp(210);
-  const mirrorIn = sp(250);
-
-  const particles = Array.from({ length: 14 }, (_, i) => ({
-    x: (i * 143 + 50) % 1920 + Math.sin(frame * 0.025 + i) * 12,
-    y: (i * 83 + 35) % 1080 + Math.cos(frame * 0.03 + i * 0.6) * 10,
-    size: 2 + (i % 3), opacity: 0.08,
-  }));
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#1C1C1C', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 40% 40%, #2D2D2D 0%, #1C1C1C 75%)' }} />
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', backgroundColor: i % 3 === 0 ? '#FF6B6B' : '#FFD966', opacity: p.opacity }} />
-      ))}
-
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.6) 100%)' }} />
-
-      <div style={{ position: 'absolute', inset: 0, transform: `scale(${cameraScale}) translateX(${cameraX}px)`, opacity: exitOpacity }}>
-
-        {/* Stan Lee thinking */}
-        <div style={{ position: 'absolute', left: 120, top: 250, opacity: sp(5) }}>
-          <svg width="140" height="220" viewBox="0 0 140 220">
-            <circle cx="70" cy="28" r="20" stroke="#F5F5F5" strokeWidth="3" fill="none" />
-            <circle cx="62" cy="25" r="2.5" fill="#FFD966" />
-            <circle cx="78" cy="25" r="2.5" fill="#FFD966" />
-            <line x1="70" y1="48" x2="70" y2="120" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="70" y1="70" x2="45" y2="50" stroke="#F5F5F5" strokeWidth="3" />
-            <circle cx="43" cy="47" r="3" fill="#F5F5F5" />
-            <line x1="70" y1="70" x2="95" y2="90" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="70" y1="120" x2="52" y2="175" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="70" y1="120" x2="88" y2="175" stroke="#F5F5F5" strokeWidth="3" />
-          </svg>
-        </div>
-
-        {/* Rejected names */}
-        {rejectedNames.map((rn, i) => {
-          const s = sp(rn.delay);
-          const crossW = interpolate(sp(rn.crossDelay), [0, 1], [0, 350]);
-          return (
-            <div key={i} style={{
-              position: 'absolute', left: 380, top: 180 + i * 160,
-              transform: `translateX(${interpolate(s, [0, 1], [50, 0])}px)`,
-              opacity: s,
-            }}>
-              <div style={{
-                width: 400, padding: '20px 30px', borderRadius: 16,
-                backgroundColor: 'rgba(45,45,45,0.8)',
-                border: '2px solid rgba(255,107,107,0.25)',
-                position: 'relative',
-              }}>
-                <div style={{ fontFamily: "'Inter'", fontSize: 30, fontWeight: 800, color: '#9E9E9E', letterSpacing: 3 }}>
-                  {rn.name}
-                </div>
-                <div style={{ fontFamily: "'Noto Sans Devanagari'", fontSize: 16, color: '#9E9E9E', marginTop: 4 }}>
-                  {rn.hindi}
-                </div>
-                <div style={{
-                  position: 'absolute', left: 15, top: '50%',
-                  width: crossW, height: 3, backgroundColor: '#FF6B6B',
-                  transform: 'translateY(-50%) rotate(-5deg)',
-                }} />
-                {crossW > 300 && (
-                  <div style={{ position: 'absolute', right: -50, top: '50%', transform: 'translateY(-50%)', fontSize: 30, opacity: 0.7 }}>❌</div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Winner: SPIDER-MAN */}
-        <div style={{
-          position: 'absolute', left: 380, top: 520,
-          transform: `scale(${winnerIn})`,
-          opacity: winnerIn,
-        }}>
-          <div style={{
-            width: 500, padding: '24px 36px', borderRadius: 20,
-            background: 'linear-gradient(135deg, rgba(255,217,102,0.1), rgba(255,193,7,0.05))',
-            border: '3px solid rgba(255,217,102,0.5)',
-            boxShadow: `0 0 ${winnerGlow}px rgba(255,217,102,0.2)`,
-            position: 'relative',
-          }}>
-            <div style={{ fontFamily: "'Inter'", fontSize: 42, fontWeight: 800, color: '#FFD966', letterSpacing: 5 }}>
-              SPIDER-MAN ✓
-            </div>
-            <div style={{ fontFamily: "'Noto Sans Devanagari'", fontSize: 18, color: '#FFC107', marginTop: 6 }}>
-              ड्रामेटिक • याद रहने वाला
-            </div>
-            <div style={{
-              position: 'absolute', right: 15, top: -8,
-              padding: '4px 14px', borderRadius: 20,
-              backgroundColor: '#FFC107',
-              fontFamily: "'Inter'", fontSize: 12, fontWeight: 700, color: '#1C1C1C',
-              letterSpacing: 2,
-            }}>
-              WINNER
-            </div>
-          </div>
-        </div>
-
-        {/* Vertical divider */}
-        <div style={{
-          position: 'absolute', left: 960, top: 100, width: 2, height: 800,
-          background: 'linear-gradient(180deg, transparent, rgba(255,217,102,0.2), transparent)',
-          opacity: sp(150),
+      {/* LAYER 2 */}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
+          position: "absolute", left: `${star.x}%`, top: `${star.y}%`,
+          width: star.size, height: star.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: star.opacity,
+          filter: `blur(${star.size * 0.3}px)`,
         }} />
+      ))}
 
-        {/* Investment parallel: What's your name? */}
+      {/* LAYER 3 */}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: "absolute", left: `${orb.x}%`, top: `${orb.y}%`,
+          width: orb.size, height: orb.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: orb.opacity,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 4 */}
+      <AbsoluteFill style={{
+        background: `radial-gradient(circle at 50% 50%, ${particleColor} 0%, transparent 55%)`,
+        opacity: glowOpacity,
+      }} />
+
+      {/* LAYER 5 */}
+      <div style={{
+        position: "absolute", right: "12%", top: "15%",
+        width: 90, height: 90,
+        border: `1px solid ${particleColor}`, opacity: 0.05,
+        transform: `rotate(${accentRotation1}deg)`,
+      }} />
+      <div style={{
+        position: "absolute", left: "20%", bottom: "20%",
+        width: 60, height: 60, borderRadius: "50%",
+        border: `1px solid ${particleColor}`, opacity: 0.06,
+        transform: `rotate(${accentRotation2}deg) translateY(${accentDriftY}px)`,
+      }} />
+      <div style={{
+        position: "absolute", left: "45%", top: "80%",
+        width: 100, height: 1, backgroundColor: particleColor,
+        opacity: 0.05, transform: `rotate(${accentRotation1 * 0.4}deg)`,
+      }} />
+
+      {/* LAYER 6 */}
+      <AbsoluteFill style={{
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bgBase} 100%)`,
+        opacity: 0.9,
+      }} />
+
+      {/* TEXT */}
+      <AbsoluteFill style={{
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+      }}>
         <div style={{
-          position: 'absolute', right: 100, top: 180,
-          opacity: questionIn,
-          transform: `translateY(${interpolate(questionIn, [0, 1], [30, 0])}px)`,
+          color: "#FF1E00", fontFamily, fontSize: 46, fontWeight: 500,
+          fontStyle: "italic", letterSpacing: 6, textTransform: "uppercase",
+          margin: 0, opacity: chapterNumOpacity,
+          filter: `blur(${chapterNumBlur}px)`, transform: `translateY(${chapterNumY}px)`,
         }}>
-          <div style={{
-            fontFamily: "'Yantra One'", fontSize: 44, color: '#FFD966',
-            textShadow: '0 0 20px rgba(255,217,102,0.3)', lineHeight: 1.4,
-            textAlign: 'center',
-          }}>
-            तुम कौन से<br />निवेशक हो?
-          </div>
-          <div style={{
-            width: interpolate(sp(220), [0, 1], [0, 300]),
-            height: 2, backgroundColor: '#FFD966', margin: '12px auto 0', opacity: 0.5,
-          }} />
+          Chapter 2
         </div>
-
-        {/* Mirror / question mark concept */}
         <div style={{
-          position: 'absolute', right: 200, top: 420,
-          opacity: mirrorIn, transform: `scale(${mirrorIn})`,
-        }}>
-          <div style={{
-            width: 200, height: 260, borderRadius: 100, borderBottomLeftRadius: 30, borderBottomRightRadius: 30,
-            border: '3px solid rgba(158,158,158,0.3)',
-            backgroundColor: 'rgba(45,45,45,0.4)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="100" height="130" viewBox="0 0 100 130">
-              <circle cx="50" cy="22" r="16" stroke="#9E9E9E" strokeWidth="2" fill="none" strokeDasharray="3 3" />
-              <line x1="50" y1="38" x2="50" y2="75" stroke="#9E9E9E" strokeWidth="2" strokeDasharray="3 3" />
-              <line x1="50" y1="52" x2="30" y2="65" stroke="#9E9E9E" strokeWidth="2" strokeDasharray="3 3" />
-              <line x1="50" y1="52" x2="70" y2="65" stroke="#9E9E9E" strokeWidth="2" strokeDasharray="3 3" />
-              <line x1="50" y1="75" x2="35" y2="105" stroke="#9E9E9E" strokeWidth="2" strokeDasharray="3 3" />
-              <line x1="50" y1="75" x2="65" y2="105" stroke="#9E9E9E" strokeWidth="2" strokeDasharray="3 3" />
-            </svg>
-            <div style={{
-              fontFamily: "'Inter'", fontSize: 60, fontWeight: 800, color: '#FFD966',
-              position: 'absolute', opacity: 0.4,
+          width: lineWidth, height: 1, backgroundColor: "#FF1E00",
+          opacity: lineOpacity, marginTop: 16, marginBottom: 20,
+        }} />
+        <div style={{ display: "flex", gap: 20, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          {wordAnimations.map((w, i) => (
+            <span key={i} style={{
+              fontFamily, fontSize: 110, fontWeight: 700, color: "#FCFAEE",
+              letterSpacing: 2, lineHeight: 1.1, margin: 0,
+              opacity: w.opacity, transform: `scale(${w.scale})`, display: "inline-block",
+              textShadow: allWordsVisible
+                ? `0 0 ${glowPulse}px ${particleColor}66, 0 0 ${glowPulse * 2}px ${particleColor}33`
+                : "none",
             }}>
-              ?
-            </div>
-          </div>
-          <div style={{
-            width: 6, height: 30, backgroundColor: '#9E9E9E', margin: '0 auto', opacity: 0.3,
-          }} />
-          <div style={{
-            width: 80, height: 8, backgroundColor: '#9E9E9E', margin: '0 auto', borderRadius: 4, opacity: 0.3,
-          }} />
+              {w.word}
+            </span>
+          ))}
         </div>
-      </div>
+      </AbsoluteFill>
 
-      <div style={{ position: 'absolute', right: 30, bottom: 20, fontFamily: "'Poppins'", fontSize: 14, fontWeight: 600, color: 'rgba(255,217,102,0.35)', letterSpacing: 2 }}>
-        ProBuffet HQ
+      {/* WATERMARK */}
+      <div style={{
+        position: "absolute", bottom: 28, right: 40, fontFamily,
+        fontSize: 20, fontStyle: "italic", color: particleColor,
+        opacity: watermarkOpacity * fadeOut, margin: 0,
+      }}>
+        Mentor by Elisa
       </div>
     </AbsoluteFill>
   );
 };
-
-export default CH4_S1_NamingGame;
 ```
 
 ```tsx
-import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring, AbsoluteFill } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
 
-export const compositionConfig = {
-  id: 'CH4_S2_InvestorTypes',
-  durationInSeconds: 12,
-  fps: 30,
-  width: 1920,
-  height: 1080,
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
 };
 
-const CH4_S2_InvestorTypes: React.FC = () => {
+export const chapterThreeTitle: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
 
-  const sp = (delay: number, config?: object) =>
-    spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 12, mass: 0.4, stiffness: 120, ...config } });
+  const bgBase = "#0A0E27";
+  const particleColor = "#D4A843";
+  const glowColor = "#1A2456";
 
-  const cameraY = interpolate(frame, [0, durationInFrames], [10, -10], { extrapolateRight: 'clamp' });
-  const cameraScale = interpolate(frame, [0, durationInFrames], [1.02, 1], { extrapolateRight: 'clamp' });
-  const exitOpacity = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  const types = [
-    {
-      title: 'मूल्य निवेशक',
-      english: 'VALUE INVESTOR',
-      icon: '💎',
-      desc: 'सस्ते में अच्छी कंपनी → सालों रखो',
-      color: '#FFD966',
-      delay: 20,
-      figureProps: { shieldX: 55, shieldY: 48 },
-    },
-    {
-      title: 'विकास निवेशक',
-      english: 'GROWTH INVESTOR',
-      icon: '🚀',
-      desc: 'तेज़ दौड़ने वाली कंपनियाँ',
-      color: '#FF6B6B',
-      delay: 80,
-      figureProps: { shieldX: 55, shieldY: 48 },
-    },
-    {
-      title: 'लाभांश प्रेमी',
-      english: 'DIVIDEND LOVER',
-      icon: '💰',
-      desc: 'हर साल पैसे → सुकून',
-      color: '#FFC107',
-      delay: 140,
-      figureProps: { shieldX: 55, shieldY: 48 },
-    },
-  ];
-
-  const particles = Array.from({ length: 12 }, (_, i) => ({
-    x: (i * 163 + 50) % 1920 + Math.sin(frame * 0.025 + i) * 10,
-    y: (i * 97 + 30) % 1080 + Math.cos(frame * 0.03 + i * 0.7) * 8,
-    size: 2 + (i % 3), opacity: 0.07,
+  const dots = Array.from({ length: 42 }, (_, i) => ({
+    x: seededRandom(i * 9 + 600) * 100,
+    y: seededRandom(i * 9 + 601) * 100,
+    size: 1 + seededRandom(i * 9 + 602) * 2,
+    opacity: 0.02 + seededRandom(i * 9 + 603) * 0.03,
   }));
 
-  return (
-    <AbsoluteFill style={{ backgroundColor: '#1C1C1C', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, #2D2D2D 0%, #1C1C1C 75%)' }} />
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const baseX = seededRandom(i * 14 + 700) * 100;
+    const baseY = seededRandom(i * 14 + 701) * 100;
+    const size = 1 + seededRandom(i * 14 + 702) * 3;
+    const phase = seededRandom(i * 14 + 703) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 14 + 704) * 0.04;
+    const opacity = 0.1 + 0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase));
+    const x = baseX + Math.sin(frame * 0.014 + phase) * 7;
+    const y = baseY + Math.cos(frame * 0.011 + phase) * 6;
+    return { x, y, size, opacity };
+  });
 
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', backgroundColor: '#FFD966', opacity: p.opacity }} />
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const size = 45 + seededRandom(i * 21 + 800) * 55;
+    const baseX = seededRandom(i * 21 + 801) * 100;
+    const baseY = seededRandom(i * 21 + 802) * 100;
+    const phase = seededRandom(i * 21 + 803) * Math.PI * 2;
+    const x = baseX + Math.sin(frame * 0.009 + phase) * 38;
+    const y = baseY + Math.cos(frame * 0.007 + phase * 1.1) * 32;
+    const opacity = 0.03 + seededRandom(i * 21 + 804) * 0.03;
+    return { x, y, size, opacity };
+  });
+
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 120));
+  const accentRotation1 = frame * 0.35;
+  const accentRotation2 = frame * -0.25;
+  const accentDriftY = Math.sin(frame * 0.01) * 7;
+
+  const chapterNumOpacity = interpolate(frame, [20, 35], [0, 1], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumBlur = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumY = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const lineOpacity = interpolate(frame, [35, 50], [0, 0.6], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const titleWords = ["The", "Black", "Flame"];
+  const wordAnimations = titleWords.map((word, i) => {
+    const startFrame = 50 + i * 5;
+    const opacity = interpolate(frame, [startFrame, startFrame + 12], [0, 1], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    const scale = interpolate(frame, [startFrame, startFrame + 12], [1.1, 1.0], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    return { word, opacity, scale };
+  });
+
+  const allWordsVisible = frame > 50 + (titleWords.length - 1) * 5 + 12;
+  const glowPulse = allWordsVisible ? 3 + 4 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 90)) : 0;
+
+  const fadeOut = interpolate(frame, [290, 300], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.ease),
+  });
+
+  const watermarkOpacity = interpolate(frame, [15, 35], [0, 0.25], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const fontFamily = "Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif";
+
+  return (
+    <AbsoluteFill style={{ overflow: "hidden", backgroundColor: bgBase, opacity: fadeOut }}>
+      <AbsoluteFill style={{
+        background: `
+          radial-gradient(ellipse at 35% 30%, ${glowColor}55 0%, transparent 50%),
+          radial-gradient(ellipse at 65% 70%, ${bgBase}66 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 50%, ${glowColor}44 0%, transparent 60%)
+        `,
+      }} />
+      {dots.map((dot, i) => (
+        <div key={`dot-${i}`} style={{
+          position: "absolute", left: `${dot.x}%`, top: `${dot.y}%`,
+          width: dot.size, height: dot.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: dot.opacity,
+        }} />
       ))}
 
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)' }} />
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
+          position: "absolute", left: `${star.x}%`, top: `${star.y}%`,
+          width: star.size, height: star.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: star.opacity,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
 
-      <div style={{ position: 'absolute', inset: 0, transform: `translateY(${cameraY}px) scale(${cameraScale})`, opacity: exitOpacity }}>
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: "absolute", left: `${orb.x}%`, top: `${orb.y}%`,
+          width: orb.size, height: orb.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: orb.opacity,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
 
-        {/* Title */}
+      <AbsoluteFill style={{
+        background: `radial-gradient(circle at 50% 50%, ${particleColor} 0%, transparent 55%)`,
+        opacity: glowOpacity,
+      }} />
+
+      {/* Accent: diamond shape */}
+      <div style={{
+        position: "absolute", left: "10%", top: "25%",
+        width: 40, height: 40, border: `1px solid ${particleColor}`,
+        opacity: 0.06, transform: `rotate(${45 + accentRotation1}deg)`,
+      }} />
+      <div style={{
+        position: "absolute", right: "15%", bottom: "30%",
+        width: 70, height: 70, borderRadius: "50%",
+        border: `1px solid ${particleColor}`, opacity: 0.05,
+        transform: `rotate(${accentRotation2}deg) translateY(${accentDriftY}px)`,
+      }} />
+      <div style={{
+        position: "absolute", left: "55%", top: "15%",
+        width: 80, height: 1, backgroundColor: particleColor,
+        opacity: 0.04, transform: `rotate(${30 + accentRotation1 * 0.3}deg)`,
+      }} />
+
+      <AbsoluteFill style={{
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bgBase} 100%)`,
+        opacity: 0.9,
+      }} />
+
+      <AbsoluteFill style={{
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+      }}>
         <div style={{
-          position: 'absolute', left: '50%', top: 40,
-          transform: 'translateX(-50%)', opacity: sp(5),
+          color: "#FF1E00", fontFamily, fontSize: 46, fontWeight: 500,
+          fontStyle: "italic", letterSpacing: 6, textTransform: "uppercase",
+          margin: 0, opacity: chapterNumOpacity,
+          filter: `blur(${chapterNumBlur}px)`, transform: `translateY(${chapterNumY}px)`,
         }}>
-          <div style={{
-            fontFamily: "'Yantra One'", fontSize: 34, color: '#F5F5F5',
-            textAlign: 'center',
-          }}>
-            तुम कौन हो? 🪞
-          </div>
+          Chapter 3
         </div>
-
-        {/* Three investor type cards */}
-        {types.map((type, i) => {
-          const s = sp(type.delay);
-          const float = Math.sin(frame * 0.045 + i * 2) * 6;
-          const borderGlow = Math.sin(frame * 0.08 + i) * 6;
-          const cardX = 100 + i * 590;
-          return (
-            <div key={i} style={{
-              position: 'absolute', left: cardX, top: 130 + float,
-              transform: `scale(${s}) translateY(${interpolate(s, [0, 1], [40, 0])}px)`,
-              opacity: s,
+        <div style={{
+          width: lineWidth, height: 1, backgroundColor: "#FF1E00",
+          opacity: lineOpacity, marginTop: 16, marginBottom: 20,
+        }} />
+        <div style={{ display: "flex", gap: 20, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          {wordAnimations.map((w, i) => (
+            <span key={i} style={{
+              fontFamily, fontSize: 110, fontWeight: 700, color: "#FCFAEE",
+              letterSpacing: 2, lineHeight: 1.1, margin: 0,
+              opacity: w.opacity, transform: `scale(${w.scale})`, display: "inline-block",
+              textShadow: allWordsVisible
+                ? `0 0 ${glowPulse}px ${particleColor}66, 0 0 ${glowPulse * 2}px ${particleColor}33`
+                : "none",
             }}>
-              <div style={{
-                width: 520, height: 700, borderRadius: 24,
-                background: `linear-gradient(180deg, ${type.color}08, ${type.color}03)`,
-                border: `2px solid ${type.color}35`,
-                boxShadow: `0 0 ${20 + borderGlow}px ${type.color}08`,
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                padding: '30px 20px',
-              }}>
-                {/* Icon */}
-                <div style={{
-                  width: 90, height: 90, borderRadius: '50%',
-                  backgroundColor: `${type.color}15`,
-                  border: `2px solid ${type.color}30`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 44, marginBottom: 16,
-                }}>
-                  {type.icon}
-                </div>
-
-                {/* English name */}
-                <div style={{
-                  fontFamily: "'Inter'", fontSize: 14, fontWeight: 700, color: type.color,
-                  letterSpacing: 4, marginBottom: 6, opacity: 0.7,
-                }}>
-                  {type.english}
-                </div>
-
-                {/* Hindi name */}
-                <div style={{
-                  fontFamily: "'Yantra One'", fontSize: 28, color: '#F5F5F5',
-                  marginBottom: 16, textAlign: 'center',
-                }}>
-                  {type.title}
-                </div>
-
-                {/* Stick figure with unique pose */}
-                <svg width="100" height="160" viewBox="0 0 100 160" style={{ marginBottom: 14 }}>
-                  <circle cx="50" cy="22" r="16" stroke={type.color} strokeWidth="2.5" fill="none" />
-                  <circle cx="44" cy="19" r="2" fill={type.color} />
-                  <circle cx="56" cy="19" r="2" fill={type.color} />
-                  <line x1="50" y1="38" x2="50" y2="85" stroke={type.color} strokeWidth="2.5" />
-                  {i === 0 && (
-                    <>
-                      {/* Value: holding diamond */}
-                      <line x1="50" y1="55" x2="28" y2="42" stroke={type.color} strokeWidth="2.5" />
-                      <polygon points="20,35 28,28 36,35 28,42" fill={type.color} opacity="0.5" />
-                      <line x1="50" y1="55" x2="72" y2="68" stroke={type.color} strokeWidth="2.5" />
-                    </>
-                  )}
-                  {i === 1 && (
-                    <>
-                      {/* Growth: arms up running */}
-                      <line x1="50" y1="55" x2="30" y2="38" stroke={type.color} strokeWidth="2.5" />
-                      <line x1="50" y1="55" x2="70" y2="38" stroke={type.color} strokeWidth="2.5" />
-                    </>
-                  )}
-                  {i === 2 && (
-                    <>
-                      {/* Dividend: receiving coins */}
-                      <line x1="50" y1="55" x2="28" y2="65" stroke={type.color} strokeWidth="2.5" />
-                      <line x1="28" y1="65" x2="25" y2="50" stroke={type.color} strokeWidth="2.5" />
-                      <line x1="50" y1="55" x2="72" y2="65" stroke={type.color} strokeWidth="2.5" />
-                      <line x1="72" y1="65" x2="75" y2="50" stroke={type.color} strokeWidth="2.5" />
-                      {[0, 1, 2].map((c) => (
-                        <circle key={c} cx={35 + c * 15} cy={40 + Math.sin(frame * 0.1 + c) * 3} r="5" fill={type.color} opacity="0.4" />
-                      ))}
-                    </>
-                  )}
-                  <line x1="50" y1="85" x2="35" y2="125" stroke={type.color} strokeWidth="2.5" />
-                  <line x1="35" y1="125" x2="35" y2="150" stroke={type.color} strokeWidth="2.5" />
-                  <line x1="50" y1="85" x2="65" y2="125" stroke={type.color} strokeWidth="2.5" />
-                  <line x1="65" y1="125" x2="65" y2="150" stroke={type.color} strokeWidth="2.5" />
-                </svg>
-
-                {/* Description */}
-                <div style={{
-                  fontFamily: "'Noto Sans Devanagari'", fontSize: 18, color: '#9E9E9E',
-                  textAlign: 'center', lineHeight: 1.5, padding: '0 10px',
-                }}>
-                  {type.desc}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Bottom question */}
-        <div style={{
-          position: 'absolute', left: '50%', bottom: 30,
-          transform: 'translateX(-50%)',
-          opacity: sp(200),
-        }}>
-          <div style={{
-            fontFamily: "'Noto Sans Devanagari'", fontSize: 22, color: '#9E9E9E',
-            textAlign: 'center',
-          }}>
-            ये सवाल तुमने कभी <span style={{ color: '#FFD966', fontWeight: 700 }}>खुद से</span> पूछा?
-          </div>
+              {w.word}
+            </span>
+          ))}
         </div>
-      </div>
+      </AbsoluteFill>
 
-      <div style={{ position: 'absolute', right: 30, bottom: 20, fontFamily: "'Poppins'", fontSize: 14, fontWeight: 600, color: 'rgba(255,217,102,0.35)', letterSpacing: 2 }}>
-        ProBuffet HQ
+      <div style={{
+        position: "absolute", bottom: 28, right: 40, fontFamily,
+        fontSize: 20, fontStyle: "italic", color: particleColor,
+        opacity: watermarkOpacity * fadeOut, margin: 0,
+      }}>
+        Mentor by Elisa
       </div>
     </AbsoluteFill>
   );
 };
-
-export default CH4_S2_InvestorTypes;
 ```
 
 ```tsx
-import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate, spring, AbsoluteFill } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
 
-export const compositionConfig = {
-  id: 'CH4_S3_PickYourName',
-  durationInSeconds: 11,
-  fps: 30,
-  width: 1920,
-  height: 1080,
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
 };
 
-const CH4_S3_PickYourName: React.FC = () => {
+export const chapterFourTitle: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
 
-  const sp = (delay: number, config?: object) =>
-    spring({ frame: Math.max(0, frame - delay), fps, config: { damping: 12, mass: 0.4, stiffness: 120, ...config } });
+  const bgBase = "#1C1208";
+  const particleColor = "#C4943A";
+  const glowColor = "#2A1F0E";
 
-  const cameraScale = interpolate(frame, [0, 130, durationInFrames], [1, 1.08, 1.04], { extrapolateRight: 'clamp' });
-  const cameraRotate = interpolate(frame, [0, durationInFrames], [0.3, -0.3], { extrapolateRight: 'clamp' });
-  const exitOpacity = interpolate(frame, [durationInFrames - 15, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-
-  // Chaotic phase — many arrows, confusion
-  const chaosOpacity = interpolate(frame, [0, 50, 130, 170], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const chaosArrows = Array.from({ length: 12 }, (_, i) => ({
-    angle: i * 30 + Math.sin(frame * 0.08 + i) * 15,
-    length: 100 + (i % 3) * 40,
-    opacity: chaosOpacity * (0.2 + (i % 4) * 0.08),
+  const dots = Array.from({ length: 38 }, (_, i) => ({
+    x: seededRandom(i * 8 + 900) * 100,
+    y: seededRandom(i * 8 + 901) * 100,
+    size: 1 + seededRandom(i * 8 + 902) * 2,
+    opacity: 0.02 + seededRandom(i * 8 + 903) * 0.03,
   }));
 
-  // Focus phase — one clear path
-  const focusIn = sp(160);
-  const pathProgress = interpolate(sp(180), [0, 1], [0, 1]);
-  const titleIn = sp(120);
-  const bottomIn = sp(200);
-  const stampIn = sp(240, { damping: 8, stiffness: 80 });
-  const nameGlow = Math.sin(frame * 0.08) * 10 + 30;
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const baseX = seededRandom(i * 16 + 1000) * 100;
+    const baseY = seededRandom(i * 16 + 1001) * 100;
+    const size = 1 + seededRandom(i * 16 + 1002) * 3;
+    const phase = seededRandom(i * 16 + 1003) * Math.PI * 2;
+    const speed = 0.028 + seededRandom(i * 16 + 1004) * 0.03;
+    const opacity = 0.1 + 0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase));
+    const x = baseX + Math.sin(frame * 0.012 + phase) * 6;
+    const y = baseY + Math.cos(frame * 0.009 + phase) * 5;
+    return { x, y, size, opacity };
+  });
 
-  const particles = Array.from({ length: 14 }, (_, i) => ({
-    x: (i * 147 + 40) % 1920 + Math.sin(frame * 0.025 + i * 0.8) * 12,
-    y: (i * 83 + 30) % 1080 + Math.cos(frame * 0.03 + i) * 10,
-    size: 2 + (i % 3), opacity: 0.07,
-  }));
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const size = 45 + seededRandom(i * 20 + 1100) * 55;
+    const baseX = seededRandom(i * 20 + 1101) * 100;
+    const baseY = seededRandom(i * 20 + 1102) * 100;
+    const phase = seededRandom(i * 20 + 1103) * Math.PI * 2;
+    const x = baseX + Math.sin(frame * 0.008 + phase) * 35;
+    const y = baseY + Math.cos(frame * 0.006 + phase * 1.2) * 30;
+    const opacity = 0.03 + seededRandom(i * 20 + 1104) * 0.03;
+    return { x, y, size, opacity };
+  });
+
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 120));
+  const accentRotation1 = frame * 0.2;
+  const accentRotation2 = frame * -0.3;
+  const accentDriftY = Math.sin(frame * 0.011) * 5;
+
+  const chapterNumOpacity = interpolate(frame, [20, 35], [0, 1], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumBlur = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumY = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const lineOpacity = interpolate(frame, [35, 50], [0, 0.6], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const titleWords = ["The", "Mirror", "Turns", "Inward"];
+  const wordAnimations = titleWords.map((word, i) => {
+    const startFrame = 50 + i * 5;
+    const opacity = interpolate(frame, [startFrame, startFrame + 12], [0, 1], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    const scale = interpolate(frame, [startFrame, startFrame + 12], [1.1, 1.0], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    return { word, opacity, scale };
+  });
+
+  const allWordsVisible = frame > 50 + (titleWords.length - 1) * 5 + 12;
+  const glowPulse = allWordsVisible ? 3 + 4 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 90)) : 0;
+
+  const fadeOut = interpolate(frame, [290, 300], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.ease),
+  });
+
+  const watermarkOpacity = interpolate(frame, [15, 35], [0, 0.25], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const fontFamily = "Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif";
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#1C1C1C', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 45%, #2D2D2D 0%, #1C1C1C 70%)' }} />
-
-      {particles.map((p, i) => (
-        <div key={i} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, borderRadius: '50%', backgroundColor: '#FFD966', opacity: p.opacity }} />
+    <AbsoluteFill style={{ overflow: "hidden", backgroundColor: bgBase, opacity: fadeOut }}>
+      <AbsoluteFill style={{
+        background: `
+          radial-gradient(ellipse at 40% 35%, ${glowColor}55 0%, transparent 55%),
+          radial-gradient(ellipse at 60% 65%, ${bgBase}55 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, ${glowColor}33 0%, transparent 65%)
+        `,
+      }} />
+      {dots.map((dot, i) => (
+        <div key={`dot-${i}`} style={{
+          position: "absolute", left: `${dot.x}%`, top: `${dot.y}%`,
+          width: dot.size, height: dot.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: dot.opacity,
+        }} />
       ))}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
+          position: "absolute", left: `${star.x}%`, top: `${star.y}%`,
+          width: star.size, height: star.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: star.opacity,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: "absolute", left: `${orb.x}%`, top: `${orb.y}%`,
+          width: orb.size, height: orb.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: orb.opacity,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+      <AbsoluteFill style={{
+        background: `radial-gradient(circle at 50% 50%, ${particleColor} 0%, transparent 55%)`,
+        opacity: glowOpacity,
+      }} />
 
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.6) 100%)' }} />
+      {/* Accent elements */}
+      <div style={{
+        position: "absolute", left: "18%", top: "18%",
+        width: 50, height: 50, borderRadius: "50%",
+        border: `1px solid ${particleColor}`, opacity: 0.05,
+        transform: `rotate(${accentRotation1}deg)`,
+      }} />
+      <div style={{
+        position: "absolute", right: "20%", bottom: "22%",
+        width: 35, height: 35, border: `1px solid ${particleColor}`,
+        opacity: 0.06, transform: `rotate(${45 + accentRotation2}deg) translateY(${accentDriftY}px)`,
+      }} />
+      <div style={{
+        position: "absolute", left: "40%", top: "75%",
+        width: 90, height: 1, backgroundColor: particleColor,
+        opacity: 0.05, transform: `rotate(${-15 + accentRotation1 * 0.3}deg)`,
+      }} />
 
-      <div style={{ position: 'absolute', inset: 0, transform: `scale(${cameraScale}) rotate(${cameraRotate}deg)`, opacity: exitOpacity }}>
+      <AbsoluteFill style={{
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bgBase} 100%)`,
+        opacity: 0.9,
+      }} />
 
-        {/* Chaos phase: confused stick figure with arrows everywhere */}
-        <div style={{ position: 'absolute', left: 350, top: 250, opacity: chaosOpacity }}>
-          <svg width="300" height="300" viewBox="0 0 300 300">
-            <circle cx="150" cy="80" r="22" stroke="#F5F5F5" strokeWidth="3" fill="none" />
-            <circle cx="142" cy="76" r="2.5" fill="#FF6B6B" />
-            <circle cx="158" cy="76" r="2.5" fill="#FF6B6B" />
-            {/* Confused mouth */}
-            <path d="M140 90 Q145 86 150 90 Q155 94 160 90" stroke="#FF6B6B" strokeWidth="1.5" fill="none" />
-            <line x1="150" y1="102" x2="150" y2="175" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="150" y1="130" x2="118" y2="110" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="150" y1="130" x2="182" y2="110" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="150" y1="175" x2="130" y2="230" stroke="#F5F5F5" strokeWidth="3" />
-            <line x1="150" y1="175" x2="170" y2="230" stroke="#F5F5F5" strokeWidth="3" />
-            {/* Question marks around head */}
-            {['?', '?', '?'].map((q, qi) => (
-              <text key={qi} x={110 + qi * 40} y={55 + Math.sin(frame * 0.1 + qi) * 5} fill="#FF6B6B" fontSize="20" fontFamily="Inter" fontWeight="800" opacity="0.5">
-                {q}
-              </text>
-            ))}
-            {/* Chaos arrows */}
-            {chaosArrows.map((a, i) => {
-              const rad = (a.angle * Math.PI) / 180;
-              return (
-                <line key={i} x1="150" y1="150" x2={150 + a.length * Math.cos(rad)} y2={150 + a.length * Math.sin(rad)}
-                  stroke="#FF6B6B" strokeWidth="1.5" opacity={a.opacity} />
-              );
-            })}
-          </svg>
-          <div style={{ fontFamily: "'Noto Sans Devanagari'", fontSize: 18, color: '#FF6B6B', textAlign: 'center', marginTop: 10 }}>
-            हर दिन नया खेल = कहीं नहीं
-          </div>
-        </div>
-
-        {/* VS divider */}
+      <AbsoluteFill style={{
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+      }}>
         <div style={{
-          position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
-          opacity: interpolate(frame, [100, 150], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
+          color: "#FF1E00", fontFamily, fontSize: 46, fontWeight: 500,
+          fontStyle: "italic", letterSpacing: 6, textTransform: "uppercase",
+          margin: 0, opacity: chapterNumOpacity,
+          filter: `blur(${chapterNumBlur}px)`, transform: `translateY(${chapterNumY}px)`,
         }}>
-          <div style={{
-            width: 60, height: 60, borderRadius: '50%',
-            backgroundColor: 'rgba(45,45,45,0.9)',
-            border: '2px solid rgba(255,217,102,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: "'Inter'", fontSize: 20, fontWeight: 800, color: '#FFD966',
-          }}>
-            VS
-          </div>
+          Chapter 4
         </div>
-
-        {/* Focus phase: determined stick figure with one clear path */}
         <div style={{
-          position: 'absolute', right: 200, top: 250,
-          opacity: focusIn,
-          transform: `scale(${focusIn})`,
-        }}>
-          <svg width="300" height="350" viewBox="0 0 300 350">
-            {/* Clear path line */}
-            <line x1="150" y1="280" x2="150" y2={280 - pathProgress * 200}
-              stroke="#FFC107" strokeWidth="4" opacity="0.4" strokeDasharray="8 4" />
-            {pathProgress > 0.8 && (
-              <polygon points="142,80 150,60 158,80" fill="#FFC107" opacity="0.6" />
-            )}
-
-            <circle cx="150" cy="80" r="22" stroke="#FFD966" strokeWidth="3" fill="none" />
-            <circle cx="142" cy="76" r="2.5" fill="#FFC107" />
-            <circle cx="158" cy="76" r="2.5" fill="#FFC107" />
-            <path d="M142 88 Q150 94 158 88" stroke="#FFD966" strokeWidth="1.5" fill="none" />
-            <line x1="150" y1="102" x2="150" y2="175" stroke="#FFD966" strokeWidth="3" />
-            {/* Arms forward / determined */}
-            <line x1="150" y1="130" x2="115" y2="148" stroke="#FFD966" strokeWidth="3" />
-            <line x1="150" y1="130" x2="185" y2="148" stroke="#FFD966" strokeWidth="3" />
-            <line x1="150" y1="175" x2="132" y2="235" stroke="#FFD966" strokeWidth="3" />
-            <line x1="132" y1="235" x2="132" y2="280" stroke="#FFD966" strokeWidth="3" />
-            <line x1="150" y1="175" x2="168" y2="235" stroke="#FFD966" strokeWidth="3" />
-            <line x1="168" y1="235" x2="168" y2="280" stroke="#FFD966" strokeWidth="3" />
-
-            {/* Cape / confidence */}
-            <path d="M150 102 Q120 140 115 200" stroke="#FFC107" strokeWidth="2" fill="rgba(255,193,7,0.08)" />
-            <path d="M150 102 Q180 140 185 200" stroke="#FFC107" strokeWidth="2" fill="rgba(255,193,7,0.08)" />
-          </svg>
-          <div style={{ fontFamily: "'Noto Sans Devanagari'", fontSize: 18, color: '#FFD966', textAlign: 'center', marginTop: 10 }}>
-            एक राह = मंज़िल तक
-          </div>
-        </div>
-
-        {/* Top title */}
-        <div style={{
-          position: 'absolute', left: '50%', top: 50,
-          transform: `translateX(-50%) translateY(${interpolate(titleIn, [0, 1], [20, 0])}px)`,
-          opacity: titleIn,
-        }}>
-          <div style={{
-            fontFamily: "'Yantra One'", fontSize: 38, color: '#F5F5F5',
-            textAlign: 'center',
-          }}>
-            बिना नाम → बिना दिशा
-          </div>
-        </div>
-
-        {/* Bottom stamp */}
-        <div style={{
-          position: 'absolute', left: '50%', bottom: 80,
-          transform: `translateX(-50%) scale(${stampIn}) rotate(-4deg)`,
-          opacity: stampIn,
-        }}>
-          <div style={{
-            padding: '16px 50px', borderRadius: 12,
-            border: `3px solid #FFD966`,
-            boxShadow: `0 0 ${nameGlow}px rgba(255,217,102,0.2)`,
-          }}>
-            <div style={{
-              fontFamily: "'Yantra One'", fontSize: 40, color: '#FFD966',
-              textShadow: `0 0 20px rgba(255,217,102,0.3)`,
+          width: lineWidth, height: 1, backgroundColor: "#FF1E00",
+          opacity: lineOpacity, marginTop: 16, marginBottom: 20,
+        }} />
+        <div style={{ display: "flex", gap: 18, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          {wordAnimations.map((w, i) => (
+            <span key={i} style={{
+              fontFamily, fontSize: 95, fontWeight: 700, color: "#FCFAEE",
+              letterSpacing: 2, lineHeight: 1.1, margin: 0,
+              opacity: w.opacity, transform: `scale(${w.scale})`, display: "inline-block",
+              textShadow: allWordsVisible
+                ? `0 0 ${glowPulse}px ${particleColor}66, 0 0 ${glowPulse * 2}px ${particleColor}33`
+                : "none",
             }}>
-              अपना नाम तय करो ✅
-            </div>
-            <div style={{
-              fontFamily: "'Noto Sans Devanagari'", fontSize: 18, color: '#9E9E9E',
-              textAlign: 'center', marginTop: 6,
-            }}>
-              फिर उसी के हिसाब से चलो
-            </div>
-          </div>
+              {w.word}
+            </span>
+          ))}
         </div>
-      </div>
+      </AbsoluteFill>
 
-      <div style={{ position: 'absolute', right: 30, bottom: 20, fontFamily: "'Poppins'", fontSize: 14, fontWeight: 600, color: 'rgba(255,217,102,0.35)', letterSpacing: 2 }}>
-        ProBuffet HQ
+      <div style={{
+        position: "absolute", bottom: 28, right: 40, fontFamily,
+        fontSize: 20, fontStyle: "italic", color: particleColor,
+        opacity: watermarkOpacity * fadeOut, margin: 0,
+      }}>
+        Mentor by Elisa
       </div>
     </AbsoluteFill>
   );
 };
+```
 
-export default CH4_S3_PickYourName;
+```tsx
+import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
+
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
+};
+
+export const chapterFiveTitle: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  const bgBase = "#F5EDE0";
+  const particleColor = "#D4A843";
+  const glowColor = "#FFFAF0";
+  const textColor = "#1C1208"; // Dark ink for ETHEREAL
+
+  const dots = Array.from({ length: 35 }, (_, i) => ({
+    x: seededRandom(i * 10 + 1200) * 100,
+    y: seededRandom(i * 10 + 1201) * 100,
+    size: 1 + seededRandom(i * 10 + 1202) * 2,
+    opacity: 0.02 + seededRandom(i * 10 + 1203) * 0.03,
+  }));
+
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const baseX = seededRandom(i * 15 + 1300) * 100;
+    const baseY = seededRandom(i * 15 + 1301) * 100;
+    const size = 1 + seededRandom(i * 15 + 1302) * 3;
+    const phase = seededRandom(i * 15 + 1303) * Math.PI * 2;
+    const speed = 0.025 + seededRandom(i * 15 + 1304) * 0.035;
+    const opacity = 0.1 + 0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase));
+    const x = baseX + Math.sin(frame * 0.013 + phase) * 5;
+    const y = baseY + Math.cos(frame * 0.01 + phase) * 6;
+    return { x, y, size, opacity };
+  });
+
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const size = 50 + seededRandom(i * 22 + 1400) * 50;
+    const baseX = seededRandom(i * 22 + 1401) * 100;
+    const baseY = seededRandom(i * 22 + 1402) * 100;
+    const phase = seededRandom(i * 22 + 1403) * Math.PI * 2;
+    const x = baseX + Math.sin(frame * 0.007 + phase) * 30;
+    const y = baseY + Math.cos(frame * 0.005 + phase * 1.3) * 28;
+    const opacity = 0.03 + seededRandom(i * 22 + 1404) * 0.03;
+    return { x, y, size, opacity };
+  });
+
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 120));
+  const accentRotation1 = frame * 0.22;
+  const accentRotation2 = frame * -0.18;
+  const accentDriftY = Math.sin(frame * 0.009) * 6;
+
+  const chapterNumOpacity = interpolate(frame, [20, 35], [0, 1], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumBlur = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumY = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const lineOpacity = interpolate(frame, [35, 50], [0, 0.6], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const titleWords = ["Owning", "Your", "Darkness"];
+  const wordAnimations = titleWords.map((word, i) => {
+    const startFrame = 50 + i * 5;
+    const opacity = interpolate(frame, [startFrame, startFrame + 12], [0, 1], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    const scale = interpolate(frame, [startFrame, startFrame + 12], [1.1, 1.0], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    return { word, opacity, scale };
+  });
+
+  const allWordsVisible = frame > 50 + (titleWords.length - 1) * 5 + 12;
+  const glowPulse = allWordsVisible ? 2 + 3 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 90)) : 0;
+
+  const fadeOut = interpolate(frame, [290, 300], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.ease),
+  });
+
+  const watermarkOpacity = interpolate(frame, [15, 35], [0, 0.25], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const fontFamily = "Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif";
+
+  return (
+    <AbsoluteFill style={{ overflow: "hidden", backgroundColor: bgBase, opacity: fadeOut }}>
+      <AbsoluteFill style={{
+        background: `
+          radial-gradient(ellipse at 30% 40%, ${glowColor}88 0%, transparent 50%),
+          radial-gradient(ellipse at 70% 55%, ${bgBase}aa 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 50%, ${glowColor}66 0%, transparent 60%)
+        `,
+      }} />
+      {dots.map((dot, i) => (
+        <div key={`dot-${i}`} style={{
+          position: "absolute", left: `${dot.x}%`, top: `${dot.y}%`,
+          width: dot.size, height: dot.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: dot.opacity,
+        }} />
+      ))}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
+          position: "absolute", left: `${star.x}%`, top: `${star.y}%`,
+          width: star.size, height: star.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: star.opacity,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: "absolute", left: `${orb.x}%`, top: `${orb.y}%`,
+          width: orb.size, height: orb.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: orb.opacity,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+      <AbsoluteFill style={{
+        background: `radial-gradient(circle at 50% 50%, ${particleColor} 0%, transparent 55%)`,
+        opacity: glowOpacity,
+      }} />
+
+      <div style={{
+        position: "absolute", right: "14%", top: "20%",
+        width: 60, height: 60, borderRadius: "50%",
+        border: `1px solid ${particleColor}`, opacity: 0.06,
+        transform: `rotate(${accentRotation1}deg)`,
+      }} />
+      <div style={{
+        position: "absolute", left: "16%", bottom: "28%",
+        width: 0, height: 0,
+        borderLeft: "25px solid transparent", borderRight: "25px solid transparent",
+        borderBottom: `43px solid ${particleColor}`,
+        opacity: 0.04, transform: `rotate(${accentRotation2}deg) translateY(${accentDriftY}px)`,
+      }} />
+      <div style={{
+        position: "absolute", left: "50%", top: "82%",
+        width: 110, height: 1, backgroundColor: particleColor,
+        opacity: 0.05, transform: `rotate(${accentRotation1 * 0.4}deg)`,
+      }} />
+
+      <AbsoluteFill style={{
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bgBase} 100%)`,
+        opacity: 0.85,
+      }} />
+
+      <AbsoluteFill style={{
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+      }}>
+        <div style={{
+          color: "#FF1E00", fontFamily, fontSize: 46, fontWeight: 500,
+          fontStyle: "italic", letterSpacing: 6, textTransform: "uppercase",
+          margin: 0, opacity: chapterNumOpacity,
+          filter: `blur(${chapterNumBlur}px)`, transform: `translateY(${chapterNumY}px)`,
+        }}>
+          Chapter 5
+        </div>
+        <div style={{
+          width: lineWidth, height: 1, backgroundColor: "#FF1E00",
+          opacity: lineOpacity, marginTop: 16, marginBottom: 20,
+        }} />
+        <div style={{ display: "flex", gap: 18, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          {wordAnimations.map((w, i) => (
+            <span key={i} style={{
+              fontFamily, fontSize: 100, fontWeight: 700, color: textColor,
+              letterSpacing: 2, lineHeight: 1.1, margin: 0,
+              opacity: w.opacity, transform: `scale(${w.scale})`, display: "inline-block",
+              textShadow: allWordsVisible
+                ? `0 0 ${glowPulse}px ${particleColor}44, 0 0 ${glowPulse * 2}px ${particleColor}22`
+                : "none",
+            }}>
+              {w.word}
+            </span>
+          ))}
+        </div>
+      </AbsoluteFill>
+
+      <div style={{
+        position: "absolute", bottom: 28, right: 40, fontFamily,
+        fontSize: 20, fontStyle: "italic", color: particleColor,
+        opacity: watermarkOpacity * fadeOut, margin: 0,
+      }}>
+        Mentor by Elisa
+      </div>
+    </AbsoluteFill>
+  );
+};
+```
+
+```tsx
+import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
+
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
+};
+
+export const chapterSixTitle: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  const bgBase = "#0A0E27";
+  const particleColor = "#D4A843";
+  const glowColor = "#1A2456";
+
+  const dots = Array.from({ length: 40 }, (_, i) => ({
+    x: seededRandom(i * 12 + 1500) * 100,
+    y: seededRandom(i * 12 + 1501) * 100,
+    size: 1 + seededRandom(i * 12 + 1502) * 2,
+    opacity: 0.02 + seededRandom(i * 12 + 1503) * 0.03,
+  }));
+
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const baseX = seededRandom(i * 18 + 1600) * 100;
+    const baseY = seededRandom(i * 18 + 1601) * 100;
+    const size = 1 + seededRandom(i * 18 + 1602) * 3;
+    const phase = seededRandom(i * 18 + 1603) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 18 + 1604) * 0.04;
+    const opacity = 0.1 + 0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase));
+    const x = baseX + Math.sin(frame * 0.015 + phase) * 7;
+    const y = baseY + Math.cos(frame * 0.012 + phase) * 6;
+    return { x, y, size, opacity };
+  });
+
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const size = 40 + seededRandom(i * 24 + 1700) * 60;
+    const baseX = seededRandom(i * 24 + 1701) * 100;
+    const baseY = seededRandom(i * 24 + 1702) * 100;
+    const phase = seededRandom(i * 24 + 1703) * Math.PI * 2;
+    const x = baseX + Math.sin(frame * 0.008 + phase) * 40;
+    const y = baseY + Math.cos(frame * 0.006 + phase * 1.1) * 35;
+    const opacity = 0.03 + seededRandom(i * 24 + 1704) * 0.03;
+    return { x, y, size, opacity };
+  });
+
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 120));
+  const accentRotation1 = frame * 0.28;
+  const accentRotation2 = frame * -0.22;
+  const accentDriftY = Math.sin(frame * 0.01) * 7;
+
+  const chapterNumOpacity = interpolate(frame, [20, 35], [0, 1], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumBlur = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const chapterNumY = interpolate(frame, [20, 35], [15, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+  const lineOpacity = interpolate(frame, [35, 50], [0, 0.6], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const titleWords = ["The", "Chain", "Breaks"];
+  const wordAnimations = titleWords.map((word, i) => {
+    const startFrame = 50 + i * 5;
+    const opacity = interpolate(frame, [startFrame, startFrame + 12], [0, 1], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    const scale = interpolate(frame, [startFrame, startFrame + 12], [1.1, 1.0], {
+      extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.3)),
+    });
+    return { word, opacity, scale };
+  });
+
+  const allWordsVisible = frame > 50 + (titleWords.length - 1) * 5 + 12;
+  const glowPulse = allWordsVisible ? 3 + 5 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2) / 90)) : 0;
+
+  const fadeOut = interpolate(frame, [290, 300], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.in(Easing.ease),
+  });
+
+  const watermarkOpacity = interpolate(frame, [15, 35], [0, 0.25], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
+  });
+
+  const fontFamily = "Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif";
+
+  return (
+    <AbsoluteFill style={{ overflow: "hidden", backgroundColor: bgBase, opacity: fadeOut }}>
+      <AbsoluteFill style={{
+        background: `
+          radial-gradient(ellipse at 45% 40%, ${glowColor}55 0%, transparent 50%),
+          radial-gradient(ellipse at 55% 60%, ${bgBase}66 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 50%, ${glowColor}44 0%, transparent 65%)
+        `,
+      }} />
+      {dots.map((dot, i) => (
+        <div key={`dot-${i}`} style={{
+          position: "absolute", left: `${dot.x}%`, top: `${dot.y}%`,
+          width: dot.size, height: dot.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: dot.opacity,
+        }} />
+      ))}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
+          position: "absolute", left: `${star.x}%`, top: `${star.y}%`,
+          width: star.size, height: star.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: star.opacity,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: "absolute", left: `${orb.x}%`, top: `${orb.y}%`,
+          width: orb.size, height: orb.size, borderRadius: "50%",
+          backgroundColor: particleColor, opacity: orb.opacity,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+      <AbsoluteFill style={{
+        background: `radial-gradient(circle at 50% 50%, ${particleColor} 0%, transparent 55%)`,
+        opacity: glowOpacity,
+      }} />
+
+      <div style={{
+        position: "absolute", left: "12%", top: "22%",
+        width: 45, height: 45, border: `1px solid ${particleColor}`,
+        opacity: 0.05, transform: `rotate(${45 + accentRotation1}deg)`,
+      }} />
+      <div style={{
+        position: "absolute", right: "16%", bottom: "18%",
+        width: 75, height: 75, borderRadius: "50%",
+        border: `1px solid ${particleColor}`, opacity: 0.04,
+        transform: `rotate(${accentRotation2}deg) translateY(${accentDriftY}px)`,
+      }} />
+      <div style={{
+        position: "absolute", left: "65%", top: "12%",
+        width: 95, height: 1, backgroundColor: particleColor,
+        opacity: 0.05, transform: `rotate(${20 + accentRotation1 * 0.35}deg)`,
+      }} />
+
+      <AbsoluteFill style={{
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bgBase} 100%)`,
+        opacity: 0.9,
+      }} />
+
+      <AbsoluteFill style={{
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+      }}>
+        <div style={{
+          color: "#FF1E00", fontFamily, fontSize: 46, fontWeight: 500,
+          fontStyle: "italic", letterSpacing: 6, textTransform: "uppercase",
+          margin: 0, opacity: chapterNumOpacity,
+          filter: `blur(${chapterNumBlur}px)`, transform: `translateY(${chapterNumY}px)`,
+        }}>
+          Chapter 6
+        </div>
+        <div style={{
+          width: lineWidth, height: 1, backgroundColor: "#FF1E00",
+          opacity: lineOpacity, marginTop: 16, marginBottom: 20,
+        }} />
+        <div style={{ display: "flex", gap: 20, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          {wordAnimations.map((w, i) => (
+            <span key={i} style={{
+              fontFamily, fontSize: 110, fontWeight: 700, color: "#FCFAEE",
+              letterSpacing: 2, lineHeight: 1.1, margin: 0,
+              opacity: w.opacity, transform: `scale(${w.scale})`, display: "inline-block",
+              textShadow: allWordsVisible
+                ? `0 0 ${glowPulse}px ${particleColor}66, 0 0 ${glowPulse * 2}px ${particleColor}33`
+                : "none",
+            }}>
+              {w.word}
+            </span>
+          ))}
+        </div>
+      </AbsoluteFill>
+
+      <div style={{
+        position: "absolute", bottom: 28, right: 40, fontFamily,
+        fontSize: 20, fontStyle: "italic", color: particleColor,
+        opacity: watermarkOpacity * fadeOut, margin: 0,
+      }}>
+        Mentor by Elisa
+      </div>
+    </AbsoluteFill>
+  );
+};
 ```
 
