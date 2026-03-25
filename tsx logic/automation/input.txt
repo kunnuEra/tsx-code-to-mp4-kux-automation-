@@ -9,7 +9,7 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'laCarcelInvisible',
+  id: 'capituloUnoElTribunalQueEntregaste',
   durationInSeconds: 10,
   fps: 30,
   width: 1920,
@@ -21,289 +21,241 @@ const seededRandom = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-const LaCarcelInvisible: React.FC = () => {
+const CapituloUnoElTribunalQueEntregaste: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  const bg = '#0A0E27';
+  const particle = '#D4A843';
+  const glow = '#1A2456';
+
+  // LAYER 1 — BACKGROUND TEXTURE
+  const grainDots = Array.from({ length: 40 }, (_, i) => {
+    const x = seededRandom(i * 3 + 1) * 100;
+    const y = seededRandom(i * 3 + 2) * 100;
+    const size = 1 + seededRandom(i * 3 + 3) * 2;
+    const op = 0.02 + seededRandom(i * 3 + 4) * 0.03;
+    return { x, y, size, op };
   });
 
-  const chapterOp = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterBlur = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterY = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-
-  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-  const lineOp = interpolate(frame, [35, 50], [0, 0.6], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  // LAYER 2 — STAR FIELD
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const x = seededRandom(i * 5 + 10) * 100;
+    const y = seededRandom(i * 5 + 11) * 100;
+    const size = 1 + seededRandom(i * 5 + 12) * 3;
+    const phase = seededRandom(i * 5 + 13) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 5 + 14) * 0.04;
+    const twinkle = 0.1 + (0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase)));
+    const driftX = Math.sin(frame * 0.01 + phase) * 6;
+    const driftY = Math.cos(frame * 0.013 + phase) * 7;
+    return { x, y, size, twinkle, driftX, driftY };
   });
 
-  const titleWords = ['La', 'Cárcel', 'Invisible'];
-  const glowPulse = 0.3 + 0.2 * Math.sin(frame * 0.05);
+  // LAYER 3 — SLOW DRIFT PARTICLES
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const baseX = seededRandom(i * 7 + 50) * 100;
+    const baseY = seededRandom(i * 7 + 51) * 100;
+    const size = 40 + seededRandom(i * 7 + 52) * 60;
+    const op = 0.03 + seededRandom(i * 7 + 53) * 0.03;
+    const phase = seededRandom(i * 7 + 54) * Math.PI * 2;
+    const driftX = Math.sin(frame * 0.006 + phase) * 40;
+    const driftY = Math.cos(frame * 0.008 + phase) * 35;
+    return { baseX, baseY, size, op, driftX, driftY };
+  });
 
-  const breatheOp = interpolate(
-    Math.sin(frame * (Math.PI / 60)),
-    [-1, 1],
-    [0.03, 0.10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
+  // LAYER 4 — RADIAL GLOW BREATHING
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2 / 120)));
+
+  // LAYER 5 — ACCENT TEXTURE ELEMENTS
+  const accentRotation1 = frame * 0.15;
+  const accentRotation2 = -frame * 0.1;
+  const accentDrift = Math.sin(frame * 0.008) * 15;
+
+  // LAYER 6 — VIGNETTE (applied via radial gradient)
+
+  // TEXT ANIMATIONS
+  const chapterOp = interpolate(frame, [20, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterBlur = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterY = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+  const lineOp = interpolate(frame, [35, 50], [0, 0.6], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  const titleWords = ['El', 'Tribunal', 'Que', 'Entregaste'];
+  const titleStartFrame = 50;
+  const wordGap = 5;
+
+  const glowPulse = 0.5 + 0.5 * Math.sin(frame * 0.05);
+  const glowIntensity = 2 + glowPulse * 6;
+
+  // FADE OUT
+  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#0D0D0D',
-        overflow: 'hidden',
-      }}
-    >
-      {/* LAYER 1 — Background Texture */}
-      <div
-        style={{
+    <AbsoluteFill style={{ backgroundColor: bg, overflow: 'hidden' }}>
+      {/* LAYER 1 — BACKGROUND TEXTURE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `
+          radial-gradient(ellipse at 30% 40%, ${glow}44 0%, transparent 60%),
+          radial-gradient(ellipse at 70% 60%, ${glow}33 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 50%, ${glow}22 0%, transparent 70%)
+        `,
+      }} />
+      {grainDots.map((dot, i) => (
+        <div key={`grain-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 30% 40%, rgba(107,91,62,0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(107,91,62,0.04) 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, rgba(26,21,16,0.3) 0%, transparent 70%)',
-        }}
-      />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = seededRandom(i * 3 + 1) * 100;
-        const y = seededRandom(i * 3 + 2) * 100;
-        const size = 1 + seededRandom(i * 3 + 3) * 2;
-        const op = 0.02 + seededRandom(i * 3 + 4) * 0.03;
-        return (
-          <div
-            key={`dot-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#6B5B3E',
-              opacity: op,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 2 — Star Field */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = seededRandom(i * 7 + 10) * 100;
-        const y = seededRandom(i * 7 + 11) * 100;
-        const size = 1 + seededRandom(i * 7 + 12) * 3;
-        const speed = 0.02 + seededRandom(i * 7 + 13) * 0.03;
-        const phase = seededRandom(i * 7 + 14) * Math.PI * 2;
-        const twinkle = 0.1 + 0.25 * (Math.sin(frame * speed + phase) + 1);
-        const driftX = Math.sin(frame * 0.008 + phase) * 6;
-        const driftY = Math.cos(frame * 0.006 + phase) * 6;
-        return (
-          <div
-            key={`star-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#6B5B3E',
-              opacity: twinkle,
-              filter: `blur(${size * 0.3}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3 — Slow Drift Particles */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const x = seededRandom(i * 11 + 50) * 80 + 10;
-        const y = seededRandom(i * 11 + 51) * 80 + 10;
-        const size = 40 + seededRandom(i * 11 + 52) * 60;
-        const op = 0.03 + seededRandom(i * 11 + 53) * 0.03;
-        const phase = seededRandom(i * 11 + 54) * Math.PI * 2;
-        const driftX = Math.sin(frame * 0.004 + phase) * 40;
-        const driftY = Math.cos(frame * 0.003 + phase) * 35;
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#6B5B3E',
-              opacity: op,
-              filter: `blur(${size * 0.6}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4 — Radial Glow Breathing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(107,91,62,0.12) 0%, transparent 65%)',
-          opacity: breatheOp,
-        }}
-      />
-
-      {/* LAYER 5 — Accent Texture Elements */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '12%',
-          top: '18%',
-          width: 180,
-          height: 180,
+          left: `${dot.x}%`,
+          top: `${dot.y}%`,
+          width: dot.size,
+          height: dot.size,
           borderRadius: '50%',
-          border: '1px solid rgba(107,91,62,0.06)',
-          opacity: 0.06,
-          transform: `rotate(${frame * 0.15}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: '15%',
-          bottom: '22%',
-          width: 0,
-          height: 0,
-          borderLeft: '40px solid transparent',
-          borderRight: '40px solid transparent',
-          borderBottom: '70px solid rgba(107,91,62,0.04)',
-          opacity: 0.05,
-          transform: `rotate(${-frame * 0.1}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '75%',
-          top: '12%',
-          width: 120,
-          height: 1,
-          backgroundColor: '#6B5B3E',
-          opacity: 0.05,
-          transform: `rotate(${30 + frame * 0.05}deg)`,
-        }}
-      />
+          backgroundColor: particle,
+          opacity: dot.op,
+        }} />
+      ))}
 
-      {/* LAYER 6 — Vignette */}
-      <div
-        style={{
+      {/* LAYER 2 — STAR FIELD */}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #0D0D0D 100%)',
-        }}
-      />
+          left: `calc(${star.x}% + ${star.driftX}px)`,
+          top: `calc(${star.y}% + ${star.driftY}px)`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: star.twinkle,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 3 — SLOW DRIFT PARTICLES */}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: 'absolute',
+          left: `calc(${orb.baseX}% + ${orb.driftX}px)`,
+          top: `calc(${orb.baseY}% + ${orb.driftY}px)`,
+          width: orb.size,
+          height: orb.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: orb.op,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 4 — RADIAL GLOW BREATHING */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(circle at 50% 50%, ${particle}33 0%, transparent 60%)`,
+        opacity: glowOpacity,
+      }} />
+
+      {/* LAYER 5 — ACCENT TEXTURE ELEMENTS */}
+      <div style={{
+        position: 'absolute',
+        top: '15%',
+        left: '10%',
+        width: 120,
+        height: 120,
+        border: `1px solid ${particle}`,
+        borderRadius: '50%',
+        opacity: 0.05,
+        transform: `rotate(${accentRotation1}deg) translateY(${accentDrift}px)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        right: '12%',
+        width: 0,
+        height: 0,
+        borderLeft: '40px solid transparent',
+        borderRight: '40px solid transparent',
+        borderBottom: `70px solid ${particle}`,
+        opacity: 0.04,
+        transform: `rotate(${accentRotation2}deg)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: '60%',
+        left: '75%',
+        width: 200,
+        height: 1,
+        backgroundColor: particle,
+        opacity: 0.06,
+        transform: `rotate(${accentRotation1 * 0.5}deg)`,
+      }} />
+
+      {/* LAYER 6 — VIGNETTE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bg} 100%)`,
+      }} />
 
       {/* TEXT CONTENT */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: fadeOut,
-          zIndex: 10,
-        }}
-      >
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        opacity: fadeOut,
+        zIndex: 10,
+      }}>
         {/* Chapter Number */}
-        <div
-          style={{
-            opacity: chapterOp,
-            filter: `blur(${chapterBlur}px)`,
-            transform: `translateY(${chapterY}px)`,
-          }}
-        >
-          <p
-            style={{
-              fontSize: 44,
-              fontWeight: 500,
-              fontStyle: 'italic',
-              color: '#FF1E00',
-              letterSpacing: 6,
-              fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-              margin: 0,
-            }}
-          >
+        <div style={{
+          opacity: chapterOp,
+          filter: `blur(${chapterBlur}px)`,
+          transform: `translateY(${chapterY}px)`,
+        }}>
+          <p style={{
+            fontSize: 44,
+            fontWeight: 500,
+            fontStyle: 'italic',
+            color: '#FF1E00',
+            letterSpacing: 6,
+            fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+            margin: 0,
+          }}>
             Capítulo 1
           </p>
         </div>
 
         {/* Decorative Line */}
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#FF1E00',
-            opacity: lineOp,
-            marginTop: 18,
-            marginBottom: 22,
-          }}
-        />
+        <div style={{
+          width: lineWidth,
+          height: 1,
+          backgroundColor: '#FF1E00',
+          opacity: lineOp,
+          marginTop: 16,
+          marginBottom: 20,
+        }} />
 
         {/* Title Words */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '0 22px',
-            maxWidth: 1400,
-          }}
-        >
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18,
+          maxWidth: 1200,
+        }}>
           {titleWords.map((word, i) => {
-            const wordStart = 50 + i * 5;
-            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.out(Easing.back(1.3)),
-            });
+            const wordStart = titleStartFrame + i * wordGap;
+            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.3)) });
+
+            const allVisible = frame > titleStartFrame + (titleWords.length - 1) * wordGap + 10;
+            const titleGlow = allVisible ? `0 0 ${glowIntensity}px ${particle}44, 0 0 ${glowIntensity * 2}px ${particle}22` : 'none';
+
             return (
-              <span
-                key={i}
-                style={{
-                  fontSize: 100,
-                  fontWeight: 700,
-                  color: '#FCFAEE',
-                  letterSpacing: 2,
-                  fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-                  opacity: wordOp,
-                  transform: `scale(${wordScale})`,
-                  display: 'inline-block',
-                  textShadow: wordOp > 0.8 ? `0 0 ${glowPulse * 30}px rgba(107,91,62,${glowPulse * 0.3})` : 'none',
-                  margin: 0,
-                }}
-              >
+              <span key={i} style={{
+                fontSize: 95,
+                fontWeight: 700,
+                color: '#FCFAEE',
+                letterSpacing: 2,
+                fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+                opacity: wordOp,
+                transform: `scale(${wordScale})`,
+                display: 'inline-block',
+                textShadow: titleGlow,
+                margin: 0,
+              }}>
                 {word}
               </span>
             );
@@ -314,30 +266,21 @@ const LaCarcelInvisible: React.FC = () => {
       {/* WATERMARK */}
       {(() => {
         const wmOp = interpolate(frame, [20, 40], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
+          extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
         });
         return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 28,
-              right: 40,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 500,
-                color: '#6B5B3E',
-                opacity: 0.4,
-                letterSpacing: 1.5,
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontStyle: 'italic',
-              }}
-            >
+          <div style={{
+            position: 'absolute', bottom: 28, right: 40,
+            opacity: wmOp * fadeOut, zIndex: 100,
+          }}>
+            <span style={{
+              fontSize: 20, fontWeight: 500,
+              color: particle,
+              opacity: 0.4,
+              letterSpacing: 1.5,
+              fontFamily: 'Playfair Display, Georgia, serif',
+              fontStyle: 'italic',
+            }}>
               Mentor by Elisa
             </span>
           </div>
@@ -347,7 +290,7 @@ const LaCarcelInvisible: React.FC = () => {
   );
 };
 
-export default LaCarcelInvisible;
+export default CapituloUnoElTribunalQueEntregaste;
 ```
 
 ```tsx
@@ -361,7 +304,7 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'elEspejoFabricado',
+  id: 'capituloDosLaBocaQueSeAbre',
   durationInSeconds: 10,
   fps: 30,
   width: 1920,
@@ -373,286 +316,232 @@ const seededRandom = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-const ElEspejoFabricado: React.FC = () => {
+const CapituloDosLaBocaQueSeAbre: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  const bg = '#0D0D0D';
+  const particle = '#6B5B3E';
+  const glow = '#1A1510';
+
+  // LAYER 1 — BACKGROUND TEXTURE
+  const grainDots = Array.from({ length: 40 }, (_, i) => {
+    const x = seededRandom(i * 3 + 100) * 100;
+    const y = seededRandom(i * 3 + 101) * 100;
+    const size = 1 + seededRandom(i * 3 + 102) * 2;
+    const op = 0.02 + seededRandom(i * 3 + 103) * 0.03;
+    return { x, y, size, op };
   });
 
-  const chapterOp = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterBlur = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterY = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-
-  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-  const lineOp = interpolate(frame, [35, 50], [0, 0.6], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  // LAYER 2 — STAR FIELD
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const x = seededRandom(i * 5 + 200) * 100;
+    const y = seededRandom(i * 5 + 201) * 100;
+    const size = 1 + seededRandom(i * 5 + 202) * 3;
+    const phase = seededRandom(i * 5 + 203) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 5 + 204) * 0.04;
+    const twinkle = 0.1 + (0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase)));
+    const driftX = Math.sin(frame * 0.01 + phase) * 7;
+    const driftY = Math.cos(frame * 0.013 + phase) * 5;
+    return { x, y, size, twinkle, driftX, driftY };
   });
 
-  const titleWords = ['El', 'Espejo', 'Fabricado'];
-  const glowPulse = 0.3 + 0.2 * Math.sin(frame * 0.05);
+  // LAYER 3 — SLOW DRIFT PARTICLES
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const baseX = seededRandom(i * 7 + 300) * 100;
+    const baseY = seededRandom(i * 7 + 301) * 100;
+    const size = 40 + seededRandom(i * 7 + 302) * 60;
+    const op = 0.03 + seededRandom(i * 7 + 303) * 0.03;
+    const phase = seededRandom(i * 7 + 304) * Math.PI * 2;
+    const driftX = Math.sin(frame * 0.006 + phase) * 45;
+    const driftY = Math.cos(frame * 0.008 + phase) * 30;
+    return { baseX, baseY, size, op, driftX, driftY };
+  });
 
-  const breatheOp = interpolate(
-    Math.sin(frame * (Math.PI / 60)),
-    [-1, 1],
-    [0.03, 0.10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
+  // LAYER 4 — RADIAL GLOW BREATHING
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2 / 120)));
+
+  // LAYER 5 — ACCENT TEXTURE ELEMENTS
+  const accentRotation1 = frame * 0.12;
+  const accentRotation2 = -frame * 0.08;
+  const accentDrift = Math.sin(frame * 0.009) * 12;
+
+  // TEXT ANIMATIONS
+  const chapterOp = interpolate(frame, [20, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterBlur = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterY = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+  const lineOp = interpolate(frame, [35, 50], [0, 0.6], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  const titleWords = ['La', 'Boca', 'Que', 'Se', 'Abre'];
+  const titleStartFrame = 50;
+  const wordGap = 5;
+
+  const glowPulse = 0.5 + 0.5 * Math.sin(frame * 0.05);
+  const glowIntensity = 2 + glowPulse * 6;
+
+  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#1C1208',
-        overflow: 'hidden',
-      }}
-    >
-      {/* LAYER 1 — Background Texture */}
-      <div
-        style={{
+    <AbsoluteFill style={{ backgroundColor: bg, overflow: 'hidden' }}>
+      {/* LAYER 1 — BACKGROUND TEXTURE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `
+          radial-gradient(ellipse at 25% 35%, ${glow}55 0%, transparent 55%),
+          radial-gradient(ellipse at 75% 65%, ${glow}44 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, ${glow}33 0%, transparent 65%)
+        `,
+      }} />
+      {grainDots.map((dot, i) => (
+        <div key={`grain-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 25% 35%, rgba(196,148,58,0.06) 0%, transparent 55%), radial-gradient(ellipse at 65% 70%, rgba(196,148,58,0.04) 0%, transparent 50%), radial-gradient(ellipse at 50% 20%, rgba(42,31,14,0.4) 0%, transparent 70%)',
-        }}
-      />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = seededRandom(i * 5 + 100) * 100;
-        const y = seededRandom(i * 5 + 101) * 100;
-        const size = 1 + seededRandom(i * 5 + 102) * 2;
-        const op = 0.02 + seededRandom(i * 5 + 103) * 0.03;
-        return (
-          <div
-            key={`dot-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#C4943A',
-              opacity: op,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 2 — Star Field */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = seededRandom(i * 9 + 200) * 100;
-        const y = seededRandom(i * 9 + 201) * 100;
-        const size = 1 + seededRandom(i * 9 + 202) * 3;
-        const speed = 0.02 + seededRandom(i * 9 + 203) * 0.03;
-        const phase = seededRandom(i * 9 + 204) * Math.PI * 2;
-        const twinkle = 0.1 + 0.25 * (Math.sin(frame * speed + phase) + 1);
-        const driftX = Math.sin(frame * 0.008 + phase) * 7;
-        const driftY = Math.cos(frame * 0.006 + phase) * 5;
-        return (
-          <div
-            key={`star-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#C4943A',
-              opacity: twinkle,
-              filter: `blur(${size * 0.3}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3 — Slow Drift Particles */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const x = seededRandom(i * 13 + 300) * 80 + 10;
-        const y = seededRandom(i * 13 + 301) * 80 + 10;
-        const size = 40 + seededRandom(i * 13 + 302) * 60;
-        const op = 0.03 + seededRandom(i * 13 + 303) * 0.03;
-        const phase = seededRandom(i * 13 + 304) * Math.PI * 2;
-        const driftX = Math.sin(frame * 0.004 + phase) * 40;
-        const driftY = Math.cos(frame * 0.003 + phase) * 35;
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#C4943A',
-              opacity: op,
-              filter: `blur(${size * 0.6}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4 — Radial Glow Breathing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(196,148,58,0.12) 0%, transparent 65%)',
-          opacity: breatheOp,
-        }}
-      />
-
-      {/* LAYER 5 — Accent Texture Elements */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '80%',
-          top: '15%',
-          width: 160,
-          height: 160,
+          left: `${dot.x}%`,
+          top: `${dot.y}%`,
+          width: dot.size,
+          height: dot.size,
           borderRadius: '50%',
-          border: '1px solid rgba(196,148,58,0.06)',
-          opacity: 0.07,
-          transform: `rotate(${frame * 0.12}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '8%',
-          bottom: '20%',
-          width: 100,
-          height: 1,
-          backgroundColor: '#C4943A',
-          opacity: 0.05,
-          transform: `rotate(${-20 + frame * 0.06}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '60%',
-          top: '75%',
-          width: 0,
-          height: 0,
-          borderLeft: '30px solid transparent',
-          borderRight: '30px solid transparent',
-          borderBottom: '52px solid rgba(196,148,58,0.04)',
-          opacity: 0.05,
-          transform: `rotate(${frame * 0.08}deg)`,
-        }}
-      />
+          backgroundColor: particle,
+          opacity: dot.op,
+        }} />
+      ))}
 
-      {/* LAYER 6 — Vignette */}
-      <div
-        style={{
+      {/* LAYER 2 — STAR FIELD */}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #1C1208 100%)',
-        }}
-      />
+          left: `calc(${star.x}% + ${star.driftX}px)`,
+          top: `calc(${star.y}% + ${star.driftY}px)`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: star.twinkle,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 3 — SLOW DRIFT PARTICLES */}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: 'absolute',
+          left: `calc(${orb.baseX}% + ${orb.driftX}px)`,
+          top: `calc(${orb.baseY}% + ${orb.driftY}px)`,
+          width: orb.size,
+          height: orb.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: orb.op,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 4 — RADIAL GLOW BREATHING */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(circle at 50% 50%, ${particle}33 0%, transparent 60%)`,
+        opacity: glowOpacity,
+      }} />
+
+      {/* LAYER 5 — ACCENT TEXTURE ELEMENTS */}
+      <div style={{
+        position: 'absolute',
+        top: '20%',
+        right: '8%',
+        width: 100,
+        height: 100,
+        border: `1px solid ${particle}`,
+        opacity: 0.06,
+        transform: `rotate(${accentRotation1}deg) translateX(${accentDrift}px)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '25%',
+        left: '15%',
+        width: 80,
+        height: 80,
+        borderRadius: '50%',
+        border: `1px solid ${particle}`,
+        opacity: 0.04,
+        transform: `rotate(${accentRotation2}deg)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '5%',
+        width: 180,
+        height: 1,
+        backgroundColor: particle,
+        opacity: 0.05,
+        transform: `rotate(${15 + accentRotation1 * 0.3}deg)`,
+      }} />
+
+      {/* LAYER 6 — VIGNETTE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bg} 100%)`,
+      }} />
 
       {/* TEXT CONTENT */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: fadeOut,
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            opacity: chapterOp,
-            filter: `blur(${chapterBlur}px)`,
-            transform: `translateY(${chapterY}px)`,
-          }}
-        >
-          <p
-            style={{
-              fontSize: 44,
-              fontWeight: 500,
-              fontStyle: 'italic',
-              color: '#FF1E00',
-              letterSpacing: 6,
-              fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-              margin: 0,
-            }}
-          >
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        opacity: fadeOut,
+        zIndex: 10,
+      }}>
+        <div style={{
+          opacity: chapterOp,
+          filter: `blur(${chapterBlur}px)`,
+          transform: `translateY(${chapterY}px)`,
+        }}>
+          <p style={{
+            fontSize: 44,
+            fontWeight: 500,
+            fontStyle: 'italic',
+            color: '#FF1E00',
+            letterSpacing: 6,
+            fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+            margin: 0,
+          }}>
             Capítulo 2
           </p>
         </div>
 
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#FF1E00',
-            opacity: lineOp,
-            marginTop: 18,
-            marginBottom: 22,
-          }}
-        />
+        <div style={{
+          width: lineWidth,
+          height: 1,
+          backgroundColor: '#FF1E00',
+          opacity: lineOp,
+          marginTop: 16,
+          marginBottom: 20,
+        }} />
 
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '0 22px',
-            maxWidth: 1400,
-          }}
-        >
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18,
+          maxWidth: 1200,
+        }}>
           {titleWords.map((word, i) => {
-            const wordStart = 50 + i * 5;
-            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.out(Easing.back(1.3)),
-            });
+            const wordStart = titleStartFrame + i * wordGap;
+            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.3)) });
+            const allVisible = frame > titleStartFrame + (titleWords.length - 1) * wordGap + 10;
+            const titleGlow = allVisible ? `0 0 ${glowIntensity}px ${particle}44, 0 0 ${glowIntensity * 2}px ${particle}22` : 'none';
+
             return (
-              <span
-                key={i}
-                style={{
-                  fontSize: 100,
-                  fontWeight: 700,
-                  color: '#FCFAEE',
-                  letterSpacing: 2,
-                  fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-                  opacity: wordOp,
-                  transform: `scale(${wordScale})`,
-                  display: 'inline-block',
-                  textShadow: wordOp > 0.8 ? `0 0 ${glowPulse * 30}px rgba(196,148,58,${glowPulse * 0.3})` : 'none',
-                  margin: 0,
-                }}
-              >
+              <span key={i} style={{
+                fontSize: 100,
+                fontWeight: 700,
+                color: '#FCFAEE',
+                letterSpacing: 2,
+                fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+                opacity: wordOp,
+                transform: `scale(${wordScale})`,
+                display: 'inline-block',
+                textShadow: titleGlow,
+                margin: 0,
+              }}>
                 {word}
               </span>
             );
@@ -663,30 +552,21 @@ const ElEspejoFabricado: React.FC = () => {
       {/* WATERMARK */}
       {(() => {
         const wmOp = interpolate(frame, [20, 40], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
+          extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
         });
         return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 28,
-              right: 40,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 500,
-                color: '#C4943A',
-                opacity: 0.4,
-                letterSpacing: 1.5,
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontStyle: 'italic',
-              }}
-            >
+          <div style={{
+            position: 'absolute', bottom: 28, right: 40,
+            opacity: wmOp * fadeOut, zIndex: 100,
+          }}>
+            <span style={{
+              fontSize: 20, fontWeight: 500,
+              color: particle,
+              opacity: 0.4,
+              letterSpacing: 1.5,
+              fontFamily: 'Playfair Display, Georgia, serif',
+              fontStyle: 'italic',
+            }}>
               Mentor by Elisa
             </span>
           </div>
@@ -696,7 +576,7 @@ const ElEspejoFabricado: React.FC = () => {
   );
 };
 
-export default ElEspejoFabricado;
+export default CapituloDosLaBocaQueSeAbre;
 ```
 
 ```tsx
@@ -710,7 +590,7 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'laInundacionEmocional',
+  id: 'capituloTresElSilencioElegido',
   durationInSeconds: 10,
   fps: 30,
   width: 1920,
@@ -722,286 +602,234 @@ const seededRandom = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-const LaInundacionEmocional: React.FC = () => {
+const CapituloTresElSilencioElegido: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  const bg = '#1A0A05';
+  const particle = '#FF8C38';
+  const glow = '#2D1205';
+
+  // LAYER 1 — BACKGROUND TEXTURE
+  const grainDots = Array.from({ length: 40 }, (_, i) => {
+    const x = seededRandom(i * 3 + 400) * 100;
+    const y = seededRandom(i * 3 + 401) * 100;
+    const size = 1 + seededRandom(i * 3 + 402) * 2;
+    const op = 0.02 + seededRandom(i * 3 + 403) * 0.03;
+    return { x, y, size, op };
   });
 
-  const chapterOp = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterBlur = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterY = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-
-  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-  const lineOp = interpolate(frame, [35, 50], [0, 0.6], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  // LAYER 2 — STAR FIELD
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const x = seededRandom(i * 5 + 500) * 100;
+    const y = seededRandom(i * 5 + 501) * 100;
+    const size = 1 + seededRandom(i * 5 + 502) * 3;
+    const phase = seededRandom(i * 5 + 503) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 5 + 504) * 0.04;
+    const twinkle = 0.1 + (0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase)));
+    const driftX = Math.sin(frame * 0.011 + phase) * 8;
+    const driftY = Math.cos(frame * 0.014 + phase) * 6;
+    return { x, y, size, twinkle, driftX, driftY };
   });
 
-  const titleWords = ['La', 'Inundación', 'Emocional'];
-  const glowPulse = 0.3 + 0.2 * Math.sin(frame * 0.05);
+  // LAYER 3 — SLOW DRIFT PARTICLES
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const baseX = seededRandom(i * 7 + 600) * 100;
+    const baseY = seededRandom(i * 7 + 601) * 100;
+    const size = 40 + seededRandom(i * 7 + 602) * 60;
+    const op = 0.03 + seededRandom(i * 7 + 603) * 0.03;
+    const phase = seededRandom(i * 7 + 604) * Math.PI * 2;
+    const driftX = Math.sin(frame * 0.007 + phase) * 35;
+    const driftY = Math.cos(frame * 0.009 + phase) * 50;
+    return { baseX, baseY, size, op, driftX, driftY };
+  });
 
-  const breatheOp = interpolate(
-    Math.sin(frame * (Math.PI / 60)),
-    [-1, 1],
-    [0.03, 0.10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
+  // LAYER 4 — RADIAL GLOW BREATHING
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2 / 120)));
+
+  // LAYER 5 — ACCENT TEXTURE ELEMENTS
+  const accentRotation1 = frame * 0.18;
+  const accentRotation2 = -frame * 0.12;
+  const accentDrift = Math.sin(frame * 0.007) * 18;
+
+  // TEXT ANIMATIONS
+  const chapterOp = interpolate(frame, [20, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterBlur = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterY = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+  const lineOp = interpolate(frame, [35, 50], [0, 0.6], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  const titleWords = ['El', 'Silencio', 'Elegido'];
+  const titleStartFrame = 50;
+  const wordGap = 5;
+
+  const glowPulse = 0.5 + 0.5 * Math.sin(frame * 0.05);
+  const glowIntensity = 2 + glowPulse * 6;
+
+  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#0A0E27',
-        overflow: 'hidden',
-      }}
-    >
-      {/* LAYER 1 — Background Texture */}
-      <div
-        style={{
+    <AbsoluteFill style={{ backgroundColor: bg, overflow: 'hidden' }}>
+      {/* LAYER 1 — BACKGROUND TEXTURE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `
+          radial-gradient(ellipse at 40% 30%, ${glow}55 0%, transparent 50%),
+          radial-gradient(ellipse at 60% 70%, ${glow}44 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 50%, ${glow}33 0%, transparent 70%)
+        `,
+      }} />
+      {grainDots.map((dot, i) => (
+        <div key={`grain-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 35% 30%, rgba(212,168,67,0.06) 0%, transparent 55%), radial-gradient(ellipse at 70% 65%, rgba(26,36,86,0.3) 0%, transparent 50%), radial-gradient(ellipse at 50% 85%, rgba(212,168,67,0.03) 0%, transparent 60%)',
-        }}
-      />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = seededRandom(i * 4 + 400) * 100;
-        const y = seededRandom(i * 4 + 401) * 100;
-        const size = 1 + seededRandom(i * 4 + 402) * 2;
-        const op = 0.02 + seededRandom(i * 4 + 403) * 0.03;
-        return (
-          <div
-            key={`dot-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4A843',
-              opacity: op,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 2 — Star Field */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = seededRandom(i * 8 + 500) * 100;
-        const y = seededRandom(i * 8 + 501) * 100;
-        const size = 1 + seededRandom(i * 8 + 502) * 3;
-        const speed = 0.02 + seededRandom(i * 8 + 503) * 0.03;
-        const phase = seededRandom(i * 8 + 504) * Math.PI * 2;
-        const twinkle = 0.1 + 0.25 * (Math.sin(frame * speed + phase) + 1);
-        const driftX = Math.sin(frame * 0.008 + phase) * 7;
-        const driftY = Math.cos(frame * 0.006 + phase) * 6;
-        return (
-          <div
-            key={`star-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4A843',
-              opacity: twinkle,
-              filter: `blur(${size * 0.3}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3 — Slow Drift Particles */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const x = seededRandom(i * 12 + 600) * 80 + 10;
-        const y = seededRandom(i * 12 + 601) * 80 + 10;
-        const size = 40 + seededRandom(i * 12 + 602) * 60;
-        const op = 0.03 + seededRandom(i * 12 + 603) * 0.03;
-        const phase = seededRandom(i * 12 + 604) * Math.PI * 2;
-        const driftX = Math.sin(frame * 0.004 + phase) * 45;
-        const driftY = Math.cos(frame * 0.003 + phase) * 35;
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4A843',
-              opacity: op,
-              filter: `blur(${size * 0.6}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4 — Radial Glow Breathing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(212,168,67,0.12) 0%, transparent 65%)',
-          opacity: breatheOp,
-        }}
-      />
-
-      {/* LAYER 5 — Accent Texture Elements */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '15%',
-          top: '70%',
-          width: 200,
-          height: 200,
+          left: `${dot.x}%`,
+          top: `${dot.y}%`,
+          width: dot.size,
+          height: dot.size,
           borderRadius: '50%',
-          border: '1px solid rgba(212,168,67,0.05)',
-          opacity: 0.06,
-          transform: `rotate(${frame * 0.1}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: '10%',
-          top: '10%',
-          width: 90,
-          height: 1,
-          backgroundColor: '#D4A843',
-          opacity: 0.05,
-          transform: `rotate(${45 + frame * 0.07}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '8%',
-          width: 0,
-          height: 0,
-          borderLeft: '25px solid transparent',
-          borderRight: '25px solid transparent',
-          borderBottom: '44px solid rgba(212,168,67,0.04)',
-          opacity: 0.05,
-          transform: `rotate(${180 + frame * 0.06}deg)`,
-        }}
-      />
+          backgroundColor: particle,
+          opacity: dot.op,
+        }} />
+      ))}
 
-      {/* LAYER 6 — Vignette */}
-      <div
-        style={{
+      {/* LAYER 2 — STAR FIELD */}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #0A0E27 100%)',
-        }}
-      />
+          left: `calc(${star.x}% + ${star.driftX}px)`,
+          top: `calc(${star.y}% + ${star.driftY}px)`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: star.twinkle,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 3 — SLOW DRIFT PARTICLES */}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: 'absolute',
+          left: `calc(${orb.baseX}% + ${orb.driftX}px)`,
+          top: `calc(${orb.baseY}% + ${orb.driftY}px)`,
+          width: orb.size,
+          height: orb.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: orb.op,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 4 — RADIAL GLOW BREATHING */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(circle at 50% 50%, ${particle}33 0%, transparent 60%)`,
+        opacity: glowOpacity,
+      }} />
+
+      {/* LAYER 5 — ACCENT TEXTURE ELEMENTS */}
+      <div style={{
+        position: 'absolute',
+        top: '12%',
+        right: '15%',
+        width: 0,
+        height: 0,
+        borderLeft: '35px solid transparent',
+        borderRight: '35px solid transparent',
+        borderBottom: `60px solid ${particle}`,
+        opacity: 0.05,
+        transform: `rotate(${accentRotation1}deg)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '18%',
+        left: '8%',
+        width: 140,
+        height: 140,
+        borderRadius: '50%',
+        border: `1px solid ${particle}`,
+        opacity: 0.04,
+        transform: `rotate(${accentRotation2}deg) translateY(${accentDrift}px)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: '55%',
+        right: '5%',
+        width: 160,
+        height: 1,
+        backgroundColor: particle,
+        opacity: 0.06,
+        transform: `rotate(${-20 + accentRotation1 * 0.2}deg)`,
+      }} />
+
+      {/* LAYER 6 — VIGNETTE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bg} 100%)`,
+      }} />
 
       {/* TEXT CONTENT */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: fadeOut,
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            opacity: chapterOp,
-            filter: `blur(${chapterBlur}px)`,
-            transform: `translateY(${chapterY}px)`,
-          }}
-        >
-          <p
-            style={{
-              fontSize: 44,
-              fontWeight: 500,
-              fontStyle: 'italic',
-              color: '#FF1E00',
-              letterSpacing: 6,
-              fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-              margin: 0,
-            }}
-          >
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        opacity: fadeOut,
+        zIndex: 10,
+      }}>
+        <div style={{
+          opacity: chapterOp,
+          filter: `blur(${chapterBlur}px)`,
+          transform: `translateY(${chapterY}px)`,
+        }}>
+          <p style={{
+            fontSize: 44,
+            fontWeight: 500,
+            fontStyle: 'italic',
+            color: '#FF1E00',
+            letterSpacing: 6,
+            fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+            margin: 0,
+          }}>
             Capítulo 3
           </p>
         </div>
 
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#FF1E00',
-            opacity: lineOp,
-            marginTop: 18,
-            marginBottom: 22,
-          }}
-        />
+        <div style={{
+          width: lineWidth,
+          height: 1,
+          backgroundColor: '#FF1E00',
+          opacity: lineOp,
+          marginTop: 16,
+          marginBottom: 20,
+        }} />
 
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '0 22px',
-            maxWidth: 1400,
-          }}
-        >
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18,
+          maxWidth: 1200,
+        }}>
           {titleWords.map((word, i) => {
-            const wordStart = 50 + i * 5;
-            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.out(Easing.back(1.3)),
-            });
+            const wordStart = titleStartFrame + i * wordGap;
+            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.3)) });
+            const allVisible = frame > titleStartFrame + (titleWords.length - 1) * wordGap + 10;
+            const titleGlow = allVisible ? `0 0 ${glowIntensity}px ${particle}44, 0 0 ${glowIntensity * 2}px ${particle}22` : 'none';
+
             return (
-              <span
-                key={i}
-                style={{
-                  fontSize: 95,
-                  fontWeight: 700,
-                  color: '#FCFAEE',
-                  letterSpacing: 2,
-                  fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-                  opacity: wordOp,
-                  transform: `scale(${wordScale})`,
-                  display: 'inline-block',
-                  textShadow: wordOp > 0.8 ? `0 0 ${glowPulse * 30}px rgba(212,168,67,${glowPulse * 0.3})` : 'none',
-                  margin: 0,
-                }}
-              >
+              <span key={i} style={{
+                fontSize: 105,
+                fontWeight: 700,
+                color: '#FCFAEE',
+                letterSpacing: 2,
+                fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+                opacity: wordOp,
+                transform: `scale(${wordScale})`,
+                display: 'inline-block',
+                textShadow: titleGlow,
+                margin: 0,
+              }}>
                 {word}
               </span>
             );
@@ -1012,30 +840,21 @@ const LaInundacionEmocional: React.FC = () => {
       {/* WATERMARK */}
       {(() => {
         const wmOp = interpolate(frame, [20, 40], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
+          extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
         });
         return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 28,
-              right: 40,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 500,
-                color: '#D4A843',
-                opacity: 0.4,
-                letterSpacing: 1.5,
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontStyle: 'italic',
-              }}
-            >
+          <div style={{
+            position: 'absolute', bottom: 28, right: 40,
+            opacity: wmOp * fadeOut, zIndex: 100,
+          }}>
+            <span style={{
+              fontSize: 20, fontWeight: 500,
+              color: particle,
+              opacity: 0.4,
+              letterSpacing: 1.5,
+              fontFamily: 'Playfair Display, Georgia, serif',
+              fontStyle: 'italic',
+            }}>
               Mentor by Elisa
             </span>
           </div>
@@ -1045,7 +864,7 @@ const LaInundacionEmocional: React.FC = () => {
   );
 };
 
-export default LaInundacionEmocional;
+export default CapituloTresElSilencioElegido;
 ```
 
 ```tsx
@@ -1059,7 +878,7 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'elBorradoDeTiMisma',
+  id: 'capituloCuatroLaEstrategiaDeLasReinas',
   durationInSeconds: 10,
   fps: 30,
   width: 1920,
@@ -1071,286 +890,234 @@ const seededRandom = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-const ElBorradoDeTiMisma: React.FC = () => {
+const CapituloCuatroLaEstrategiaDeLasReinas: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  const bg = '#1C1208';
+  const particle = '#C4943A';
+  const glow = '#2A1F0E';
+
+  // LAYER 1 — BACKGROUND TEXTURE
+  const grainDots = Array.from({ length: 40 }, (_, i) => {
+    const x = seededRandom(i * 3 + 700) * 100;
+    const y = seededRandom(i * 3 + 701) * 100;
+    const size = 1 + seededRandom(i * 3 + 702) * 2;
+    const op = 0.02 + seededRandom(i * 3 + 703) * 0.03;
+    return { x, y, size, op };
   });
 
-  const chapterOp = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterBlur = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterY = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-
-  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-  const lineOp = interpolate(frame, [35, 50], [0, 0.6], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  // LAYER 2 — STAR FIELD
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const x = seededRandom(i * 5 + 800) * 100;
+    const y = seededRandom(i * 5 + 801) * 100;
+    const size = 1 + seededRandom(i * 5 + 802) * 3;
+    const phase = seededRandom(i * 5 + 803) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 5 + 804) * 0.04;
+    const twinkle = 0.1 + (0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase)));
+    const driftX = Math.sin(frame * 0.012 + phase) * 5;
+    const driftY = Math.cos(frame * 0.01 + phase) * 8;
+    return { x, y, size, twinkle, driftX, driftY };
   });
 
-  const titleWords = ['El', 'Borrado', 'De', 'Ti', 'Misma'];
-  const glowPulse = 0.3 + 0.2 * Math.sin(frame * 0.05);
+  // LAYER 3 — SLOW DRIFT PARTICLES
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const baseX = seededRandom(i * 7 + 900) * 100;
+    const baseY = seededRandom(i * 7 + 901) * 100;
+    const size = 40 + seededRandom(i * 7 + 902) * 60;
+    const op = 0.03 + seededRandom(i * 7 + 903) * 0.03;
+    const phase = seededRandom(i * 7 + 904) * Math.PI * 2;
+    const driftX = Math.sin(frame * 0.005 + phase) * 50;
+    const driftY = Math.cos(frame * 0.007 + phase) * 40;
+    return { baseX, baseY, size, op, driftX, driftY };
+  });
 
-  const breatheOp = interpolate(
-    Math.sin(frame * (Math.PI / 60)),
-    [-1, 1],
-    [0.03, 0.10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
+  // LAYER 4 — RADIAL GLOW BREATHING
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2 / 120)));
+
+  // LAYER 5 — ACCENT TEXTURE ELEMENTS
+  const accentRotation1 = frame * 0.1;
+  const accentRotation2 = -frame * 0.14;
+  const accentDrift = Math.sin(frame * 0.01) * 10;
+
+  // TEXT ANIMATIONS
+  const chapterOp = interpolate(frame, [20, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterBlur = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterY = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+  const lineOp = interpolate(frame, [35, 50], [0, 0.6], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  const titleWords = ['La', 'Estrategia', 'De', 'Las', 'Reinas'];
+  const titleStartFrame = 50;
+  const wordGap = 5;
+
+  const glowPulse = 0.5 + 0.5 * Math.sin(frame * 0.05);
+  const glowIntensity = 2 + glowPulse * 6;
+
+  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#1A0A05',
-        overflow: 'hidden',
-      }}
-    >
-      {/* LAYER 1 — Background Texture */}
-      <div
-        style={{
+    <AbsoluteFill style={{ backgroundColor: bg, overflow: 'hidden' }}>
+      {/* LAYER 1 — BACKGROUND TEXTURE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `
+          radial-gradient(ellipse at 35% 45%, ${glow}55 0%, transparent 55%),
+          radial-gradient(ellipse at 65% 55%, ${glow}44 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, ${glow}33 0%, transparent 65%)
+        `,
+      }} />
+      {grainDots.map((dot, i) => (
+        <div key={`grain-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 40% 35%, rgba(255,140,56,0.06) 0%, transparent 55%), radial-gradient(ellipse at 75% 60%, rgba(45,18,5,0.4) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(255,140,56,0.03) 0%, transparent 60%)',
-        }}
-      />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = seededRandom(i * 6 + 700) * 100;
-        const y = seededRandom(i * 6 + 701) * 100;
-        const size = 1 + seededRandom(i * 6 + 702) * 2;
-        const op = 0.02 + seededRandom(i * 6 + 703) * 0.03;
-        return (
-          <div
-            key={`dot-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#FF8C38',
-              opacity: op,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 2 — Star Field */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = seededRandom(i * 10 + 800) * 100;
-        const y = seededRandom(i * 10 + 801) * 100;
-        const size = 1 + seededRandom(i * 10 + 802) * 3;
-        const speed = 0.02 + seededRandom(i * 10 + 803) * 0.03;
-        const phase = seededRandom(i * 10 + 804) * Math.PI * 2;
-        const twinkle = 0.1 + 0.25 * (Math.sin(frame * speed + phase) + 1);
-        const driftX = Math.sin(frame * 0.008 + phase) * 6;
-        const driftY = Math.cos(frame * 0.006 + phase) * 7;
-        return (
-          <div
-            key={`star-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#FF8C38',
-              opacity: twinkle,
-              filter: `blur(${size * 0.3}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3 — Slow Drift Particles */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const x = seededRandom(i * 14 + 900) * 80 + 10;
-        const y = seededRandom(i * 14 + 901) * 80 + 10;
-        const size = 40 + seededRandom(i * 14 + 902) * 60;
-        const op = 0.03 + seededRandom(i * 14 + 903) * 0.03;
-        const phase = seededRandom(i * 14 + 904) * Math.PI * 2;
-        const driftX = Math.sin(frame * 0.004 + phase) * 40;
-        const driftY = Math.cos(frame * 0.003 + phase) * 30;
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#FF8C38',
-              opacity: op,
-              filter: `blur(${size * 0.6}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4 — Radial Glow Breathing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(255,140,56,0.12) 0%, transparent 65%)',
-          opacity: breatheOp,
-        }}
-      />
-
-      {/* LAYER 5 — Accent Texture Elements */}
-      <div
-        style={{
-          position: 'absolute',
-          right: '18%',
-          top: '20%',
-          width: 140,
-          height: 140,
+          left: `${dot.x}%`,
+          top: `${dot.y}%`,
+          width: dot.size,
+          height: dot.size,
           borderRadius: '50%',
-          border: '1px solid rgba(255,140,56,0.05)',
-          opacity: 0.06,
-          transform: `rotate(${-frame * 0.13}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '10%',
-          top: '60%',
-          width: 110,
-          height: 1,
-          backgroundColor: '#FF8C38',
-          opacity: 0.04,
-          transform: `rotate(${60 + frame * 0.05}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '70%',
-          bottom: '15%',
-          width: 0,
-          height: 0,
-          borderLeft: '35px solid transparent',
-          borderRight: '35px solid transparent',
-          borderBottom: '60px solid rgba(255,140,56,0.03)',
-          opacity: 0.05,
-          transform: `rotate(${frame * 0.09}deg)`,
-        }}
-      />
+          backgroundColor: particle,
+          opacity: dot.op,
+        }} />
+      ))}
 
-      {/* LAYER 6 — Vignette */}
-      <div
-        style={{
+      {/* LAYER 2 — STAR FIELD */}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #1A0A05 100%)',
-        }}
-      />
+          left: `calc(${star.x}% + ${star.driftX}px)`,
+          top: `calc(${star.y}% + ${star.driftY}px)`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: star.twinkle,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 3 — SLOW DRIFT PARTICLES */}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
+          position: 'absolute',
+          left: `calc(${orb.baseX}% + ${orb.driftX}px)`,
+          top: `calc(${orb.baseY}% + ${orb.driftY}px)`,
+          width: orb.size,
+          height: orb.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: orb.op,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 4 — RADIAL GLOW BREATHING */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(circle at 50% 50%, ${particle}33 0%, transparent 60%)`,
+        opacity: glowOpacity,
+      }} />
+
+      {/* LAYER 5 — ACCENT TEXTURE ELEMENTS */}
+      <div style={{
+        position: 'absolute',
+        top: '10%',
+        left: '12%',
+        width: 90,
+        height: 90,
+        border: `1px solid ${particle}`,
+        borderRadius: '50%',
+        opacity: 0.06,
+        transform: `rotate(${accentRotation1}deg) translateY(${accentDrift}px)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '15%',
+        right: '10%',
+        width: 0,
+        height: 0,
+        borderLeft: '45px solid transparent',
+        borderRight: '45px solid transparent',
+        borderBottom: `78px solid ${particle}`,
+        opacity: 0.04,
+        transform: `rotate(${accentRotation2}deg)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: '45%',
+        left: '80%',
+        width: 150,
+        height: 1,
+        backgroundColor: particle,
+        opacity: 0.07,
+        transform: `rotate(${30 + accentRotation1 * 0.4}deg)`,
+      }} />
+
+      {/* LAYER 6 — VIGNETTE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bg} 100%)`,
+      }} />
 
       {/* TEXT CONTENT */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: fadeOut,
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            opacity: chapterOp,
-            filter: `blur(${chapterBlur}px)`,
-            transform: `translateY(${chapterY}px)`,
-          }}
-        >
-          <p
-            style={{
-              fontSize: 44,
-              fontWeight: 500,
-              fontStyle: 'italic',
-              color: '#FF1E00',
-              letterSpacing: 6,
-              fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-              margin: 0,
-            }}
-          >
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        opacity: fadeOut,
+        zIndex: 10,
+      }}>
+        <div style={{
+          opacity: chapterOp,
+          filter: `blur(${chapterBlur}px)`,
+          transform: `translateY(${chapterY}px)`,
+        }}>
+          <p style={{
+            fontSize: 44,
+            fontWeight: 500,
+            fontStyle: 'italic',
+            color: '#FF1E00',
+            letterSpacing: 6,
+            fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+            margin: 0,
+          }}>
             Capítulo 4
           </p>
         </div>
 
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#FF1E00',
-            opacity: lineOp,
-            marginTop: 18,
-            marginBottom: 22,
-          }}
-        />
+        <div style={{
+          width: lineWidth,
+          height: 1,
+          backgroundColor: '#FF1E00',
+          opacity: lineOp,
+          marginTop: 16,
+          marginBottom: 20,
+        }} />
 
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '0 20px',
-            maxWidth: 1400,
-          }}
-        >
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18,
+          maxWidth: 1200,
+        }}>
           {titleWords.map((word, i) => {
-            const wordStart = 50 + i * 5;
-            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.out(Easing.back(1.3)),
-            });
+            const wordStart = titleStartFrame + i * wordGap;
+            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.3)) });
+            const allVisible = frame > titleStartFrame + (titleWords.length - 1) * wordGap + 10;
+            const titleGlow = allVisible ? `0 0 ${glowIntensity}px ${particle}44, 0 0 ${glowIntensity * 2}px ${particle}22` : 'none';
+
             return (
-              <span
-                key={i}
-                style={{
-                  fontSize: 90,
-                  fontWeight: 700,
-                  color: '#FCFAEE',
-                  letterSpacing: 2,
-                  fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-                  opacity: wordOp,
-                  transform: `scale(${wordScale})`,
-                  display: 'inline-block',
-                  textShadow: wordOp > 0.8 ? `0 0 ${glowPulse * 30}px rgba(255,140,56,${glowPulse * 0.3})` : 'none',
-                  margin: 0,
-                }}
-              >
+              <span key={i} style={{
+                fontSize: 90,
+                fontWeight: 700,
+                color: '#FCFAEE',
+                letterSpacing: 2,
+                fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+                opacity: wordOp,
+                transform: `scale(${wordScale})`,
+                display: 'inline-block',
+                textShadow: titleGlow,
+                margin: 0,
+              }}>
                 {word}
               </span>
             );
@@ -1361,30 +1128,21 @@ const ElBorradoDeTiMisma: React.FC = () => {
       {/* WATERMARK */}
       {(() => {
         const wmOp = interpolate(frame, [20, 40], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
+          extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
         });
         return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 28,
-              right: 40,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 500,
-                color: '#FF8C38',
-                opacity: 0.4,
-                letterSpacing: 1.5,
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontStyle: 'italic',
-              }}
-            >
+          <div style={{
+            position: 'absolute', bottom: 28, right: 40,
+            opacity: wmOp * fadeOut, zIndex: 100,
+          }}>
+            <span style={{
+              fontSize: 20, fontWeight: 500,
+              color: particle,
+              opacity: 0.4,
+              letterSpacing: 1.5,
+              fontFamily: 'Playfair Display, Georgia, serif',
+              fontStyle: 'italic',
+            }}>
               Mentor by Elisa
             </span>
           </div>
@@ -1394,7 +1152,7 @@ const ElBorradoDeTiMisma: React.FC = () => {
   );
 };
 
-export default ElBorradoDeTiMisma;
+export default CapituloCuatroLaEstrategiaDeLasReinas;
 ```
 
 ```tsx
@@ -1408,7 +1166,7 @@ import {
 } from 'remotion';
 
 export const compositionConfig = {
-  id: 'elCastigoSinSonido',
+  id: 'capituloCincoLaRaizQueNoVes',
   durationInSeconds: 10,
   fps: 30,
   width: 1920,
@@ -1420,635 +1178,234 @@ const seededRandom = (seed: number): number => {
   return x - Math.floor(x);
 };
 
-const ElCastigoSinSonido: React.FC = () => {
+const CapituloCincoLaRaizQueNoVes: React.FC = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
-  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  const bg = '#F5EDE0';
+  const particle = '#D4A843';
+  const glow = '#FFFAF0';
+
+  // LAYER 1 — BACKGROUND TEXTURE
+  const grainDots = Array.from({ length: 40 }, (_, i) => {
+    const x = seededRandom(i * 3 + 1000) * 100;
+    const y = seededRandom(i * 3 + 1001) * 100;
+    const size = 1 + seededRandom(i * 3 + 1002) * 2;
+    const op = 0.02 + seededRandom(i * 3 + 1003) * 0.03;
+    return { x, y, size, op };
   });
 
-  const chapterOp = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterBlur = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterY = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-
-  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-  const lineOp = interpolate(frame, [35, 50], [0, 0.6], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
+  // LAYER 2 — STAR FIELD
+  const stars = Array.from({ length: 15 }, (_, i) => {
+    const x = seededRandom(i * 5 + 1100) * 100;
+    const y = seededRandom(i * 5 + 1101) * 100;
+    const size = 1 + seededRandom(i * 5 + 1102) * 3;
+    const phase = seededRandom(i * 5 + 1103) * Math.PI * 2;
+    const speed = 0.03 + seededRandom(i * 5 + 1104) * 0.04;
+    const twinkle = 0.1 + (0.5 * (0.5 + 0.5 * Math.sin(frame * speed + phase)));
+    const driftX = Math.sin(frame * 0.009 + phase) * 7;
+    const driftY = Math.cos(frame * 0.012 + phase) * 6;
+    return { x, y, size, twinkle, driftX, driftY };
   });
 
-  const titleWords = ['El', 'Castigo', 'Sin', 'Sonido'];
-  const glowPulse = 0.3 + 0.2 * Math.sin(frame * 0.05);
+  // LAYER 3 — SLOW DRIFT PARTICLES
+  const orbs = Array.from({ length: 5 }, (_, i) => {
+    const baseX = seededRandom(i * 7 + 1200) * 100;
+    const baseY = seededRandom(i * 7 + 1201) * 100;
+    const size = 40 + seededRandom(i * 7 + 1202) * 60;
+    const op = 0.03 + seededRandom(i * 7 + 1203) * 0.03;
+    const phase = seededRandom(i * 7 + 1204) * Math.PI * 2;
+    const driftX = Math.sin(frame * 0.006 + phase) * 40;
+    const driftY = Math.cos(frame * 0.008 + phase) * 45;
+    return { baseX, baseY, size, op, driftX, driftY };
+  });
 
-  const breatheOp = interpolate(
-    Math.sin(frame * (Math.PI / 60)),
-    [-1, 1],
-    [0.03, 0.10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
+  // LAYER 4 — RADIAL GLOW BREATHING
+  const glowOpacity = 0.03 + 0.07 * (0.5 + 0.5 * Math.sin(frame * (Math.PI * 2 / 120)));
+
+  // LAYER 5 — ACCENT TEXTURE ELEMENTS
+  const accentRotation1 = frame * 0.13;
+  const accentRotation2 = -frame * 0.09;
+  const accentDrift = Math.sin(frame * 0.008) * 14;
+
+  // TEXT ANIMATIONS
+  const chapterOp = interpolate(frame, [20, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterBlur = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const chapterY = interpolate(frame, [20, 35], [15, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+
+  const lineWidth = interpolate(frame, [35, 50], [0, 120], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.ease) });
+  const lineOp = interpolate(frame, [35, 50], [0, 0.6], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  const titleWords = ['La', 'Raíz', 'Que', 'No', 'Ves'];
+  const titleStartFrame = 50;
+  const wordGap = 5;
+
+  const glowPulse = 0.5 + 0.5 * Math.sin(frame * 0.05);
+  const glowIntensity = 2 + glowPulse * 6;
+
+  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#F5EDE0',
-        overflow: 'hidden',
-      }}
-    >
-      {/* LAYER 1 — Background Texture */}
-      <div
-        style={{
+    <AbsoluteFill style={{ backgroundColor: bg, overflow: 'hidden' }}>
+      {/* LAYER 1 — BACKGROUND TEXTURE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `
+          radial-gradient(ellipse at 30% 50%, ${glow}88 0%, transparent 60%),
+          radial-gradient(ellipse at 70% 40%, ${glow}66 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 50%, ${glow}44 0%, transparent 70%)
+        `,
+      }} />
+      {grainDots.map((dot, i) => (
+        <div key={`grain-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 30% 40%, rgba(212,168,67,0.08) 0%, transparent 55%), radial-gradient(ellipse at 60% 70%, rgba(212,168,67,0.05) 0%, transparent 50%), radial-gradient(ellipse at 50% 20%, rgba(255,250,240,0.3) 0%, transparent 60%)',
-        }}
-      />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = seededRandom(i * 5 + 1000) * 100;
-        const y = seededRandom(i * 5 + 1001) * 100;
-        const size = 1 + seededRandom(i * 5 + 1002) * 2;
-        const op = 0.03 + seededRandom(i * 5 + 1003) * 0.04;
-        return (
-          <div
-            key={`dot-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4A843',
-              opacity: op,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 2 — Star Field */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = seededRandom(i * 9 + 1100) * 100;
-        const y = seededRandom(i * 9 + 1101) * 100;
-        const size = 1 + seededRandom(i * 9 + 1102) * 3;
-        const speed = 0.02 + seededRandom(i * 9 + 1103) * 0.03;
-        const phase = seededRandom(i * 9 + 1104) * Math.PI * 2;
-        const twinkle = 0.1 + 0.25 * (Math.sin(frame * speed + phase) + 1);
-        const driftX = Math.sin(frame * 0.008 + phase) * 6;
-        const driftY = Math.cos(frame * 0.006 + phase) * 5;
-        return (
-          <div
-            key={`star-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4A843',
-              opacity: twinkle,
-              filter: `blur(${size * 0.3}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3 — Slow Drift Particles */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const x = seededRandom(i * 15 + 1200) * 80 + 10;
-        const y = seededRandom(i * 15 + 1201) * 80 + 10;
-        const size = 40 + seededRandom(i * 15 + 1202) * 60;
-        const op = 0.03 + seededRandom(i * 15 + 1203) * 0.03;
-        const phase = seededRandom(i * 15 + 1204) * Math.PI * 2;
-        const driftX = Math.sin(frame * 0.004 + phase) * 35;
-        const driftY = Math.cos(frame * 0.003 + phase) * 30;
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4A843',
-              opacity: op,
-              filter: `blur(${size * 0.6}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4 — Radial Glow Breathing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(255,250,240,0.15) 0%, transparent 65%)',
-          opacity: breatheOp,
-        }}
-      />
-
-      {/* LAYER 5 — Accent Texture Elements */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '20%',
-          top: '25%',
-          width: 170,
-          height: 170,
+          left: `${dot.x}%`,
+          top: `${dot.y}%`,
+          width: dot.size,
+          height: dot.size,
           borderRadius: '50%',
-          border: '1px solid rgba(212,168,67,0.08)',
-          opacity: 0.07,
-          transform: `rotate(${frame * 0.11}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: '12%',
-          bottom: '30%',
-          width: 100,
-          height: 1,
-          backgroundColor: '#D4A843',
-          opacity: 0.06,
-          transform: `rotate(${-15 + frame * 0.04}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '55%',
-          top: '80%',
-          width: 0,
-          height: 0,
-          borderLeft: '28px solid transparent',
-          borderRight: '28px solid transparent',
-          borderBottom: '48px solid rgba(212,168,67,0.05)',
-          opacity: 0.05,
-          transform: `rotate(${frame * 0.07}deg)`,
-        }}
-      />
+          backgroundColor: particle,
+          opacity: dot.op,
+        }} />
+      ))}
 
-      {/* LAYER 6 — Vignette */}
-      <div
-        style={{
+      {/* LAYER 2 — STAR FIELD */}
+      {stars.map((star, i) => (
+        <div key={`star-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #F5EDE0 100%)',
-        }}
-      />
+          left: `calc(${star.x}% + ${star.driftX}px)`,
+          top: `calc(${star.y}% + ${star.driftY}px)`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: star.twinkle,
+          filter: `blur(${star.size * 0.3}px)`,
+        }} />
+      ))}
 
-      {/* TEXT CONTENT */}
-      <div
-        style={{
+      {/* LAYER 3 — SLOW DRIFT PARTICLES */}
+      {orbs.map((orb, i) => (
+        <div key={`orb-${i}`} style={{
           position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: fadeOut,
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            opacity: chapterOp,
-            filter: `blur(${chapterBlur}px)`,
-            transform: `translateY(${chapterY}px)`,
-          }}
-        >
-          <p
-            style={{
-              fontSize: 44,
-              fontWeight: 500,
-              fontStyle: 'italic',
-              color: '#FF1E00',
-              letterSpacing: 6,
-              fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-              margin: 0,
-            }}
-          >
+          left: `calc(${orb.baseX}% + ${orb.driftX}px)`,
+          top: `calc(${orb.baseY}% + ${orb.driftY}px)`,
+          width: orb.size,
+          height: orb.size,
+          borderRadius: '50%',
+          backgroundColor: particle,
+          opacity: orb.op,
+          filter: `blur(${orb.size * 0.6}px)`,
+        }} />
+      ))}
+
+      {/* LAYER 4 — RADIAL GLOW BREATHING */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(circle at 50% 50%, ${particle}33 0%, transparent 60%)`,
+        opacity: glowOpacity,
+      }} />
+
+      {/* LAYER 5 — ACCENT TEXTURE ELEMENTS */}
+      <div style={{
+        position: 'absolute',
+        top: '18%',
+        left: '6%',
+        width: 110,
+        height: 110,
+        border: `1px solid ${particle}`,
+        borderRadius: '50%',
+        opacity: 0.08,
+        transform: `rotate(${accentRotation1}deg)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '22%',
+        right: '14%',
+        width: 0,
+        height: 0,
+        borderLeft: '30px solid transparent',
+        borderRight: '30px solid transparent',
+        borderBottom: `52px solid ${particle}`,
+        opacity: 0.05,
+        transform: `rotate(${accentRotation2}deg) translateX(${accentDrift}px)`,
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: '65%',
+        left: '70%',
+        width: 170,
+        height: 1,
+        backgroundColor: particle,
+        opacity: 0.06,
+        transform: `rotate(${-10 + accentRotation1 * 0.25}deg)`,
+      }} />
+
+      {/* LAYER 6 — VIGNETTE */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: `radial-gradient(ellipse at 50% 50%, transparent 40%, ${bg} 100%)`,
+      }} />
+
+      {/* TEXT CONTENT — ETHEREAL uses dark text */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        opacity: fadeOut,
+        zIndex: 10,
+      }}>
+        <div style={{
+          opacity: chapterOp,
+          filter: `blur(${chapterBlur}px)`,
+          transform: `translateY(${chapterY}px)`,
+        }}>
+          <p style={{
+            fontSize: 44,
+            fontWeight: 500,
+            fontStyle: 'italic',
+            color: '#FF1E00',
+            letterSpacing: 6,
+            fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+            margin: 0,
+          }}>
             Capítulo 5
           </p>
         </div>
 
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#FF1E00',
-            opacity: lineOp,
-            marginTop: 18,
-            marginBottom: 22,
-          }}
-        />
-
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '0 20px',
-            maxWidth: 1400,
-          }}
-        >
-          {titleWords.map((word, i) => {
-            const wordStart = 50 + i * 5;
-            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.out(Easing.back(1.3)),
-            });
-            return (
-              <span
-                key={i}
-                style={{
-                  fontSize: 95,
-                  fontWeight: 700,
-                  color: '#1C1208',
-                  letterSpacing: 2,
-                  fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-                  opacity: wordOp,
-                  transform: `scale(${wordScale})`,
-                  display: 'inline-block',
-                  textShadow: wordOp > 0.8 ? `0 0 ${glowPulse * 30}px rgba(212,168,67,${glowPulse * 0.2})` : 'none',
-                  margin: 0,
-                }}
-              >
-                {word}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* WATERMARK */}
-      {(() => {
-        const wmOp = interpolate(frame, [20, 40], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-        });
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 28,
-              right: 40,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 500,
-                color: '#D4A843',
-                opacity: 0.4,
-                letterSpacing: 1.5,
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontStyle: 'italic',
-              }}
-            >
-              Mentor by Elisa
-            </span>
-          </div>
-        );
-      })()}
-    </AbsoluteFill>
-  );
-};
-
-export default ElCastigoSinSonido;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-export const compositionConfig = {
-  id: 'laVerdadQueArde',
-  durationInSeconds: 10,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const seededRandom = (seed: number): number => {
-  const x = Math.sin(seed * 9999) * 10000;
-  return x - Math.floor(x);
-};
-
-const LaVerdadQueArde: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-
-  const chapterOp = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterBlur = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterY = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-
-  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-  const lineOp = interpolate(frame, [35, 50], [0, 0.6], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-
-  const titleWords = ['La', 'Verdad', 'Que', 'Arde'];
-  const glowPulse = 0.3 + 0.2 * Math.sin(frame * 0.05);
-
-  const breatheOp = interpolate(
-    Math.sin(frame * (Math.PI / 60)),
-    [-1, 1],
-    [0.03, 0.10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#091A1A',
-        overflow: 'hidden',
-      }}
-    >
-      {/* LAYER 1 — Background Texture */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 35% 30%, rgba(94,170,168,0.06) 0%, transparent 55%), radial-gradient(ellipse at 70% 65%, rgba(15,46,46,0.4) 0%, transparent 50%), radial-gradient(ellipse at 45% 85%, rgba(94,170,168,0.03) 0%, transparent 60%)',
-        }}
-      />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = seededRandom(i * 7 + 1300) * 100;
-        const y = seededRandom(i * 7 + 1301) * 100;
-        const size = 1 + seededRandom(i * 7 + 1302) * 2;
-        const op = 0.02 + seededRandom(i * 7 + 1303) * 0.03;
-        return (
-          <div
-            key={`dot-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#5EAAA8',
-              opacity: op,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 2 — Star Field */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = seededRandom(i * 11 + 1400) * 100;
-        const y = seededRandom(i * 11 + 1401) * 100;
-        const size = 1 + seededRandom(i * 11 + 1402) * 3;
-        const speed = 0.02 + seededRandom(i * 11 + 1403) * 0.03;
-        const phase = seededRandom(i * 11 + 1404) * Math.PI * 2;
-        const twinkle = 0.1 + 0.25 * (Math.sin(frame * speed + phase) + 1);
-        const driftX = Math.sin(frame * 0.008 + phase) * 7;
-        const driftY = Math.cos(frame * 0.006 + phase) * 6;
-        return (
-          <div
-            key={`star-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#5EAAA8',
-              opacity: twinkle,
-              filter: `blur(${size * 0.3}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3 — Slow Drift Particles */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const x = seededRandom(i * 16 + 1500) * 80 + 10;
-        const y = seededRandom(i * 16 + 1501) * 80 + 10;
-        const size = 40 + seededRandom(i * 16 + 1502) * 60;
-        const op = 0.03 + seededRandom(i * 16 + 1503) * 0.03;
-        const phase = seededRandom(i * 16 + 1504) * Math.PI * 2;
-        const driftX = Math.sin(frame * 0.004 + phase) * 40;
-        const driftY = Math.cos(frame * 0.003 + phase) * 35;
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#5EAAA8',
-              opacity: op,
-              filter: `blur(${size * 0.6}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4 — Radial Glow Breathing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(94,170,168,0.12) 0%, transparent 65%)',
-          opacity: breatheOp,
-        }}
-      />
-
-      {/* LAYER 5 — Accent Texture Elements */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '75%',
-          top: '18%',
-          width: 190,
-          height: 190,
-          borderRadius: '50%',
-          border: '1px solid rgba(94,170,168,0.06)',
-          opacity: 0.06,
-          transform: `rotate(${frame * 0.14}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '5%',
-          bottom: '25%',
-          width: 0,
-          height: 0,
-          borderLeft: '32px solid transparent',
-          borderRight: '32px solid transparent',
-          borderBottom: '55px solid rgba(94,170,168,0.04)',
-          opacity: 0.05,
-          transform: `rotate(${-frame * 0.08}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '40%',
-          top: '10%',
-          width: 130,
+        <div style={{
+          width: lineWidth,
           height: 1,
-          backgroundColor: '#5EAAA8',
-          opacity: 0.04,
-          transform: `rotate(${25 + frame * 0.05}deg)`,
-        }}
-      />
+          backgroundColor: '#FF1E00',
+          opacity: lineOp,
+          marginTop: 16,
+          marginBottom: 20,
+        }} />
 
-      {/* LAYER 6 — Vignette */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #091A1A 100%)',
-        }}
-      />
-
-      {/* TEXT CONTENT */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: fadeOut,
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            opacity: chapterOp,
-            filter: `blur(${chapterBlur}px)`,
-            transform: `translateY(${chapterY}px)`,
-          }}
-        >
-          <p
-            style={{
-              fontSize: 44,
-              fontWeight: 500,
-              fontStyle: 'italic',
-              color: '#FF1E00',
-              letterSpacing: 6,
-              fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-              margin: 0,
-            }}
-          >
-            Capítulo 6
-          </p>
-        </div>
-
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#FF1E00',
-            opacity: lineOp,
-            marginTop: 18,
-            marginBottom: 22,
-          }}
-        />
-
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '0 22px',
-            maxWidth: 1400,
-          }}
-        >
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 18,
+          maxWidth: 1200,
+        }}>
           {titleWords.map((word, i) => {
-            const wordStart = 50 + i * 5;
-            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.out(Easing.back(1.3)),
-            });
+            const wordStart = titleStartFrame + i * wordGap;
+            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.3)) });
+            const allVisible = frame > titleStartFrame + (titleWords.length - 1) * wordGap + 10;
+            const titleGlow = allVisible ? `0 0 ${glowIntensity}px ${particle}44, 0 0 ${glowIntensity * 2}px ${particle}22` : 'none';
+
             return (
-              <span
-                key={i}
-                style={{
-                  fontSize: 100,
-                  fontWeight: 700,
-                  color: '#FCFAEE',
-                  letterSpacing: 2,
-                  fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-                  opacity: wordOp,
-                  transform: `scale(${wordScale})`,
-                  display: 'inline-block',
-                  textShadow: wordOp > 0.8 ? `0 0 ${glowPulse * 30}px rgba(94,170,168,${glowPulse * 0.3})` : 'none',
-                  margin: 0,
-                }}
-              >
+              <span key={i} style={{
+                fontSize: 100,
+                fontWeight: 700,
+                color: '#1C1208',
+                letterSpacing: 2,
+                fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
+                opacity: wordOp,
+                transform: `scale(${wordScale})`,
+                display: 'inline-block',
+                textShadow: titleGlow,
+                margin: 0,
+              }}>
                 {word}
               </span>
             );
@@ -2059,379 +1416,21 @@ const LaVerdadQueArde: React.FC = () => {
       {/* WATERMARK */}
       {(() => {
         const wmOp = interpolate(frame, [20, 40], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
+          extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
         });
         return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 28,
-              right: 40,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 500,
-                color: '#5EAAA8',
-                opacity: 0.4,
-                letterSpacing: 1.5,
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontStyle: 'italic',
-              }}
-            >
-              Mentor by Elisa
-            </span>
-          </div>
-        );
-      })()}
-    </AbsoluteFill>
-  );
-};
-
-export default LaVerdadQueArde;
-```
-
-```tsx
-import React from 'react';
-import {
-  useCurrentFrame,
-  useVideoConfig,
-  interpolate,
-  Easing,
-  AbsoluteFill,
-} from 'remotion';
-
-export const compositionConfig = {
-  id: 'laPuertaQueSiempreEstuvo',
-  durationInSeconds: 10,
-  fps: 30,
-  width: 1920,
-  height: 1080,
-};
-
-const seededRandom = (seed: number): number => {
-  const x = Math.sin(seed * 9999) * 10000;
-  return x - Math.floor(x);
-};
-
-const LaPuertaQueSiempreEstuvo: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  const fadeOut = interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-
-  const chapterOp = interpolate(frame, [20, 35], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterBlur = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const chapterY = interpolate(frame, [20, 35], [15, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-
-  const lineWidth = interpolate(frame, [35, 50], [0, 120], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.ease),
-  });
-  const lineOp = interpolate(frame, [35, 50], [0, 0.6], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-
-  const titleWords = ['La', 'Puerta', 'Que', 'Siempre', 'Estuvo'];
-  const glowPulse = 0.3 + 0.2 * Math.sin(frame * 0.05);
-
-  const breatheOp = interpolate(
-    Math.sin(frame * (Math.PI / 60)),
-    [-1, 1],
-    [0.03, 0.10],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: '#1A0A14',
-        overflow: 'hidden',
-      }}
-    >
-      {/* LAYER 1 — Background Texture */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at 40% 35%, rgba(212,120,156,0.06) 0%, transparent 55%), radial-gradient(ellipse at 65% 70%, rgba(45,16,37,0.4) 0%, transparent 50%), radial-gradient(ellipse at 30% 80%, rgba(212,120,156,0.03) 0%, transparent 60%)',
-        }}
-      />
-      {Array.from({ length: 40 }).map((_, i) => {
-        const x = seededRandom(i * 8 + 1600) * 100;
-        const y = seededRandom(i * 8 + 1601) * 100;
-        const size = 1 + seededRandom(i * 8 + 1602) * 2;
-        const op = 0.02 + seededRandom(i * 8 + 1603) * 0.03;
-        return (
-          <div
-            key={`dot-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4789C',
-              opacity: op,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 2 — Star Field */}
-      {Array.from({ length: 15 }).map((_, i) => {
-        const x = seededRandom(i * 10 + 1700) * 100;
-        const y = seededRandom(i * 10 + 1701) * 100;
-        const size = 1 + seededRandom(i * 10 + 1702) * 3;
-        const speed = 0.02 + seededRandom(i * 10 + 1703) * 0.03;
-        const phase = seededRandom(i * 10 + 1704) * Math.PI * 2;
-        const twinkle = 0.1 + 0.25 * (Math.sin(frame * speed + phase) + 1);
-        const driftX = Math.sin(frame * 0.008 + phase) * 7;
-        const driftY = Math.cos(frame * 0.006 + phase) * 5;
-        return (
-          <div
-            key={`star-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4789C',
-              opacity: twinkle,
-              filter: `blur(${size * 0.3}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 3 — Slow Drift Particles */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const x = seededRandom(i * 17 + 1800) * 80 + 10;
-        const y = seededRandom(i * 17 + 1801) * 80 + 10;
-        const size = 40 + seededRandom(i * 17 + 1802) * 60;
-        const op = 0.03 + seededRandom(i * 17 + 1803) * 0.03;
-        const phase = seededRandom(i * 17 + 1804) * Math.PI * 2;
-        const driftX = Math.sin(frame * 0.004 + phase) * 40;
-        const driftY = Math.cos(frame * 0.003 + phase) * 35;
-        return (
-          <div
-            key={`orb-${i}`}
-            style={{
-              position: 'absolute',
-              left: `${x}%`,
-              top: `${y}%`,
-              width: size,
-              height: size,
-              borderRadius: '50%',
-              backgroundColor: '#D4789C',
-              opacity: op,
-              filter: `blur(${size * 0.6}px)`,
-              transform: `translate(${driftX}px, ${driftY}px)`,
-            }}
-          />
-        );
-      })}
-
-      {/* LAYER 4 — Radial Glow Breathing */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(212,120,156,0.12) 0%, transparent 65%)',
-          opacity: breatheOp,
-        }}
-      />
-
-      {/* LAYER 5 — Accent Texture Elements */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '18%',
-          top: '15%',
-          width: 160,
-          height: 160,
-          borderRadius: '50%',
-          border: '1px solid rgba(212,120,156,0.06)',
-          opacity: 0.06,
-          transform: `rotate(${-frame * 0.12}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: '20%',
-          bottom: '18%',
-          width: 110,
-          height: 1,
-          backgroundColor: '#D4789C',
-          opacity: 0.05,
-          transform: `rotate(${40 + frame * 0.06}deg)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '65%',
-          top: '72%',
-          width: 0,
-          height: 0,
-          borderLeft: '30px solid transparent',
-          borderRight: '30px solid transparent',
-          borderBottom: '52px solid rgba(212,120,156,0.04)',
-          opacity: 0.05,
-          transform: `rotate(${frame * 0.1}deg)`,
-        }}
-      />
-
-      {/* LAYER 6 — Vignette */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, #1A0A14 100%)',
-        }}
-      />
-
-      {/* TEXT CONTENT */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: fadeOut,
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            opacity: chapterOp,
-            filter: `blur(${chapterBlur}px)`,
-            transform: `translateY(${chapterY}px)`,
-          }}
-        >
-          <p
-            style={{
-              fontSize: 44,
-              fontWeight: 500,
+          <div style={{
+            position: 'absolute', bottom: 28, right: 40,
+            opacity: wmOp * fadeOut, zIndex: 100,
+          }}>
+            <span style={{
+              fontSize: 20, fontWeight: 500,
+              color: particle,
+              opacity: 0.4,
+              letterSpacing: 1.5,
+              fontFamily: 'Playfair Display, Georgia, serif',
               fontStyle: 'italic',
-              color: '#FF1E00',
-              letterSpacing: 6,
-              fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-              margin: 0,
-            }}
-          >
-            Capítulo 7
-          </p>
-        </div>
-
-        <div
-          style={{
-            width: lineWidth,
-            height: 1,
-            backgroundColor: '#FF1E00',
-            opacity: lineOp,
-            marginTop: 18,
-            marginBottom: 22,
-          }}
-        />
-
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '0 18px',
-            maxWidth: 1400,
-          }}
-        >
-          {titleWords.map((word, i) => {
-            const wordStart = 50 + i * 5;
-            const wordOp = interpolate(frame, [wordStart, wordStart + 10], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            const wordScale = interpolate(frame, [wordStart, wordStart + 10], [1.1, 1.0], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: Easing.out(Easing.back(1.3)),
-            });
-            return (
-              <span
-                key={i}
-                style={{
-                  fontSize: 88,
-                  fontWeight: 700,
-                  color: '#FCFAEE',
-                  letterSpacing: 2,
-                  fontFamily: 'Playfair Display, Cormorant Garamond, EB Garamond, Georgia, serif',
-                  opacity: wordOp,
-                  transform: `scale(${wordScale})`,
-                  display: 'inline-block',
-                  textShadow: wordOp > 0.8 ? `0 0 ${glowPulse * 30}px rgba(212,120,156,${glowPulse * 0.3})` : 'none',
-                  margin: 0,
-                }}
-              >
-                {word}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* WATERMARK */}
-      {(() => {
-        const wmOp = interpolate(frame, [20, 40], [0, 0.25], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-        });
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 28,
-              right: 40,
-              opacity: wmOp,
-              zIndex: 100,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                fontWeight: 500,
-                color: '#D4789C',
-                opacity: 0.4,
-                letterSpacing: 1.5,
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontStyle: 'italic',
-              }}
-            >
+            }}>
               Mentor by Elisa
             </span>
           </div>
@@ -2441,6 +1440,6 @@ const LaPuertaQueSiempreEstuvo: React.FC = () => {
   );
 };
 
-export default LaPuertaQueSiempreEstuvo;
+export default CapituloCincoLaRaizQueNoVes;
 ```
 
